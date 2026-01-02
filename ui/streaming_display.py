@@ -93,7 +93,25 @@ class ToolExecutionDisplay:
     Display for tool execution progress.
 
     Shows currently executing and completed tools with status indicators.
+    Phase 2B Enhanced: Animated spinners, color-coded status, better formatting.
     """
+
+    # Animated spinner frames
+    SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+    # Tool category icons
+    TOOL_ICONS = {
+        "file": "📁",
+        "web": "🌐",
+        "agent": "🤖",
+        "code": "💻",
+        "memory": "🧠",
+        "vector": "🔍",
+        "time": "⏰",
+        "calc": "🔢",
+        "string": "📝",
+        "default": "🛠️"
+    }
 
     def __init__(self, container=None):
         """
@@ -106,6 +124,7 @@ class ToolExecutionDisplay:
         self.active_tools: Dict[str, Dict[str, Any]] = {}
         self.completed_tools: Dict[str, Dict[str, Any]] = {}
         self.tool_order: List[str] = []  # Track display order
+        self.spinner_index = 0  # For animated spinners
 
     def start_tool(self, tool_id: str, tool_name: str, tool_input: Optional[Dict] = None) -> None:
         """
@@ -156,9 +175,62 @@ class ToolExecutionDisplay:
             self.completed_tools[tool_id] = tool_data
             self._render()
 
+    def _get_tool_category(self, tool_name: str) -> str:
+        """
+        Detect tool category from name.
+
+        Args:
+            tool_name: Tool name
+
+        Returns:
+            Category string (file/web/agent/code/memory/vector/time/calc/string/default)
+        """
+        name_lower = tool_name.lower()
+
+        # File operations
+        if any(x in name_lower for x in ["file", "read", "write", "list", "delete", "move", "copy"]):
+            return "file"
+
+        # Web operations
+        if any(x in name_lower for x in ["web", "fetch", "search", "http", "url"]):
+            return "web"
+
+        # Agent operations
+        if any(x in name_lower for x in ["agent", "spawn", "council", "socratic"]):
+            return "agent"
+
+        # Code execution
+        if any(x in name_lower for x in ["code", "execute", "python", "run"]):
+            return "code"
+
+        # Memory operations
+        if any(x in name_lower for x in ["memory", "store", "recall", "forget"]):
+            return "memory"
+
+        # Vector/search operations
+        if any(x in name_lower for x in ["vector", "search", "knowledge", "semantic", "embed"]):
+            return "vector"
+
+        # Time operations
+        if any(x in name_lower for x in ["time", "date", "clock"]):
+            return "time"
+
+        # Calculator
+        if any(x in name_lower for x in ["calc", "math", "add", "subtract", "multiply"]):
+            return "calc"
+
+        # String operations
+        if any(x in name_lower for x in ["string", "text", "concat", "split", "length"]):
+            return "string"
+
+        return "default"
+
     def _render(self) -> None:
         """Render current tool states."""
         with self.container.container():
+            # Increment spinner for animated effect
+            self.spinner_index = (self.spinner_index + 1) % len(self.SPINNER_FRAMES)
+
             # Render tools in order
             for tool_id in self.tool_order:
                 tool_data = None
@@ -173,7 +245,7 @@ class ToolExecutionDisplay:
 
     def _render_tool(self, tool_id: str, tool_data: Dict[str, Any]) -> None:
         """
-        Render a single tool.
+        Render a single tool with enhanced visual feedback.
 
         Args:
             tool_id: Tool execution ID
@@ -183,45 +255,101 @@ class ToolExecutionDisplay:
         name = tool_data["name"]
         tool_input = tool_data.get("input", {})
 
-        # Status emoji
+        # Get tool category icon
+        category = self._get_tool_category(name)
+        category_icon = self.TOOL_ICONS.get(category, self.TOOL_ICONS["default"])
+
+        # Status emoji and timing
+        elapsed = None
         if status == "running":
-            emoji = "🔄"
+            # Animated spinner
+            spinner = self.SPINNER_FRAMES[self.spinner_index]
             elapsed = time.time() - tool_data["start_time"]
             time_str = f"⏱️ {elapsed:.1f}s"
+            status_text = "Running"
         elif status == "complete":
-            emoji = "✅"
-            time_str = f"({tool_data.get('duration', 0):.2f}s)"
+            spinner = "✅"
+            time_str = f"✓ {tool_data.get('duration', 0):.2f}s"
+            status_text = "Complete"
         else:  # error
-            emoji = "❌"
-            time_str = f"({tool_data.get('duration', 0):.2f}s)"
+            spinner = "❌"
+            time_str = f"✗ {tool_data.get('duration', 0):.2f}s"
+            status_text = "Error"
 
         # Format tool call
         if tool_input:
-            input_str = ", ".join(
-                f"{k}={repr(v)[:30]}" + ("..." if len(repr(v)) > 30 else "")
-                for k, v in tool_input.items()
-            )
+            # Smart truncation of input parameters
+            input_parts = []
+            for k, v in tool_input.items():
+                v_repr = repr(v)
+                if len(v_repr) > 40:
+                    v_repr = v_repr[:37] + "..."
+                input_parts.append(f"{k}={v_repr}")
+            input_str = ", ".join(input_parts)
             tool_call = f"{name}({input_str})"
         else:
             tool_call = f"{name}()"
 
-        # Main tool display
-        st.markdown(f"{emoji} **{tool_call}** {time_str}")
+        # Color-coded container based on status
+        if status == "running":
+            # Running tools in info container
+            with st.container():
+                col1, col2 = st.columns([0.85, 0.15])
+                with col1:
+                    st.markdown(f"{spinner} {category_icon} **{tool_call}**")
+                with col2:
+                    st.caption(time_str)
 
-        # Show result if complete
+                # Progress bar for long-running tools (>2s)
+                if elapsed is not None and elapsed > 2.0:
+                    # Pulse effect (indeterminate progress)
+                    progress_value = (elapsed % 2) / 2  # Oscillates 0-1
+                    st.progress(progress_value)
+
+        elif status == "complete":
+            # Completed tools in success container
+            with st.success(f"{spinner} {category_icon} **{tool_call}**", icon="✅"):
+                st.caption(f"{status_text} • {time_str}")
+
+        else:  # error
+            # Error tools in error container
+            with st.error(f"{spinner} {category_icon} **{tool_call}**", icon="❌"):
+                st.caption(f"{status_text} • {time_str}")
+
+        # Show result if complete or error
         if status in ["complete", "error"] and "result" in tool_data:
             result = tool_data["result"]
 
-            # Show result in expander for cleanliness
-            with st.expander("Result" if status == "complete" else "Error", expanded=False):
-                if isinstance(result, dict) or isinstance(result, list):
+            # Detect result type for smart formatting
+            expander_label = "View Result" if status == "complete" else "View Error"
+
+            with st.expander(expander_label, expanded=False):
+                # JSON/dict/list formatting
+                if isinstance(result, (dict, list)):
                     st.json(result)
-                else:
-                    result_str = str(result)
-                    if len(result_str) > 500:
-                        st.code(result_str[:500] + "...", language="text")
+
+                # String results - detect language for syntax highlighting
+                elif isinstance(result, str):
+                    result_str = result
+
+                    # Detect code/structured content
+                    language = "text"
+                    if result_str.strip().startswith(("{", "[")):
+                        language = "json"
+                    elif result_str.strip().startswith("```"):
+                        language = "markdown"
+                    elif any(x in result_str for x in ["def ", "class ", "import ", "return "]):
+                        language = "python"
+
+                    # Truncate very long results
+                    if len(result_str) > 1000:
+                        st.code(result_str[:1000] + f"\n\n... ({len(result_str) - 1000} more characters)", language=language)
                     else:
-                        st.code(result_str, language="text")
+                        st.code(result_str, language=language)
+
+                # Other types
+                else:
+                    st.code(str(result), language="text")
 
     def clear(self) -> None:
         """Clear all tool displays."""

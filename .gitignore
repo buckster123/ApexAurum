@@ -28,6 +28,9 @@ ENV/
 sandbox/conversations.json
 sandbox/agents.json
 sandbox/memory.json
+sandbox/presets.json
+sandbox/index_status.json
+sandbox/vector_db/
 sandbox/*.py
 
 # Logs
