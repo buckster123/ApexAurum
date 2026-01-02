@@ -6,16 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, vector search, intelligent prompt caching (50-90% cost savings), 30+ integrated tools, and context management with auto-summarization.
 
-**Status:** V1.0 Beta - Production Ready (~15,000 lines of code)
+**Status:** V1.0 Beta - Production Ready with Phase 2A Presets (~16,600 lines of code)
 
 ## Essential Reading Before Starting
 
-1. **PROJECT_STATUS.md** - Current implementation status and what's pending
-2. **DEVELOPMENT_GUIDE.md** - Detailed developer onboarding guide
+
+1. **START_HERE.md** - 
+2. **PROJECT_STATUS.md** - Current implementation status and what's pending
+3. **DEVELOPMENT_GUIDE.md** - Detailed developer onboarding guide
 
 ## Quick Start Commands
 
-### Running the Application
+### Running the Application after venv setup and copying modified files to venv for testing.
 
 ```bash
 # Start the Streamlit application
@@ -90,17 +92,22 @@ cat .env
 
 ### Key Components
 
-**main.py (4,169 lines)** - Monolithic Streamlit application
+**main.py (4,577 lines)** - Monolithic Streamlit application
 - Lines 1-500: Imports, configuration, state management
 - Lines 500-1200: AppState class (conversation management)
-- Lines 1200-2000: Sidebar rendering (controls, stats, tools)
-- Lines 2000-3000: Chat interface (messages, streaming)
-- Lines 3000-3500: Message and tool processing
-- Lines 3500-4169: 12+ modal dialogs (search, export, knowledge, etc.)
+- Lines 1200-2400: Sidebar rendering (controls, stats, tools)
+  - **Lines 1328-1378:** Agent Quick Actions Bar (Phase 1 Polish)
+  - **Lines 1383-1448:** System Status Dashboard (Phase 1 Polish)
+  - **Lines 1460-1546:** Settings Presets Selector (Phase 2A)
+- Lines 2400-3300: Chat interface (messages, streaming)
+- Lines 3025-3256: **Preset Manager Modal** (Phase 2A)
+- Lines 3300-3900: Message and tool processing
+- Lines 3900-4577: 13+ modal dialogs (presets, agents, search, export, etc.)
 
-**core/ (24 modules)** - Core infrastructure
+**core/ (25 modules)** - Core infrastructure
 - `api_client.py` - Claude API wrapper with streaming and retry logic
 - `cache_manager.py` - Prompt caching (4 strategies: disabled/conservative/balanced/aggressive)
+- `preset_manager.py` - Settings presets (Phase 2A: 5 built-in + custom presets)
 - `cost_tracker.py` - Token counting and cost calculation
 - `context_manager.py` - Context optimization (5 strategies to prevent overflow)
 - `vector_db.py` - ChromaDB integration for semantic search
@@ -309,11 +316,52 @@ Available models (defined in `core/models.py`):
 
 Model can be changed in sidebar during runtime.
 
+## Recent Updates (January 2026)
+
+### Phase 2A: Settings Presets - Complete ✅
+
+**New Features:**
+1. **PresetManager Class** (`core/preset_manager.py` - 530 lines)
+   - 5 built-in presets: Speed Mode, Cost Saver, Deep Thinking, Research Mode, Simple Chat
+   - Full CRUD operations for custom presets
+   - JSON export/import functionality
+   - Settings validation and comparison
+
+2. **Sidebar Preset Selector** (Lines 1460-1546)
+   - Always-visible dropdown with all presets
+   - Real-time "Custom (Modified)" detection
+   - One-click preset switching
+   - Save As... and Manage buttons
+
+3. **Preset Manager Modal** (Lines 3025-3256)
+   - Browse tab: View/apply/edit/delete presets
+   - Create tab: Save current settings as preset
+   - Export/Import tab: Backup/restore custom presets
+   - Built-in preset protection
+
+**Impact:**
+- ⚡ One-click switching between optimized configurations
+- 💾 Users can save and share custom presets
+- 🎯 Power users get professional preset management
+- 🚀 Faster workflow for different use cases
+
+### Phase 1 UI Polish - Complete ✅
+
+**Features:**
+1. **Agent Quick Actions Bar** - Always-visible agent controls
+2. **System Status Dashboard** - At-a-glance health monitoring
+3. **Tool Count Correction** - Fixed display to show 30 tools
+
+**Impact:** Much more intuitive for new users, faster access to common operations
+
 ## Known Issues & Limitations
 
 ### Current Issues
 
-1. **Agent Tools UI Integration** - Agent tools are registered (30 total tools detected) but need end-to-end testing in the Streamlit UI. Code is complete and tested in isolation.
+1. ~~**Agent Tools UI Integration**~~ ✅ **RESOLVED (Jan 2026)**
+   - All 30 agent tools are registered and working
+   - UI polished with dedicated Quick Actions bar
+   - Real-time status monitoring implemented
 
 2. **Cache TTL** - Anthropic API caches expire after 5 minutes of inactivity. This is an API limitation, not a code issue.
 
@@ -367,9 +415,14 @@ python -c "from core import ClaudeAPIClient; from tools import ALL_TOOLS; print(
 # 2. Start app
 streamlit run main.py
 
-# 3. In UI: Send "What time is it?" - should call time tool and respond
+# 3. Check Phase 1 UI polish:
+#    - Agent Quick Actions visible at top of sidebar
+#    - System Status dashboard shows Cache/Cost/Context
+#    - Main page caption shows "30 tools"
 
-# 4. Check sidebar shows "30 tools available"
+# 4. In UI: Send "What time is it?" - should call time tool and respond
+
+# 5. Check sidebar shows "30 tools available"
 ```
 
 ### Comprehensive Testing
@@ -466,6 +519,12 @@ grep ANTHROPIC_API_KEY .env
 
 ---
 
-**Last Updated:** 2025-12-31
-**Version:** 1.0 Beta
-**Total Code:** ~15,000 lines across 40+ Python files
+**Last Updated:** 2026-01-02
+**Version:** 1.0 Beta (Phase 2A Settings Presets Complete)
+**Total Code:** ~16,600 lines across 41 Python files
+
+**Latest Changes:**
+- **Phase 2A:** Full-featured Settings Presets system with 5 built-ins + custom support
+- Phase 1 UI Polish: Agent Quick Actions + System Status Dashboard
+- Enhanced preset management with export/import
+- Real-time preset detection and switching

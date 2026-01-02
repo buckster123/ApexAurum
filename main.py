@@ -1288,6 +1288,16 @@ def init_session_state():
     if "show_cache_details" not in st.session_state:
         st.session_state.show_cache_details = False
 
+    # Preset Manager state (Phase 2A)
+    if "show_preset_manager" not in st.session_state:
+        st.session_state.show_preset_manager = False
+
+    if "preset_edit_id" not in st.session_state:
+        st.session_state.preset_edit_id = None
+
+    if "show_preset_save_dialog" not in st.session_state:
+        st.session_state.show_preset_save_dialog = False
+
 
 # ============================================================================
 # UI Components
@@ -1325,8 +1335,235 @@ def render_sidebar():
             help="Automatically save before switching/clearing"
         )
 
+        # ========== PHASE 1 POLISH: Agent Quick Actions & Status ==========
+        st.divider()
+
+        # Agent Status (at-a-glance when agents exist)
+        from tools.agents import _agent_manager
+        agents_data = _agent_manager.list_agents()
+
+        if agents_data:
+            # Count by status
+            running = sum(1 for a in agents_data if a["status"] == "running")
+            completed = sum(1 for a in agents_data if a["status"] == "completed")
+            failed = sum(1 for a in agents_data if a["status"] == "failed")
+
+            # At-a-glance status
+            status_text = f"🤖 **Agents:** "
+            if running > 0:
+                status_text += f"{running} 🔄 "
+            if completed > 0:
+                status_text += f"| {completed} ✅ "
+            if failed > 0:
+                status_text += f"| {failed} ❌"
+
+            st.markdown(status_text)
+
+            # Quick actions for agents
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                if st.button("➕ Spawn", use_container_width=True, help="Spawn new agent", key="quick_spawn"):
+                    st.session_state.show_spawn_agent = True
+                    st.rerun()
+            with col2:
+                if st.button("🗳️ Council", use_container_width=True, help="Multi-agent council", key="quick_council"):
+                    st.session_state.show_council = True
+                    st.rerun()
+            with col3:
+                if st.button("🔄 Refresh", use_container_width=True, help="Refresh agent status", key="quick_refresh_agents"):
+                    st.rerun()
+        else:
+            # No agents yet - show quick actions only
+            st.markdown("🤖 **Quick Actions**")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("➕ Spawn Agent", use_container_width=True, help="Spawn new agent", key="quick_spawn_noagents"):
+                    st.session_state.show_spawn_agent = True
+                    st.rerun()
+            with col2:
+                if st.button("🗳️ Council", use_container_width=True, help="Multi-agent council", key="quick_council_noagents"):
+                    st.session_state.show_council = True
+                    st.rerun()
+
+        # ========== END PHASE 1 POLISH ==========
+
         st.divider()
         st.title("⚙️ Settings")
+
+        # ========== PHASE 1 POLISH: Quick Status Dashboard ==========
+        with st.container():
+            st.markdown("#### 📊 System Status")
+
+            # Get stats
+            cache_stats = None
+            cost_stats = None
+            context_stats = None
+
+            if hasattr(st.session_state, 'client'):
+                if hasattr(st.session_state.client, 'cache_tracker') and st.session_state.cache_strategy != "disabled":
+                    cache_stats = st.session_state.client.cache_tracker.get_session_stats()
+
+                if hasattr(st.session_state.client, 'cost_tracker'):
+                    cost_stats = st.session_state.client.cost_tracker.get_session_stats()
+
+            if hasattr(st.session_state, 'context_manager'):
+                context_stats = st.session_state.context_manager.get_context_stats(
+                    st.session_state.messages,
+                    st.session_state.system_prompt,
+                    ALL_TOOL_SCHEMAS if st.session_state.tools_enabled else None
+                )
+
+            # Display compact metrics
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                # Cache status
+                if st.session_state.cache_strategy == "disabled":
+                    st.metric("💾 Cache", "Disabled", help="Enable in Cache Management section")
+                elif cache_stats:
+                    hit_rate = cache_stats.get("cache_hit_rate", 0) * 100
+                    if hit_rate >= 70:
+                        status_icon = "🟢"
+                    elif hit_rate >= 40:
+                        status_icon = "🟡"
+                    else:
+                        status_icon = "🟠"
+                    st.metric("💾 Cache", f"{status_icon} {hit_rate:.0f}%", help=f"Strategy: {st.session_state.cache_strategy.title()}")
+                else:
+                    st.metric("💾 Cache", "Active", help=f"Strategy: {st.session_state.cache_strategy.title()}")
+
+            with col2:
+                # Cost tracking
+                if cost_stats:
+                    cost = cost_stats.get('cost', 0)
+                    st.metric("💰 Cost", f"${cost:.3f}", help="Session cost")
+                else:
+                    st.metric("💰 Cost", "$0.000", help="Session cost")
+
+            with col3:
+                # Context usage
+                if context_stats:
+                    usage_pct = context_stats.get('usage_percent', 0)
+                    if usage_pct < 50:
+                        color_icon = "🟢"
+                    elif usage_pct < 75:
+                        color_icon = "🟡"
+                    else:
+                        color_icon = "🔴"
+                    st.metric("🧠 Context", f"{color_icon} {usage_pct:.0f}%", help=f"{context_stats.get('total_tokens', 0):,} tokens used")
+                else:
+                    st.metric("🧠 Context", "🟢 0%", help="No messages yet")
+
+        st.divider()
+        # ========== END PHASE 1 POLISH ==========
+
+        # ========== PHASE 2A: Preset Selector ==========
+        st.subheader("🎨 Settings Presets")
+
+        # Initialize preset manager (lazy load)
+        if "preset_manager" not in st.session_state:
+            from core.preset_manager import PresetManager
+            st.session_state.preset_manager = PresetManager()
+
+        preset_mgr = st.session_state.preset_manager
+
+        # Get all presets
+        all_presets = preset_mgr.get_all_presets()
+        active_preset_id = preset_mgr.get_active_preset_id()
+
+        # Build display options
+        preset_options = {}
+        for preset_id, preset in all_presets.items():
+            name = preset["name"]
+            if not preset["is_built_in"]:
+                name = f"⭐ {name}"  # Mark custom presets with star
+            preset_options[name] = preset_id
+
+        # Add "Custom" option for when user has modified settings
+        preset_options["Custom (Modified)"] = None
+
+        # Determine current selection
+        current_display = "Custom (Modified)"  # Default
+        if active_preset_id and active_preset_id in all_presets:
+            # Check if settings match active preset
+            if preset_mgr.settings_match_preset(st.session_state, active_preset_id):
+                # Settings match, show preset name
+                current_display = next(k for k, v in preset_options.items() if v == active_preset_id)
+            else:
+                # Settings don't match, show "Custom (Modified)"
+                current_display = "Custom (Modified)"
+
+        # Preset selector
+        selected_display = st.selectbox(
+            "Active Preset",
+            options=list(preset_options.keys()),
+            index=list(preset_options.keys()).index(current_display),
+            help="Quick switch between preset configurations"
+        )
+
+        selected_id = preset_options[selected_display]
+
+        # Apply preset if changed
+        if selected_id and selected_id != active_preset_id:
+            success, message = preset_mgr.apply_preset(selected_id, st.session_state)
+            if success:
+                # Apply cache strategy (special handling)
+                from core.cache_manager import CacheStrategy
+                try:
+                    strategy_enum = CacheStrategy[st.session_state.cache_strategy.upper()]
+                    st.session_state.client.set_cache_strategy(strategy_enum)
+                except Exception as e:
+                    logger.error(f"Error setting cache strategy: {e}")
+
+                # Apply context strategy (special handling)
+                try:
+                    st.session_state.context_manager.set_strategy(st.session_state.context_strategy)
+                except Exception as e:
+                    logger.error(f"Error setting context strategy: {e}")
+
+                st.success(f"✅ {message}")
+                st.rerun()
+            else:
+                st.error(f"❌ {message}")
+
+        # Action buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("💾 Save As...", use_container_width=True, help="Save current settings as preset", key="preset_save_btn"):
+                st.session_state.show_preset_save_dialog = True
+                st.rerun()
+        with col2:
+            if st.button("⚙️ Manage", use_container_width=True, help="Manage presets", key="preset_manage_btn"):
+                st.session_state.show_preset_manager = True
+                st.rerun()
+
+        # Show active preset description and metadata
+        if active_preset_id and active_preset_id in all_presets:
+            preset = all_presets[active_preset_id]
+            st.caption(f"📝 {preset['description']}")
+
+            # Compact metadata display
+            settings = preset['settings']
+
+            # Model name mapping for display
+            model_display = {
+                "claude-3-5-haiku-20241022": "Haiku",
+                "claude-sonnet-4-5-20250929": "Sonnet 4.5",
+                "claude-sonnet-3-7-20250219": "Sonnet 3.7",
+                "claude-opus-4-5-20251101": "Opus 4.5"
+            }
+            model_name = model_display.get(settings['model'], settings['model'])
+
+            # Build compact metadata string
+            metadata = (
+                f"**Active:** {model_name} • "
+                f"{settings['cache_strategy'].title()} cache • "
+                f"{settings['context_strategy'].title()} context"
+            )
+            st.caption(metadata)
+
+        st.divider()
+        # ========== END PHASE 2A ==========
 
         # Model selection
         st.subheader("Model")
@@ -2803,7 +3040,240 @@ def main():
 
     # Main chat interface
     st.title("💬 Apex Aurum - Claude Edition")
-    st.caption("Powered by Claude API with 23 tools + Vision support 👁️")
+    st.caption("Powered by Claude API with 30 tools + Vision support 👁️")
+
+    # ========== PHASE 2A: Preset Manager Dialog ==========
+    if st.session_state.get("show_preset_manager", False):
+        st.markdown("### 🎨 Preset Manager")
+
+        preset_mgr = st.session_state.preset_manager
+
+        tab1, tab2, tab3 = st.tabs(["📋 Browse", "➕ Create", "📦 Export/Import"])
+
+        # TAB 1: Browse & Manage
+        with tab1:
+            st.markdown("#### All Presets")
+
+            all_presets = preset_mgr.get_all_presets()
+            active_preset_id = preset_mgr.get_active_preset_id()
+
+            if not all_presets:
+                st.info("No presets available")
+            else:
+                for preset_id, preset in all_presets.items():
+                    is_active = (preset_id == active_preset_id)
+                    is_built_in = preset["is_built_in"]
+
+                    # Card for each preset
+                    with st.container():
+                        col1, col2 = st.columns([3, 1])
+
+                        with col1:
+                            # Name with active indicator
+                            name_display = preset["name"]
+                            if is_active:
+                                name_display = f"✅ {name_display}"
+                            st.markdown(f"**{name_display}**")
+                            st.caption(preset["description"])
+
+                            # Show settings summary
+                            settings = preset["settings"]
+                            model_short = settings["model"].split("-")[-1] if "-" in settings["model"] else settings["model"]
+                            st.caption(
+                                f"Model: {model_short} | "
+                                f"Cache: {settings['cache_strategy']} | "
+                                f"Context: {settings['context_strategy']}"
+                            )
+
+                        with col2:
+                            # Action buttons
+                            if not is_active:
+                                if st.button("▶️ Apply", key=f"apply_{preset_id}", use_container_width=True):
+                                    success, message = preset_mgr.apply_preset(preset_id, st.session_state)
+                                    if success:
+                                        # Apply special handling
+                                        from core.cache_manager import CacheStrategy
+                                        try:
+                                            strategy_enum = CacheStrategy[st.session_state.cache_strategy.upper()]
+                                            st.session_state.client.set_cache_strategy(strategy_enum)
+                                        except Exception as e:
+                                            logger.error(f"Error setting cache strategy: {e}")
+
+                                        try:
+                                            st.session_state.context_manager.set_strategy(st.session_state.context_strategy)
+                                        except Exception as e:
+                                            logger.error(f"Error setting context strategy: {e}")
+
+                                        st.success(f"✅ {message}")
+                                        st.rerun()
+                                    else:
+                                        st.error(f"❌ {message}")
+                            else:
+                                st.button("✅ Active", key=f"active_{preset_id}", disabled=True, use_container_width=True)
+
+                            if not is_built_in:
+                                # Edit button (custom only)
+                                if st.button("✏️ Edit", key=f"edit_{preset_id}", use_container_width=True):
+                                    st.session_state.preset_edit_id = preset_id
+                                    st.rerun()
+
+                                # Delete button (custom only)
+                                if st.button("🗑️ Delete", key=f"del_{preset_id}", use_container_width=True):
+                                    success, message = preset_mgr.delete_custom_preset(preset_id)
+                                    if success:
+                                        st.success(f"✅ {message}")
+                                        st.rerun()
+                                    else:
+                                        st.error(f"❌ {message}")
+                            else:
+                                st.caption("🔒 Built-in")
+
+                        st.divider()
+
+            # Edit mode (shown when preset_edit_id is set)
+            if st.session_state.get("preset_edit_id"):
+                edit_id = st.session_state.preset_edit_id
+                preset = preset_mgr.get_preset(edit_id)
+
+                if preset and not preset["is_built_in"]:
+                    st.markdown("#### ✏️ Edit Preset")
+
+                    with st.form("edit_preset_form"):
+                        new_name = st.text_input("Preset Name", value=preset["name"].replace("⭐ ", ""))
+                        new_desc = st.text_area("Description", value=preset["description"])
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.form_submit_button("Cancel", use_container_width=True):
+                                st.session_state.preset_edit_id = None
+                                st.rerun()
+                        with col2:
+                            if st.form_submit_button("Save Changes", type="primary", use_container_width=True):
+                                success, message = preset_mgr.update_custom_preset(
+                                    edit_id,
+                                    name=new_name,
+                                    description=new_desc
+                                )
+                                if success:
+                                    st.success(f"✅ {message}")
+                                    st.session_state.preset_edit_id = None
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ {message}")
+
+        # TAB 2: Create New Preset
+        with tab2:
+            st.markdown("#### Create New Preset")
+            st.info("This will save your current settings as a new preset")
+
+            # Show current settings
+            current_settings = preset_mgr.extract_current_settings(st.session_state)
+
+            with st.expander("Current Settings Preview", expanded=True):
+                st.json(current_settings)
+
+            with st.form("create_preset_form"):
+                preset_name = st.text_input("Preset Name", placeholder="My Custom Preset")
+                preset_desc = st.text_area("Description", placeholder="Describe this preset...")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    cancel = st.form_submit_button("Cancel", use_container_width=True)
+                with col2:
+                    create = st.form_submit_button("Create Preset", type="primary", use_container_width=True)
+
+                if cancel:
+                    st.session_state.show_preset_manager = False
+                    st.rerun()
+
+                if create:
+                    if not preset_name:
+                        st.error("❌ Preset name is required")
+                    else:
+                        success, message, new_id = preset_mgr.save_custom_preset(
+                            preset_name,
+                            preset_desc or "Custom preset",
+                            st.session_state
+                        )
+                        if success:
+                            st.success(f"✅ {message}")
+                            # Switch to browse tab to show new preset
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {message}")
+
+        # TAB 3: Export/Import
+        with tab3:
+            st.markdown("#### Export/Import Presets")
+
+            col_exp, col_imp = st.columns(2)
+
+            with col_exp:
+                st.write("**Export Presets**")
+
+                if st.button("📤 Export All Custom Presets", use_container_width=True):
+                    custom_presets = preset_mgr.get_custom_presets()
+
+                    if custom_presets:
+                        export_data = {
+                            "version": preset_mgr.VERSION,
+                            "exported_at": datetime.now().isoformat(),
+                            "presets": custom_presets
+                        }
+
+                        export_json = json.dumps(export_data, indent=2)
+
+                        st.download_button(
+                            label="⬇️ Download presets.json",
+                            data=export_json,
+                            file_name="custom_presets.json",
+                            mime="application/json",
+                            use_container_width=True
+                        )
+                    else:
+                        st.info("No custom presets to export")
+
+            with col_imp:
+                st.write("**Import Presets**")
+
+                uploaded_file = st.file_uploader(
+                    "Upload presets JSON",
+                    type=["json"],
+                    key="preset_import_uploader"
+                )
+
+                if uploaded_file:
+                    if st.button("📥 Import Presets", use_container_width=True):
+                        try:
+                            import_data = json.loads(uploaded_file.read().decode("utf-8"))
+
+                            # Validate structure
+                            if "presets" in import_data:
+                                imported_count = 0
+                                for preset_id, preset in import_data["presets"].items():
+                                    # Add each preset as custom
+                                    preset_mgr.presets_data["custom"][preset_id] = preset
+                                    imported_count += 1
+
+                                preset_mgr._save_presets()
+                                st.success(f"✅ Imported {imported_count} preset(s)")
+                                st.rerun()
+                            else:
+                                st.error("❌ Invalid preset file format")
+
+                        except Exception as e:
+                            st.error(f"❌ Import failed: {e}")
+                            logger.error(f"Preset import error: {e}", exc_info=True)
+
+        # Close button
+        if st.button("Close", use_container_width=True, key="close_preset_manager"):
+            st.session_state.show_preset_manager = False
+            st.session_state.preset_edit_id = None  # Clear edit mode
+            st.rerun()
+
+        st.markdown("---")
+
+    # ========== END PHASE 2A ==========
 
     # Agent UI Dialogs (Phase 10)
     # Spawn Agent Dialog

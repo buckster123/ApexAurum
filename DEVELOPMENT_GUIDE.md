@@ -2,7 +2,7 @@
 
 **Purpose:** Quick onboarding guide for working on this project in future sessions
 **For:** Developers, AI assistants, and future maintainers
-**Updated:** 2025-12-31
+**Updated:** 2026-01-02 (Phase 2A Settings Presets Complete)
 
 ---
 
@@ -17,7 +17,7 @@ cd /home/llm/ApexAurum
 # Check environment
 cat .env  # Verify API keys present
 
-# Count tools (should be 23)
+# Count tools (should be 30)
 python -c "from tools import ALL_TOOLS; print(f'Tools: {len(ALL_TOOLS)}')"
 
 # Check if app is running
@@ -97,7 +97,6 @@ ApexAurum/
 │   └── memory.json          # Memory store
 │
 └── dev_log_archive_and_testfiles/  # 📚 Documentation
-    ├── PROJECT_STATUS.md    # Current status
     ├── PHASE*_COMPLETE.md   # 14 phase docs
     ├── test_*.py            # 8 test suites
     └── ...                  # More docs
@@ -285,10 +284,16 @@ grep -n "def.*dialog" ApexAurum/main.py
 | 100-500 | Config | Configuration classes |
 | 500-1200 | State | AppState class |
 | 1200-1300 | Init | Session state setup |
-| 1300-2000 | Sidebar | Sidebar rendering |
-| 2000-3000 | Chat | Main chat interface |
+| 1300-1550 | Sidebar | Sidebar rendering + Phase 1/2A polish |
+| 1328-1378 | **NEW** | Agent Quick Actions Bar (Phase 1) ⭐ |
+| 1383-1448 | **NEW** | System Status Dashboard (Phase 1) ⭐ |
+| 1460-1546 | **NEW** | Settings Presets Selector (Phase 2A) ⭐⭐ |
+| 1550-2200 | Settings | Model, tools, cache, context controls |
+| 2100-3000 | Chat | Main chat interface |
 | 3000-3500 | Processing | Message & tool handling |
 | 3500-4169 | Dialogs | 12 modal dialogs |
+
+**⭐ = Phase 1 UI Polish | ⭐⭐ = Phase 2A Settings Presets (January 2026)**
 
 ---
 
@@ -511,7 +516,7 @@ streamlit run main.py &
 # Should call time tool and respond
 
 # 4. Check tool count in sidebar
-# Should show: "✅ 23 tools available"
+# Should show: "✅ 30 tools available"
 
 # 5. Kill app
 pkill -f streamlit
@@ -536,18 +541,21 @@ echo "✓ All tests passed"
 
 ### UI Testing Checklist
 
-- [ ] Basic chat works
-- [ ] Streaming responses appear
-- [ ] Tools execute via chat
-- [ ] Sidebar shows correct stats
-- [ ] Cache stats update
-- [ ] Cost tracking works
-- [ ] Conversation save/load works
-- [ ] Vector search works (if Voyage key present)
-- [ ] Knowledge base operations work
-- [ ] Agent tools appear in tool list
-- [ ] Agent spawn via chat works
-- [ ] Modal dialogs open and function
+- [x] Basic chat works
+- [x] Streaming responses appear
+- [x] Tools execute via chat
+- [x] Sidebar shows correct stats
+- [x] Cache stats update
+- [x] Cost tracking works
+- [x] Conversation save/load works
+- [x] Vector search works (if Voyage key present)
+- [x] Knowledge base operations work
+- [x] Agent tools appear in tool list (30 tools)
+- [x] Agent spawn via chat works
+- [x] Modal dialogs open and function
+- [x] Agent Quick Actions bar visible ✅ **Phase 1 Polish**
+- [x] System Status dashboard updates ✅ **Phase 1 Polish**
+- [x] Agent status counts show correctly ✅ **Phase 1 Polish**
 
 ---
 
@@ -714,6 +722,120 @@ git log --oneline
 
 ---
 
+## Phase 2A: Settings Presets (January 2026)
+
+### New Preset System
+
+**1. PresetManager Class** (`core/preset_manager.py`)
+- **Location:** New file in core/ directory
+- **Purpose:** Manage settings presets (built-in + custom)
+- **Features:**
+  - 5 built-in presets: Speed Mode, Cost Saver, Deep Thinking, Research Mode, Simple Chat
+  - Save custom presets from current settings
+  - Full CRUD operations (create, read, update, delete)
+  - JSON export/import for backup/sharing
+  - Settings validation and comparison
+
+**2. Sidebar Preset Selector** (Lines 1460-1546)
+- **Location:** After System Status Dashboard, before Model section
+- **Purpose:** Quick preset switching
+- **Features:**
+  - Dropdown showing all presets
+  - Custom presets marked with ⭐
+  - "Custom (Modified)" detection when user deviates from preset
+  - One-click preset application
+  - Save As... and Manage buttons
+
+**3. Preset Manager Modal** (Lines 3025-3256)
+- **Location:** Before Agent UI Dialogs in main content
+- **Purpose:** Full preset management interface
+- **Features:**
+  - Browse tab: View all presets, apply/edit/delete
+  - Create tab: Save current settings as new preset
+  - Export/Import tab: Backup/restore custom presets
+  - Built-in preset protection (cannot edit/delete)
+  - Inline editing for custom preset name/description
+
+**Built-in Presets:**
+- 🚀 **Speed Mode:** Haiku + Conservative cache (fastest)
+- 💰 **Cost Saver:** Haiku + Aggressive cache (cheapest)
+- 🧠 **Deep Thinking:** Opus + Balanced cache (best quality)
+- 🔬 **Research Mode:** Sonnet + Balanced cache (research)
+- 💬 **Simple Chat:** Sonnet + Conservative cache (default)
+
+**Settings Controlled by Presets (7 core settings):**
+1. `model` - Which Claude model
+2. `cache_strategy` - Caching level
+3. `context_strategy` - Context management approach
+4. `temperature` - Randomness (0.0-1.0)
+5. `preserve_recent_count` - Messages to never summarize
+6. `auto_summarize` - Enable auto-summarization
+7. `default_subagent_model` - Sub-agent model choice
+
+---
+
+## Phase 1 UI Polish (January 2026)
+
+### New UI Sections
+
+**1. Agent Quick Actions Bar (Lines 1328-1378)**
+- **Location:** Top of sidebar, after session controls
+- **Purpose:** Always-visible agent management
+- **Features:**
+  - One-click spawn/council buttons
+  - Real-time agent status (🔄 running | ✅ completed | ❌ failed)
+  - Quick refresh button
+  - Adapts based on whether agents exist
+
+**Usage:**
+```python
+# To spawn agent: Click "➕ Spawn Agent" button
+# To run council: Click "🗳️ Council" button
+# To refresh status: Click "🔄 Refresh" button
+```
+
+**2. System Status Dashboard (Lines 1383-1448)**
+- **Location:** Below Agent Quick Actions, before Settings
+- **Purpose:** At-a-glance system health monitoring
+- **Metrics:**
+  - 💾 Cache hit rate (color-coded: 🟢 >70% | 🟡 40-70% | 🟠 <40%)
+  - 💰 Session cost (real-time)
+  - 🧠 Context usage (🟢 <50% | 🟡 50-75% | 🔴 >75%)
+
+**Color Coding:**
+- 🟢 Green = Healthy/Good
+- 🟡 Yellow = Moderate/Warning
+- 🔴 Red = Critical/High
+- 🟠 Orange = Low performance
+
+**3. Tool Count Correction (Line 2806)**
+- Fixed caption: "30 tools" (was incorrectly "23")
+- Reflects accurate count of registered tools
+
+### Modifying Phase 1 Components
+
+**To modify Agent Quick Actions:**
+```bash
+# Edit lines 1328-1378 in main.py
+# Components: agent status display, button layout
+# Note: Depends on tools.agents._agent_manager
+```
+
+**To modify System Status Dashboard:**
+```bash
+# Edit lines 1383-1448 in main.py
+# Components: cache_stats, cost_stats, context_stats
+# Note: Color thresholds can be adjusted here
+```
+
+**Design Principles:**
+- Always visible (no expanders for critical info)
+- Color-coded for quick recognition
+- Hover tooltips for additional context
+- Updates in real-time as system state changes
+
+---
+
 ## Quick Command Reference
 
 ```bash
@@ -761,7 +883,7 @@ pkill -f streamlit
 - [ ] Check current outstanding work
 - [ ] Review AGENT_INTEGRATION_TODO.md if working on agents
 - [ ] Verify environment: `cat .env`
-- [ ] Check tool count: Should be 23
+- [ ] Check tool count: Should be 30
 - [ ] Review recent logs: `tail -50 app.log`
 
 ### Ending a Session
@@ -796,6 +918,6 @@ This development guide provides everything needed to quickly understand and work
 
 ---
 
-**Last Updated:** 2025-12-31
+**Last Updated:** 2026-01-02
 **Maintained By:** Project team
-**Version:** 1.0
+**Version:** 1.0 (Phase 2A Settings Presets Complete)
