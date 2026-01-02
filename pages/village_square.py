@@ -176,15 +176,16 @@ def generate_agent_response(
 
     # Generate response
     try:
-        response = api_client.generate(
+        response = api_client.create_message(
             messages=messages,
-            system_prompt=system_prompt,  # Now uses loaded bootstrap
-            model=st.session_state.get('village_model', 'claude-sonnet-4-5-20251022'),
+            system=system_prompt,  # Now uses loaded bootstrap
+            model=st.session_state.get('village_model', 'claude-sonnet-4-5-20250929'),
             max_tokens=st.session_state.get('village_max_tokens', 2000),
             temperature=st.session_state.get('village_temperature', 1.0)
         )
 
-        return response
+        # Extract text from response
+        return response.content[0].text
 
     except Exception as e:
         return f"[Error generating response: {e}]"
@@ -271,7 +272,7 @@ with col2:
 
     st.session_state.village_model = st.selectbox(
         "Model",
-        ["claude-sonnet-4-5-20251022", "claude-haiku-4-5-20251001", "claude-opus-4-5-20251101"],
+        ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001", "claude-opus-4-5-20251101"],
         index=0
     )
 
