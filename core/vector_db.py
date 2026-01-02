@@ -184,7 +184,13 @@ class VectorCollection:
         ids: Optional[List[str]] = None
     ) -> bool:
         """
-        Add documents to collection.
+        Add documents to collection with enhanced metadata.
+
+        Enhanced metadata includes:
+        - access_count: Track how often this memory is accessed
+        - last_accessed_ts: Unix timestamp of last access
+        - related_memories: List of related memory IDs
+        - embedding_version: Track which embedding model was used
 
         Args:
             texts: List of text documents
@@ -206,6 +212,25 @@ class VectorCollection:
 
             if metadatas and len(metadatas) != len(texts):
                 raise ValueError("metadatas must match texts length")
+
+            # Enhance metadata with new fields (Phase 1 Memory Enhancement)
+            if metadatas is None:
+                metadatas = [{} for _ in range(len(texts))]
+
+            current_time = datetime.now()
+            current_ts = current_time.timestamp()
+
+            for metadata in metadatas:
+                # Add new fields with defaults (only if not already present)
+                if "access_count" not in metadata:
+                    metadata["access_count"] = 0
+                if "last_accessed_ts" not in metadata:
+                    metadata["last_accessed_ts"] = current_ts
+                if "related_memories" not in metadata:
+                    # ChromaDB only accepts str/int/float/bool, so store as JSON string
+                    metadata["related_memories"] = "[]"
+                if "embedding_version" not in metadata:
+                    metadata["embedding_version"] = self.embedding_generator.model_name
 
             # Generate embeddings
             embeddings = self.embedding_generator.encode(texts)
@@ -326,6 +351,53 @@ class VectorCollection:
         except Exception as e:
             logger.error(f"Error updating {self.name}: {e}")
             raise VectorDBError(f"Update failed: {e}")
+
+    def track_access(self, vector_ids: List[str]) -> bool:
+        """
+        Track access to vectors by incrementing access_count and updating last_accessed_ts.
+
+        This is a non-blocking operation used for memory health analytics.
+        Failure to track access will be logged but won't raise exceptions.
+
+        Args:
+            vector_ids: List of vector IDs that were accessed
+
+        Returns:
+            bool: Success status (non-blocking, logs errors but doesn't fail)
+        """
+        try:
+            if not vector_ids:
+                return True
+
+            # Get current metadata for these vectors
+            docs = self.collection.get(ids=vector_ids)
+
+            if not docs["ids"]:
+                logger.warning(f"No vectors found for tracking: {vector_ids}")
+                return False
+
+            # Update metadata
+            current_ts = datetime.now().timestamp()
+            updated_metadatas = []
+
+            for metadata in docs["metadatas"]:
+                metadata["access_count"] = metadata.get("access_count", 0) + 1
+                metadata["last_accessed_ts"] = current_ts
+                updated_metadatas.append(metadata)
+
+            # Batch update
+            self.collection.update(
+                ids=docs["ids"],
+                metadatas=updated_metadatas
+            )
+
+            logger.debug(f"Tracked access for {len(docs['ids'])} vectors in {self.name}")
+            return True
+
+        except Exception as e:
+            # Non-blocking: log error but don't fail the operation
+            logger.warning(f"Failed to track vector access in {self.name}: {e}")
+            return False
 
     def count(self) -> int:
         """

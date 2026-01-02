@@ -686,6 +686,108 @@ VECTOR_TOOL_SCHEMAS = {
 }
 
 
+# ============================================================================
+# Memory System Utilities (Phase 1)
+# ============================================================================
+
+def migrate_existing_vectors_to_v2(collection: str = "knowledge") -> Dict[str, Any]:
+    """
+    Migrate existing vectors to include new metadata fields.
+    Safe to run multiple times (idempotent).
+
+    This adds the following fields to existing vectors:
+    - access_count: Initialized to 0
+    - last_accessed_ts: Set to creation time or current time
+    - related_memories: Initialized to empty list
+    - session_id: Marked as "migrated_v1"
+    - embedding_version: Set to current model
+
+    Args:
+        collection: Collection name to migrate (default: "knowledge")
+
+    Returns:
+        Dict with migration stats including success status, total vectors, and migrated count
+    """
+    try:
+        db = _get_vector_db()
+        if db is None:
+            return {"success": False, "error": "Vector database not available"}
+
+        coll = db.get_or_create_collection(collection)
+
+        # Get all existing documents
+        all_docs = coll.get()
+
+        if not all_docs["ids"]:
+            return {
+                "success": True,
+                "message": f"Collection '{collection}' is empty, no migration needed",
+                "migrated": 0,
+                "total_vectors": 0
+            }
+
+        # Update metadata
+        updated_count = 0
+        updated_metadatas = []
+
+        for metadata in all_docs["metadatas"]:
+            needs_update = False
+
+            # Add new fields if missing
+            if "access_count" not in metadata:
+                metadata["access_count"] = 0
+                needs_update = True
+
+            if "last_accessed_ts" not in metadata:
+                # Use added_at if available, otherwise current time
+                if "added_at" in metadata:
+                    try:
+                        added_dt = datetime.fromisoformat(metadata["added_at"])
+                        metadata["last_accessed_ts"] = added_dt.timestamp()
+                    except:
+                        metadata["last_accessed_ts"] = datetime.now().timestamp()
+                else:
+                    metadata["last_accessed_ts"] = datetime.now().timestamp()
+                needs_update = True
+
+            if "related_memories" not in metadata:
+                # ChromaDB only accepts str/int/float/bool, so store as JSON string
+                metadata["related_memories"] = "[]"
+                needs_update = True
+
+            if "session_id" not in metadata:
+                metadata["session_id"] = "migrated_v1"
+                needs_update = True
+
+            if "embedding_version" not in metadata:
+                metadata["embedding_version"] = "all-MiniLM-L6-v2"
+                needs_update = True
+
+            updated_metadatas.append(metadata)
+            if needs_update:
+                updated_count += 1
+
+        # Batch update all metadata
+        if updated_count > 0:
+            coll.update(ids=all_docs["ids"], metadatas=updated_metadatas)
+            logger.info(f"Migrated {updated_count} vectors in {collection}")
+
+        return {
+            "success": True,
+            "collection": collection,
+            "total_vectors": len(all_docs["ids"]),
+            "migrated": updated_count,
+            "skipped": len(all_docs["ids"]) - updated_count
+        }
+
+    except Exception as e:
+        logger.error(f"Migration error: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
 # For backward compatibility and easy imports
 __all__ = [
     'vector_add',
@@ -696,5 +798,6 @@ __all__ = [
     'vector_add_knowledge',
     'vector_search_knowledge',
     'vector_update_knowledge_confidence',
+    'migrate_existing_vectors_to_v2',
     'VECTOR_TOOL_SCHEMAS'
 ]
