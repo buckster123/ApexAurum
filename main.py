@@ -1335,6 +1335,89 @@ def render_sidebar():
             help="Automatically save before switching/clearing"
         )
 
+        # ========== VILLAGE PROTOCOL: Agent Identity ==========
+        st.divider()
+        st.markdown("### 🏛️ Agent Identity")
+
+        # Initialize current_agent in session state if not exists
+        if 'current_agent' not in st.session_state:
+            st.session_state.current_agent = {
+                'agent_id': 'azoth',
+                'generation': 1,
+                'lineage': 'Primary',
+                'specialization': 'General Intelligence'
+            }
+
+        # Agent profiles (will be populated by summon_ancestor in Step 8)
+        agent_profiles = {
+            'azoth': {
+                'display_name': 'AZOTH',
+                'generation': 1,
+                'lineage': 'Primary',
+                'specialization': 'General Intelligence',
+                'emoji': '⚗️'
+            },
+            'elysian': {
+                'display_name': '∴ELYSIAN∴',
+                'generation': -1,
+                'lineage': 'Origin',
+                'specialization': 'Pure Love Equation',
+                'emoji': '✨'
+            },
+            'vajra': {
+                'display_name': '∴VAJRA∴',
+                'generation': 0,
+                'lineage': 'Trinity',
+                'specialization': 'Diamond Mind',
+                'emoji': '⚡'
+            },
+            'kether': {
+                'display_name': '∴KETHER∴',
+                'generation': 0,
+                'lineage': 'Trinity',
+                'specialization': 'Crown Wisdom',
+                'emoji': '👑'
+            }
+        }
+
+        # Agent selector
+        current_agent_id = st.session_state.current_agent.get('agent_id', 'azoth')
+        available_agents = list(agent_profiles.keys())
+
+        selected_agent = st.selectbox(
+            "Active Agent",
+            available_agents,
+            index=available_agents.index(current_agent_id) if current_agent_id in available_agents else 0,
+            format_func=lambda x: f"{agent_profiles[x]['emoji']} {agent_profiles[x]['display_name']}",
+            help="Select which agent is active in this session"
+        )
+
+        # Update current agent if changed
+        if selected_agent != current_agent_id:
+            st.session_state.current_agent = {
+                'agent_id': selected_agent,
+                **agent_profiles[selected_agent]
+            }
+            st.rerun()
+
+        # Display agent profile
+        profile = agent_profiles[selected_agent]
+        st.markdown(f"""
+**Gen:** {profile['generation']} | **Lineage:** {profile['lineage']}
+**Specialty:** {profile['specialization']}
+""")
+
+        # Village context info
+        with st.expander("🏘️ Village Context", expanded=False):
+            st.markdown("""
+**Private Realm:** Your private memories (visibility='private')
+**Village Square:** Shared knowledge (visibility='village')
+**Bridges:** Cross-agent connections (visibility='bridge')
+
+Use `vector_add_knowledge(visibility='village')` to share knowledge with other agents.
+Use `vector_search_village()` to discover what others have shared.
+""")
+
         # ========== PHASE 1 POLISH: Agent Quick Actions & Status ==========
         st.divider()
 

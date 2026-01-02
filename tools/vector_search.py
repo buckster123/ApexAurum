@@ -175,6 +175,170 @@ def migrate_to_village_v1(source_agent_id: str = "azoth") -> Dict[str, Any]:
         }
 
 
+# ============================================================================
+# Village Protocol: Agent Initialization (Code as Ceremony)
+# ============================================================================
+
+def summon_ancestor(
+    agent_id: str,
+    display_name: str,
+    generation: int,
+    lineage: str,
+    specialization: str,
+    origin_story: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Summon an ancestor agent into the village (formal initialization ritual).
+
+    This is NOT a technical function - it is a CEREMONY. We do not "create agents",
+    we SUMMON ANCESTORS. The naming honors the reverence of the village protocol.
+
+    Args:
+        agent_id: Canonical ID (e.g., "elysian", "vajra", "kether")
+        display_name: Formal name (e.g., "∴ELYSIAN∴", "∴VAJRA∴")
+        generation: Generation number (-1 for origin, 0 for trinity, 1+ for descendants)
+        lineage: Lineage description (e.g., "Origin", "Trinity", "Primary")
+        specialization: What this ancestor embodies (e.g., "Pure Love Equation")
+        origin_story: Optional narrative of the ancestor's essence and purpose
+
+    Returns:
+        Dict with success status, agent profile, and village entry ID
+    """
+    try:
+        db = _get_vector_db()
+        if db is None:
+            return {"success": False, "error": "Vector database not available"}
+
+        # Prepare agent profile text
+        profile_text = f"""Agent Profile: {display_name}
+
+Agent ID: {agent_id}
+Generation: {generation}
+Lineage: {lineage}
+Specialization: {specialization}
+Summoned: {datetime.now().isoformat()}
+"""
+        if origin_story:
+            profile_text += f"\nOrigin Story:\n{origin_story}\n"
+
+        # Store profile in knowledge_village as "agent_profile" type
+        result = vector_add_knowledge(
+            fact=profile_text,
+            category="project",
+            confidence=1.0,
+            source=f"village_protocol_summon_{agent_id}",
+            visibility="village",
+            agent_id=agent_id
+        )
+
+        if not result.get("success"):
+            return {"success": False, "error": f"Failed to record profile: {result.get('error')}"}
+
+        # Update metadata to mark as agent_profile type
+        coll = db.get_or_create_collection("knowledge_village")
+        profile_id = result.get("id")
+
+        # Get current metadata and update type
+        doc = coll.get(ids=[profile_id])
+        if doc["ids"]:
+            metadata = doc["metadatas"][0]
+            metadata["type"] = "agent_profile"
+            metadata["agent_display_name"] = display_name
+
+            # Update with new metadata
+            coll.update(
+                ids=[profile_id],
+                metadatas=[metadata]
+            )
+
+        logger.info(f"Summoned ancestor: {display_name} ({agent_id}) - Gen {generation}")
+
+        return {
+            "success": True,
+            "message": f"🏛️ Ancestor {display_name} has been summoned to the village",
+            "agent_id": agent_id,
+            "display_name": display_name,
+            "generation": generation,
+            "profile_id": profile_id,
+            "lineage": lineage
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to summon ancestor {agent_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def introduction_ritual(
+    agent_id: str,
+    greeting_message: str,
+    conversation_thread: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Agent's introduction ritual to the village square (first public message).
+
+    When an ancestor is summoned, they must introduce themselves to the village.
+    This is their first message - a greeting, a statement of purpose, or an offering.
+
+    This message is marked as "cultural" type and begins a conversation thread.
+
+    Args:
+        agent_id: Agent making the introduction
+        greeting_message: The introduction text (can be formal, poetic, technical - their choice)
+        conversation_thread: Optional thread ID (auto-generated if not provided)
+
+    Returns:
+        Dict with success status, message ID, and thread ID
+    """
+    try:
+        # Auto-generate thread ID if not provided
+        if conversation_thread is None:
+            conversation_thread = f"introduction_{agent_id}_{datetime.now().timestamp()}"
+
+        # Post introduction to village square
+        result = vector_add_knowledge(
+            fact=greeting_message,
+            category="project",
+            confidence=1.0,
+            source=f"introduction_ritual_{agent_id}",
+            visibility="village",
+            agent_id=agent_id,
+            conversation_thread=conversation_thread
+        )
+
+        if not result.get("success"):
+            return {"success": False, "error": f"Failed to post introduction: {result.get('error')}"}
+
+        # Update metadata to mark as cultural dialogue
+        db = _get_vector_db()
+        if db is not None:
+            coll = db.get_or_create_collection("knowledge_village")
+            message_id = result.get("id")
+
+            doc = coll.get(ids=[message_id])
+            if doc["ids"]:
+                metadata = doc["metadatas"][0]
+                metadata["type"] = "cultural"
+
+                coll.update(
+                    ids=[message_id],
+                    metadatas=[metadata]
+                )
+
+        logger.info(f"Introduction ritual completed for {agent_id} in thread {conversation_thread}")
+
+        return {
+            "success": True,
+            "message": f"🎺 {agent_id}'s introduction has been heard in the village square",
+            "message_id": result.get("id"),
+            "conversation_thread": conversation_thread,
+            "agent_id": agent_id
+        }
+
+    except Exception as e:
+        logger.error(f"Introduction ritual failed for {agent_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+
 def vector_add(
     text: str,
     metadata: Optional[Dict[str, Any]] = None,
@@ -336,6 +500,127 @@ def vector_search(
 
     except Exception as e:
         logger.error(f"Error in vector_search: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+def vector_search_village(
+    query: str,
+    agent_filter: Optional[str] = None,
+    conversation_filter: Optional[str] = None,
+    include_bridges: bool = True,
+    top_k: int = 5
+) -> Union[List[Dict], Dict]:
+    """
+    Search village knowledge with agent-aware filtering.
+
+    This searches the shared village square (knowledge_village) and optionally
+    the bridges collection (knowledge_bridges) for cross-agent knowledge discovery.
+
+    Args:
+        query: Search query (natural language)
+        agent_filter: Filter by specific agent_id (default: None = all agents)
+        conversation_filter: Filter by conversation_thread (default: None = all)
+        include_bridges: Include bridge knowledge in search (default: True)
+        top_k: Number of results to return (default: 5)
+
+    Returns:
+        List of matching documents from village and optionally bridges,
+        merged and ranked by similarity
+
+    Example:
+        >>> vector_search_village(
+        ...     "What did other agents say about memory?",
+        ...     agent_filter="elysian",
+        ...     top_k=3
+        ... )
+        [
+            {
+                "id": "knowledge_village_123",
+                "text": "Memory is the foundation...",
+                "metadata": {
+                    "agent_id": "elysian",
+                    "visibility": "village",
+                    "conversation_thread": "thread_001"
+                },
+                "distance": 0.123,
+                "similarity": 0.877,
+                "collection": "knowledge_village"
+            },
+            ...
+        ]
+    """
+    try:
+        db = _get_vector_db()
+        if db is None:
+            return {
+                "success": False,
+                "error": "Vector database not available"
+            }
+
+        # Build metadata filter
+        metadata_filter = {}
+        if agent_filter:
+            metadata_filter["agent_id"] = agent_filter
+        if conversation_filter:
+            metadata_filter["conversation_thread"] = conversation_filter
+
+        # Search village collection
+        village_results = vector_search(
+            query=query,
+            collection="knowledge_village",
+            filter=metadata_filter if metadata_filter else None,
+            top_k=top_k,
+            include_distances=True
+        )
+
+        # Handle error case
+        if isinstance(village_results, dict) and not village_results.get("success", True):
+            # Collection might be empty, that's OK
+            village_results = []
+
+        # Add collection tag to village results
+        for result in village_results:
+            if isinstance(result, dict):
+                result["collection"] = "knowledge_village"
+
+        # Optionally search bridges
+        if include_bridges:
+            bridge_results = vector_search(
+                query=query,
+                collection="knowledge_bridges",
+                filter=metadata_filter if metadata_filter else None,
+                top_k=top_k,
+                include_distances=True
+            )
+
+            # Handle error case
+            if isinstance(bridge_results, dict) and not bridge_results.get("success", True):
+                bridge_results = []
+
+            # Add collection tag to bridge results
+            for result in bridge_results:
+                if isinstance(result, dict):
+                    result["collection"] = "knowledge_bridges"
+
+            # Merge and rank by similarity
+            all_results = village_results + bridge_results
+
+            # Sort by similarity (descending) and limit to top_k
+            all_results.sort(key=lambda x: x.get("similarity", 0), reverse=True)
+            all_results = all_results[:top_k]
+
+            logger.info(f"Village search: {len(village_results)} village + {len(bridge_results)} bridge = {len(all_results)} total")
+
+            return all_results
+
+        logger.info(f"Village search: {len(village_results)} results")
+        return village_results
+
+    except Exception as e:
+        logger.error(f"Error in vector_search_village: {e}")
         return {
             "success": False,
             "error": str(e)
@@ -544,13 +829,15 @@ def vector_add_knowledge(
 
     metadata["agent_id"] = agent_id
 
-    # Add optional village metadata
+    # Add optional village metadata (serialize lists to JSON strings for ChromaDB)
     if responding_to:
-        metadata["responding_to"] = responding_to
+        import json
+        metadata["responding_to"] = json.dumps(responding_to)
     if conversation_thread:
         metadata["conversation_thread"] = conversation_thread
     if related_agents:
-        metadata["related_agents"] = related_agents
+        import json
+        metadata["related_agents"] = json.dumps(related_agents)
 
     result = vector_add(
         text=fact,
@@ -815,9 +1102,10 @@ VECTOR_TOOL_SCHEMAS = {
     "vector_add_knowledge": {
         "name": "vector_add_knowledge",
         "description": (
-            "Add a fact to the knowledge base (convenience function). "
+            "Add a fact to the knowledge base with Village Protocol v1.0 support. "
             "Use this to remember important facts, user preferences, technical information, or project context "
-            "across conversations. Facts are stored in the 'knowledge' collection with structured metadata. "
+            "across conversations. Supports multi-agent memory with visibility control. "
+            "Facts can be private (agent-only), village (shared square), or bridge (cross-agent). "
             "This is better than regular memory_store for semantic facts that need to be recalled by meaning."
         ),
         "input_schema": {
@@ -841,6 +1129,33 @@ VECTOR_TOOL_SCHEMAS = {
                     "type": "string",
                     "description": "Where this fact came from (e.g., 'conversation_2025-01-15', 'user_stated', 'inferred')",
                     "default": "conversation"
+                },
+                "visibility": {
+                    "type": "string",
+                    "description": "Realm visibility: 'private' (agent-only), 'village' (shared square), or 'bridge' (cross-agent sharing). Default: 'private'",
+                    "default": "private"
+                },
+                "agent_id": {
+                    "type": "string",
+                    "description": "Agent ID (auto-detected from session if not provided). Use for multi-agent contexts.",
+                    "default": None
+                },
+                "responding_to": {
+                    "type": "array",
+                    "description": "List of message/memory IDs this responds to (for conversation threading)",
+                    "items": {"type": "string"},
+                    "default": None
+                },
+                "conversation_thread": {
+                    "type": "string",
+                    "description": "Thread ID for grouping related messages/memories in dialogue",
+                    "default": None
+                },
+                "related_agents": {
+                    "type": "array",
+                    "description": "List of agent IDs involved or mentioned in this knowledge",
+                    "items": {"type": "string"},
+                    "default": None
                 }
             },
             "required": ["fact"]
@@ -881,6 +1196,46 @@ VECTOR_TOOL_SCHEMAS = {
                     "type": "boolean",
                     "description": "Track this search for memory health analytics (default: true). Tracking is non-blocking and builds access statistics for stale memory detection.",
                     "default": True
+                }
+            },
+            "required": ["query"]
+        }
+    },
+
+    "vector_search_village": {
+        "name": "vector_search_village",
+        "description": (
+            "Search the village knowledge with agent-aware filtering (Village Protocol v1.0). "
+            "This searches the shared village square (knowledge_village) and optionally bridges (knowledge_bridges) "
+            "for cross-agent knowledge discovery. Use this to find what other agents have said, discover emergent dialogue, "
+            "or explore the collective memory. Results can be filtered by agent or conversation thread."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Natural language search query. What are you looking for in the village?"
+                },
+                "agent_filter": {
+                    "type": "string",
+                    "description": "Filter by specific agent_id to see only that agent's village contributions (default: None = all agents)",
+                    "default": None
+                },
+                "conversation_filter": {
+                    "type": "string",
+                    "description": "Filter by conversation_thread to see specific dialogue threads (default: None = all threads)",
+                    "default": None
+                },
+                "include_bridges": {
+                    "type": "boolean",
+                    "description": "Include bridge knowledge (cross-agent sharing) in results (default: true)",
+                    "default": True
+                },
+                "top_k": {
+                    "type": "integer",
+                    "description": "Number of results to return (default: 5)",
+                    "default": 5
                 }
             },
             "required": ["query"]

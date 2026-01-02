@@ -1,0 +1,28 @@
+{
+  "question": "best programming language?",
+  "winner": "python",
+  "votes": {
+    "python": 3,
+    "javascript": 0,
+    "typescript": 0
+  },
+  "total_agents": 3,
+  "consensus": true,
+  "reasoning": [
+    {
+      "agent": 1,
+      "vote": "python",
+      "reasoning": "**Choice: 1 (Python)**\n\n**Reasoning:**\n\nPython is the best general-purpose choice among these three because:\n\n- **Versatility**: Excels across multiple domains - data science, AI/ML, web development, ..."
+    },
+    {
+      "agent": 2,
+      "vote": "python",
+      "reasoning": "**Choice: 1 (Python)**\n\n**Reasoning:**\n\nPython is the best general-purpose choice among these three because:\n\n- **Versatility**: Excels across multiple domains (web development, data science, AI/ML, a..."
+    },
+    {
+      "agent": 3,
+      "vote": "python",
+      "reasoning": "# Answer: 1 (Python)\n\n## Reasoning:\n\n**Python** is the best choice among these three because:\n\n- **Versatility**: Excels across multiple domains - data science, AI/ML, web development, automation, sci..."
+    }
+  ]
+}
