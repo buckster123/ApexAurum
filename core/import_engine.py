@@ -229,9 +229,9 @@ class ImportEngine:
 
         # Ensure timestamps
         now = datetime.now().isoformat()
-        if "created_at" not in conversation:
+        if "created_at" not in conversation or conversation["created_at"] is None:
             conversation["created_at"] = now
-        if "updated_at" not in conversation:
+        if "updated_at" not in conversation or conversation["updated_at"] is None:
             conversation["updated_at"] = now
 
         # Ensure metadata structure
