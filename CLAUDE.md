@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, vector search, intelligent prompt caching (50-90% cost savings), 30+ integrated tools, and context management with auto-summarization.
 
-**Status:** V1.0 Beta - Production Ready with Phase 2A Presets (~16,600 lines of code)
+**Status:** V1.0 Beta - Production Ready with Phase 2B-1 Agent Monitoring (~17,077 lines of code)
 
 ## Essential Reading Before Starting
 
@@ -98,6 +98,7 @@ cat .env
 - Lines 1200-2400: Sidebar rendering (controls, stats, tools)
   - **Lines 1328-1378:** Agent Quick Actions Bar (Phase 1 Polish)
   - **Lines 1383-1448:** System Status Dashboard (Phase 1 Polish)
+  - **Lines 1388-1508:** Agent Monitoring Sidebar (Phase 2B-1)
   - **Lines 1460-1546:** Settings Presets Selector (Phase 2A)
 - Lines 2400-3300: Chat interface (messages, streaming)
 - Lines 3025-3256: **Preset Manager Modal** (Phase 2A)
@@ -345,6 +346,51 @@ Model can be changed in sidebar during runtime.
 - 🎯 Power users get professional preset management
 - 🚀 Faster workflow for different use cases
 
+### Phase 2B: Enhanced Tool Feedback - Complete ✅
+
+**New Features:**
+1. **Animated Spinners** - Braille spinner animation (⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏) during tool execution
+2. **Tool Category Icons** - 📁 file, 🌐 web, 🤖 agent, 💻 code, 🧠 memory, 🔍 vector, ⏰ time, 🔢 calc, 📝 string
+3. **Color-Coded Status** - Green success boxes (✅), red error boxes (❌)
+4. **Progress Bars** - Animated bars for tools running >2 seconds
+5. **Smart Result Formatting** - Auto-detects code, JSON, Markdown with syntax highlighting
+6. **Better Truncation** - 1000 char limit with continuation indicator
+
+**Impact:** Professional visual polish, much more engaging tool execution feedback
+
+### Phase 2B-1: Agent Monitoring Sidebar + Fixes - Complete ✅
+
+**New Features:**
+1. **Agent Monitoring Sidebar** (Lines 1388-1508)
+   - Real-time agent status list (up to 10 most recent)
+   - Smart sorting: Running → Completed → Failed, newest first
+   - Color-coded status: 🔵 running, 🟢 completed, 🔴 failed, 🟡 pending
+   - Agent type icons: 🤖🔬💻📊✍️
+   - Expandable cards with full task, results, timing
+   - One-click "View Full Results" integration
+   - **Full results display (no truncation)**
+
+2. **Council UX Improvements**
+   - Fixed form Enter key behavior
+   - Added 🗑️ delete buttons for options
+   - Separated results from form (fixes Streamlit button error)
+
+3. **Council Export/Save**
+   - 📋 Copy, 🧠 Knowledge, 💾 Memory, 📥 JSON download
+
+4. **Model Updates**
+   - Added Haiku 4.5 support: `claude-haiku-4-5-20251001`
+   - Updated all presets to use Haiku 4.5
+   - Fixed all model ID references
+
+**Bug Fixes:**
+- Fixed agent sorting TypeError (timestamp negation)
+- Fixed council knowledge button (wrong parameters)
+- Fixed council no-votes handling
+- Fixed Streamlit form button error
+
+**Impact:** Real-time agent visibility, council results exportable, latest Claude models supported
+
 ### Phase 1 UI Polish - Complete ✅
 
 **Features:**
@@ -520,11 +566,12 @@ grep ANTHROPIC_API_KEY .env
 ---
 
 **Last Updated:** 2026-01-02
-**Version:** 1.0 Beta (Phase 2A Settings Presets Complete)
-**Total Code:** ~16,600 lines across 41 Python files
+**Version:** 1.0 Beta (Phase 2B-1 Agent Monitoring Complete)
+**Total Code:** ~17,077 lines across 42 Python files
 
 **Latest Changes:**
+- **Phase 2B-1:** Agent Monitoring Sidebar + Council Export + Model Updates (Haiku 4.5!)
+- **Phase 2B:** Enhanced Tool Feedback with animated spinners and category icons
 - **Phase 2A:** Full-featured Settings Presets system with 5 built-ins + custom support
 - Phase 1 UI Polish: Agent Quick Actions + System Status Dashboard
-- Enhanced preset management with export/import
-- Real-time preset detection and switching
+- All major bugs fixed, production-ready

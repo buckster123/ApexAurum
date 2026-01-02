@@ -8,11 +8,11 @@
 
 **ApexAurum - Claude Edition** is a production-grade AI chat platform built on Claude API.
 
-- **Status:** V1.0 Beta - 100% Complete, Production Ready & Fully Featured
+- **Status:** V1.0 Beta - 100% Complete, Production Ready & Highly Polished
 - **What it does:** Multi-agent AI system with cost optimization (50-90% savings!)
-- **Main features:** 30 tools, vector search, knowledge base, prompt caching, settings presets
-- **Code:** ~16,600 lines across main.py, core/, tools/, ui/
-- **Latest:** Phase 2A Settings Presets (Jan 2026) - One-click preset switching + custom presets
+- **Main features:** 30 tools, vector search, knowledge base, prompt caching, settings presets, agent monitoring
+- **Code:** ~17,077 lines across main.py, core/, tools/, ui/
+- **Latest:** Phase 2B-1 Agent Monitoring (Jan 2026) - Real-time agent sidebar + council export + Haiku 4.5
 
 ---
 
@@ -71,14 +71,27 @@ streamlit run main.py
 Overall: 100% Complete - Production Ready & Fully Featured
 ```
 
-### 🆕 Phase 2A: Settings Presets (January 2026)
+### 🆕 Phase 2B-1: Agent Monitoring (January 2026)
 
 **New features:**
+- 🔍 **Agent Monitoring Sidebar** - Real-time status of up to 10 agents
+- 🤖 **Agent type icons** - 🤖 general, 🔬 researcher, 💻 coder, 📊 analyst, ✍️ writer
+- 🔵🟢🔴 **Color-coded status** - Running/Completed/Failed/Pending
+- 📄 **Full results display** - No truncation, see everything
+- 💾 **Council export** - Copy/Knowledge/Memory/JSON download options
+- ⚡ **Haiku 4.5 support** - Latest Claude model integrated
+
+**Phase 2B: Enhanced Tool Feedback (January 2026):**
+- ⠋ **Animated spinners** - Braille animation during tool execution
+- 📁🌐🤖💻 **Category icons** - Instant tool type identification
+- ✅❌ **Color-coded results** - Green success, red errors
+- ⏳ **Progress bars** - For tools running >2 seconds
+
+**Phase 2A: Settings Presets (January 2026):**
 - 🎨 **Settings Presets** - 5 built-in presets + custom preset support
 - ⚡ **One-click switching** - Speed/Cost Saver/Deep Thinking/Research/Chat modes
 - 💾 **Save custom presets** - Save your preferred settings
 - 📦 **Export/Import** - Backup and share your custom presets
-- 🎯 **Smart detection** - Shows "Custom (Modified)" when you tweak settings
 
 **Phase 1 UI Polish (January 2026):**
 - 🤖 Agent Quick Actions Bar
@@ -196,14 +209,17 @@ See **quick-commands.md** in `.claude/skills/apex-maintainer/` for full referenc
 
 ## 🎉 Project Highlights
 
-- **~16,600 lines** of production code
+- **~17,077 lines** of production code
 - **30 tools** integrated and working
+- **Agent monitoring** with real-time sidebar
+- **Enhanced tool feedback** with animated spinners
 - **5 built-in presets** + custom preset support
+- **Council export** to Copy/Knowledge/Memory/JSON
+- **Haiku 4.5** latest model support
 - **50-90% cost savings** via intelligent caching
-- **14 phases** + Phase 2A of documented development
+- **16 phases** of documented development (14 + 2A + 2B + 2B-1)
 - **8 test suites** for validation
-- **Production-ready** and fully featured
-- **Phase 2A presets** complete (Jan 2026)
+- **Production-ready** and highly polished
 
 ---
 
@@ -212,5 +228,5 @@ See **quick-commands.md** in `.claude/skills/apex-maintainer/` for full referenc
 ---
 
 **Last Updated:** 2026-01-02
-**Version:** 1.0 Beta (Phase 2A Settings Presets Complete)
-**Status:** Production Ready & Fully Featured
+**Version:** 1.0 Beta (Phase 2B-1 Agent Monitoring Complete)
+**Status:** Production Ready & Highly Polished

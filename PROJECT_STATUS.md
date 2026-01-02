@@ -1,8 +1,8 @@
 # ApexAurum - Claude Edition: Project Status Report
 
 **Generated:** 2026-01-02
-**Version:** 1.0 Beta (Phase 2A Complete - Settings Presets)
-**Status:** Production-Ready, Fully Featured
+**Version:** 1.0 Beta (Phase 2B-1 Complete - Agent Monitoring)
+**Status:** Production-Ready, Fully Featured, Highly Polished
 
 ---
 
@@ -13,9 +13,9 @@ ApexAurum - Claude Edition is a **production-grade AI chat interface** built on 
 - Multi-agent orchestration system
 - Vector search and knowledge management
 - Intelligent prompt caching (50-90% cost savings)
-- Comprehensive tool system (15+ tools)
+- Comprehensive tool system (30 tools)
 - Context management with auto-summarization
-- Professional Streamlit UI with 12+ modal dialogs
+- Professional Streamlit UI with 13+ modal dialogs
 
 **Current Phase:** Post-V1.0 Beta - Advanced features and polish
 
@@ -26,16 +26,16 @@ ApexAurum - Claude Edition is a **production-grade AI chat interface** built on 
 ### Codebase Statistics
 
 ```
-Main Application:    main.py          4,169 lines
-Core Modules:        core/*.py       ~9,500 lines (24 files)
-Tool Modules:        tools/*.py      ~1,800 lines (7 files)
-UI Modules:          ui/*.py           ~200 lines (2 files)
+Main Application:    main.py          4,577 lines
+Core Modules:        core/*.py       ~10,200 lines (25 files)
+Tool Modules:        tools/*.py       ~1,900 lines (7 files)
+UI Modules:          ui/*.py           ~400 lines (2 files)
 ----------------------------------------
-Total Code:                         ~15,669 lines
+Total Code:                         ~17,077 lines
 
 Documentation:                        40+ files
-Phase Docs:                           14 complete phases
-Test Suites:                          7 comprehensive tests
+Phase Docs:                           16 complete phases (14 + 2A + 2B + 2B-1)
+Test Suites:                          8 comprehensive tests
 ```
 
 ### Feature Completeness
@@ -68,7 +68,7 @@ Documentation:                 ✅ 100% Complete
    - Image upload and vision support
    - Clean Streamlit UI
 
-2. **Tool System (15+ Tools)**
+2. **Tool System (30 Tools)**
    - Time and date operations
    - Calculator (Python-based)
    - Memory (key-value storage)
@@ -76,8 +76,8 @@ Documentation:                 ✅ 100% Complete
    - Web fetch and search
    - Image analysis (vision)
    - Python code execution
-   - Process management
-   - Vector search integration
+   - Vector search and knowledge base
+   - Agent operations (spawn, status, result, council)
    - Knowledge base management
 
 3. **Cost Optimization**
@@ -195,13 +195,122 @@ Documentation:                 ✅ 100% Complete
 - `main.py` lines 3025-3256: Modal dialog (+231 lines)
 - **Total: ~857 lines added**
 
+### ✅ Phase 2B: Enhanced Tool Feedback - Complete (Jan 2026)
+
+**Status:** Fully implemented and tested
+
+**New Features:**
+1. **Animated Spinners**
+   - Braille spinner animation frames (⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏)
+   - Animates during tool execution
+   - Frame-by-frame updates in Streamlit
+
+2. **Tool Category Icons**
+   - 📁 File operations (read, write, list, delete)
+   - 🌐 Web operations (fetch, search, HTTP)
+   - 🤖 Agent operations (spawn, council)
+   - 💻 Code execution (python, execute)
+   - 🧠 Memory operations (store, recall)
+   - 🔍 Vector/search operations
+   - ⏰ Time operations
+   - 🔢 Calculator
+   - 📝 String operations
+   - 🛠️ Default (fallback)
+
+3. **Color-Coded Status Containers**
+   - Running: Clean container with animated spinner
+   - Complete: Green success box with ✅
+   - Error: Red error box with ❌
+   - Shows status text and timing
+
+4. **Progress Bars for Long Operations**
+   - Tools running >2 seconds get animated progress bar
+   - Pulsing effect (indeterminate progress)
+   - Visual feedback for long operations
+
+5. **Smart Result Formatting**
+   - JSON/dict/list: Pretty-printed with `st.json()`
+   - Code detection: Auto-detects Python, JSON, Markdown
+   - Syntax highlighting: Language-specific formatting
+   - Smart truncation: 1000 char limit with continuation indicator
+   - Collapsible expanders: "View Result" / "View Error" buttons
+
+**Impact:**
+- ✅ Much more engaging tool execution feedback
+- ✅ Instantly identify tool types by icon
+- ✅ Clear success/error status with color coding
+- ✅ Professional visual polish
+
+**Code Changes:**
+- `ui/streaming_display.py`: +153 lines, -22 lines
+- `.gitignore`: +2 lines (sandbox runtime data)
+- **Total: ~180 lines enhanced**
+
+### ✅ Phase 2B-1: Agent Monitoring Sidebar + Major Fixes - Complete (Jan 2026)
+
+**Status:** Fully implemented, tested, and working
+
+**New Components:**
+1. **Agent Monitoring Sidebar** (`main.py` lines 1388-1508)
+   - Real-time agent status list (up to 10 most recent)
+   - Smart sorting: Running → Completed → Failed → Pending, newest first
+   - Color-coded status: 🔵 running, 🟢 completed, 🔴 failed, 🟡 pending
+   - Agent type icons: 🤖 general, 🔬 researcher, 💻 coder, 📊 analyst, ✍️ writer
+   - Expandable cards with full task, results, timing
+   - One-click "View Full Results" button integration
+   - **Full results display (no truncation)**
+
+2. **Council UX Improvements**
+   - Fixed form Enter key behavior (no unwanted option additions)
+   - Added helpful tip: "Fill out options then click Run Council"
+   - Added 🗑️ delete buttons for options (when >2 options)
+   - Separated results display from form (fixes Streamlit button error)
+
+3. **Council Export/Save Options**
+   - 📋 **Copy**: Copy full results to clipboard with toast
+   - 🧠 **Knowledge**: Save to knowledge base (searchable)
+   - 💾 **Memory**: Save to key-value memory (auto key generation)
+   - 📥 **JSON**: Download complete results as JSON file
+
+4. **Model Updates (Haiku 4.5 Support)**
+   - `core/models.py`: Added `HAIKU_4_5 = "claude-haiku-4-5-20251001"`
+   - Updated `ModelCapabilities`, `select_for_task()`, `get_cheapest()`
+   - `core/preset_manager.py`: Speed Mode & Cost Saver use Haiku 4.5
+   - `main.py`: Updated model selector, preset display, spawn dialog
+   - **Correct Model IDs:**
+     - Sonnet 4.5: `claude-sonnet-4-5-20250929`
+     - Opus 4.5: `claude-opus-4-5-20251101`
+     - Haiku 4.5: `claude-haiku-4-5-20251001`
+
+**Bug Fixes:**
+- Fixed agent sorting TypeError: String timestamp negation error
+- Fixed council knowledge button: Wrong parameter names (fact vs content)
+- Fixed council no-votes handling: Returns error instead of fake results
+- Fixed Streamlit form button error: Results now display outside form
+
+**Impact:**
+- ✅ Real-time visibility into all agent activity
+- ✅ Full results at-a-glance (no modal needed for quick checks)
+- ✅ Council results can be saved/exported multiple ways
+- ✅ Latest Claude models supported (Haiku 4.5!)
+- ✅ All major UX friction points resolved
+
+**Code Changes:**
+- `main.py`: +311 lines, -64 lines
+- `core/models.py`: +15 lines, -5 lines
+- `core/preset_manager.py`: +2 lines, -2 lines
+- `tools/agents.py`: +7 lines, -2 lines
+- **Total: ~300 lines added/modified**
+
 ## What's Pending (Optional Future Enhancements)
 
-### Phase 2B-C: Additional Polish (Future)
+### Phase 2C+: Additional Polish (Future)
 
 **Optional enhancements if desired:**
 1. ~~**Settings Presets**~~ ✅ **COMPLETE (Phase 2A)**
-2. **Enhanced Tool Feedback** - Progress spinners with execution times
+2. ~~**Enhanced Tool Feedback**~~ ✅ **COMPLETE (Phase 2B)**
+3. ~~**Agent Monitoring Sidebar**~~ ✅ **COMPLETE (Phase 2B-1)**
+4. **Export/Import Conversations** - Backup & share conversations
 3. **Visual Refinements** - Additional polish and animations
 4. **Keyboard Shortcuts** - Power user keyboard controls
 5. **Analytics Dashboard** - Detailed usage visualizations
