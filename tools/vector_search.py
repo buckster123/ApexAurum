@@ -703,6 +703,163 @@ VECTOR_TOOL_SCHEMAS = {
             },
             "required": ["query"]
         }
+    },
+
+    "memory_health_stale": {
+        "name": "memory_health_stale",
+        "description": (
+            "Find memories that haven't been accessed in X days. "
+            "Use this to identify stale knowledge that may need review or cleanup. "
+            "Returns list of memories with access stats (access_count, days_since_access, confidence). "
+            "Helps maintain memory quality by finding forgotten knowledge."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days_unused": {
+                    "type": "integer",
+                    "description": "Threshold in days. Memories not accessed for this many days are considered stale (default: 30)",
+                    "default": 30
+                },
+                "collection": {
+                    "type": "string",
+                    "description": "Collection to check (default: 'knowledge')",
+                    "default": "knowledge"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 20)",
+                    "default": 20
+                }
+            },
+            "required": []
+        }
+    },
+
+    "memory_health_low_access": {
+        "name": "memory_health_low_access",
+        "description": (
+            "Find memories with very low access counts (rarely used). "
+            "Use this to identify knowledge that was added but never or rarely accessed. "
+            "Returns memories with low usage that might be irrelevant or need review. "
+            "Helps clean up unused knowledge."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "max_access_count": {
+                    "type": "integer",
+                    "description": "Maximum access count to flag. Memories accessed this many times or fewer are considered low-access (default: 2)",
+                    "default": 2
+                },
+                "min_age_days": {
+                    "type": "integer",
+                    "description": "Only flag memories older than this many days (default: 7)",
+                    "default": 7
+                },
+                "collection": {
+                    "type": "string",
+                    "description": "Collection to check (default: 'knowledge')",
+                    "default": "knowledge"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 20)",
+                    "default": 20
+                }
+            },
+            "required": []
+        }
+    },
+
+    "memory_health_duplicates": {
+        "name": "memory_health_duplicates",
+        "description": (
+            "Find potential duplicate memories with high similarity. "
+            "Use this to identify redundant knowledge that could be consolidated. "
+            "Returns pairs of similar memories with similarity scores (0.0-1.0). "
+            "Helps reduce memory bloat and improve organization."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "collection": {
+                    "type": "string",
+                    "description": "Collection to scan (default: 'knowledge')",
+                    "default": "knowledge"
+                },
+                "similarity_threshold": {
+                    "type": "number",
+                    "description": "Similarity cutoff 0.0-1.0. Pairs above this threshold are considered duplicates (default: 0.95)",
+                    "default": 0.95
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum duplicate pairs to return (default: 20)",
+                    "default": 20
+                },
+                "sample_size": {
+                    "type": "integer",
+                    "description": "If set, only check this many recent documents for performance (default: check all)",
+                    "default": None
+                }
+            },
+            "required": []
+        }
+    },
+
+    "memory_consolidate": {
+        "name": "memory_consolidate",
+        "description": (
+            "Merge two similar memories into one, preserving metadata. "
+            "Use this after identifying duplicates to clean up redundant knowledge. "
+            "The kept memory gets combined access counts and related_memories list. "
+            "One memory is deleted, the other is enhanced with merged data."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "id1": {
+                    "type": "string",
+                    "description": "First memory ID (from duplicate detection)"
+                },
+                "id2": {
+                    "type": "string",
+                    "description": "Second memory ID (from duplicate detection)"
+                },
+                "collection": {
+                    "type": "string",
+                    "description": "Collection name (default: 'knowledge')",
+                    "default": "knowledge"
+                },
+                "keep": {
+                    "type": "string",
+                    "description": "Strategy for which to keep: 'higher_confidence', 'higher_access', 'id1', or 'id2' (default: 'higher_confidence')",
+                    "default": "higher_confidence"
+                }
+            },
+            "required": ["id1", "id2"]
+        }
+    },
+
+    "memory_migration_run": {
+        "name": "memory_migration_run",
+        "description": (
+            "Migrate existing vectors to include new metadata fields (access_count, last_accessed_ts, etc.). "
+            "Safe to run multiple times (idempotent). Only needs to run once after upgrading memory system. "
+            "Use this to enable memory health features on existing knowledge."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "collection": {
+                    "type": "string",
+                    "description": "Collection to migrate (default: 'knowledge')",
+                    "default": "knowledge"
+                }
+            },
+            "required": []
+        }
     }
 }
 
@@ -809,6 +966,97 @@ def migrate_existing_vectors_to_v2(collection: str = "knowledge") -> Dict[str, A
         }
 
 
+# ============================================================================
+# Memory Health Tools (Phase 3) - Tool Wrappers
+# ============================================================================
+
+def memory_health_stale(
+    days_unused: int = 30,
+    collection: str = "knowledge",
+    limit: Optional[int] = 20
+) -> Dict:
+    """
+    Tool wrapper for get_stale_memories.
+
+    Find memories that haven't been accessed in X days.
+    """
+    from core.memory_health import get_stale_memories
+    return get_stale_memories(
+        days_unused=days_unused,
+        collection=collection,
+        limit=limit
+    )
+
+
+def memory_health_low_access(
+    max_access_count: int = 2,
+    min_age_days: int = 7,
+    collection: str = "knowledge",
+    limit: Optional[int] = 20
+) -> Dict:
+    """
+    Tool wrapper for get_low_access_memories.
+
+    Find memories with very low access counts.
+    """
+    from core.memory_health import get_low_access_memories
+    return get_low_access_memories(
+        max_access_count=max_access_count,
+        min_age_days=min_age_days,
+        collection=collection,
+        limit=limit
+    )
+
+
+def memory_health_duplicates(
+    collection: str = "knowledge",
+    similarity_threshold: float = 0.95,
+    limit: int = 20,
+    sample_size: Optional[int] = None
+) -> Dict:
+    """
+    Tool wrapper for get_duplicate_candidates.
+
+    Find potential duplicate memories.
+    """
+    from core.memory_health import get_duplicate_candidates
+    return get_duplicate_candidates(
+        collection=collection,
+        similarity_threshold=similarity_threshold,
+        limit=limit,
+        sample_size=sample_size
+    )
+
+
+def memory_consolidate(
+    id1: str,
+    id2: str,
+    collection: str = "knowledge",
+    keep: str = "higher_confidence"
+) -> Dict:
+    """
+    Tool wrapper for consolidate_memories.
+
+    Merge two similar memories into one.
+    """
+    from core.memory_health import consolidate_memories
+    return consolidate_memories(
+        id1=id1,
+        id2=id2,
+        collection=collection,
+        keep=keep
+    )
+
+
+def memory_migration_run(collection: str = "knowledge") -> Dict:
+    """
+    Tool wrapper for migration utility.
+
+    Migrate existing vectors to enhanced metadata schema.
+    """
+    return migrate_existing_vectors_to_v2(collection)
+
+
 # For backward compatibility and easy imports
 __all__ = [
     'vector_add',
@@ -820,5 +1068,10 @@ __all__ = [
     'vector_search_knowledge',
     'vector_update_knowledge_confidence',
     'migrate_existing_vectors_to_v2',
+    'memory_health_stale',
+    'memory_health_low_access',
+    'memory_health_duplicates',
+    'memory_consolidate',
+    'memory_migration_run',
     'VECTOR_TOOL_SCHEMAS'
 ]

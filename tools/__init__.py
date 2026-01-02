@@ -66,6 +66,11 @@ from .vector_search import (
     vector_get_stats,
     vector_add_knowledge,
     vector_search_knowledge,
+    memory_health_stale,
+    memory_health_low_access,
+    memory_health_duplicates,
+    memory_consolidate,
+    memory_migration_run,
     VECTOR_TOOL_SCHEMAS,
 )
 
@@ -117,6 +122,12 @@ ALL_TOOLS = {
     "vector_get_stats": vector_get_stats,
     "vector_add_knowledge": vector_add_knowledge,
     "vector_search_knowledge": vector_search_knowledge,
+    # Memory Health (Phase 3)
+    "memory_health_stale": memory_health_stale,
+    "memory_health_low_access": memory_health_low_access,
+    "memory_health_duplicates": memory_health_duplicates,
+    "memory_consolidate": memory_consolidate,
+    "memory_migration_run": memory_migration_run,
 }
 
 __all__ = [
@@ -156,6 +167,12 @@ __all__ = [
     "vector_get_stats",
     "vector_add_knowledge",
     "vector_search_knowledge",
+    # Memory Health
+    "memory_health_stale",
+    "memory_health_low_access",
+    "memory_health_duplicates",
+    "memory_consolidate",
+    "memory_migration_run",
     # Schemas
     "UTILITY_TOOL_SCHEMAS",
     "FILESYSTEM_TOOL_SCHEMAS",
