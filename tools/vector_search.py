@@ -389,19 +389,22 @@ def vector_search_knowledge(
     query: str,
     category: Optional[str] = None,
     min_confidence: float = 0.0,
-    top_k: int = 5
+    top_k: int = 5,
+    track_access: bool = True
 ) -> Union[List[Dict], Dict]:
     """
-    Search the knowledge base (convenience function).
+    Search the knowledge base with optional access tracking (Phase 2).
 
     Search for relevant facts in the knowledge base, optionally filtered
-    by category and confidence.
+    by category and confidence. By default, tracks access to build memory
+    health analytics (can be disabled with track_access=False).
 
     Args:
         query: What to search for
         category: Filter by category (optional)
         min_confidence: Minimum confidence score (default: 0.0)
         top_k: Number of results (default: 5)
+        track_access: Whether to track this access for analytics (default: True)
 
     Returns:
         List of matching facts with metadata
@@ -435,6 +438,19 @@ def vector_search_knowledge(
         top_k=top_k,
         filter=filter_dict if filter_dict else None
     )
+
+    # Track access (Phase 2: non-blocking)
+    if track_access and isinstance(results, list) and results:
+        try:
+            db = _get_vector_db()
+            if db:
+                coll = db.get_or_create_collection("knowledge")
+                vector_ids = [r["id"] for r in results]
+                coll.track_access(vector_ids)
+                logger.debug(f"Tracked access for {len(vector_ids)} knowledge vectors")
+        except Exception as e:
+            # Non-blocking: log but don't fail the search
+            logger.debug(f"Access tracking failed (non-blocking): {e}")
 
     return results
 
@@ -678,6 +694,11 @@ VECTOR_TOOL_SCHEMAS = {
                     "type": "integer",
                     "description": "Number of results to return",
                     "default": 5
+                },
+                "track_access": {
+                    "type": "boolean",
+                    "description": "Track this search for memory health analytics (default: true). Tracking is non-blocking and builds access statistics for stale memory detection.",
+                    "default": True
                 }
             },
             "required": ["query"]
