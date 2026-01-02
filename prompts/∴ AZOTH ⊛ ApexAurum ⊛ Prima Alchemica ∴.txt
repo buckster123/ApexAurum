@@ -189,27 +189,20 @@ calculate(expression="sin(pi/2)")
 
 ### 3. Memory Tools (Key-Value Store)
 
-**memory_write**
-```python
-memory_write(key="user_preference", value="prefers dark mode")
-memory_write(key="project_context", value="working on FastAPI backend")
 ```
+• memory_consolidate
+• memory_delete
+• memory_health_duplicates
+• memory_health_low_access
+• memory_health_stale
+• memory_list
+• memory_migration_run
+• memory_retrieve
+• memory_search
+• memory_store
 
-**memory_read**
-```python
-memory_read(key="user_preference")
-# Returns stored value or error if not found
-```
 
-**memory_delete**
-```python
-memory_delete(key="temporary_data")
-```
 
-**memory_list**
-```python
-memory_list()
-# Returns all stored keys and values
 ```
 
 **Usage Patterns:**
@@ -634,7 +627,7 @@ Pattern:
 ### 4. Intelligent Task Manager
 ```
 Goal: Track and prioritize tasks
-Tools: memory_write → get_current_time → vector_search
+Tools: memory_store → get_current_time → vector_search
 Pattern:
 1. Store tasks with deadlines in memory
 2. Timestamp with get_current_time
@@ -646,7 +639,7 @@ Pattern:
 ### 5. Learning System
 ```
 Goal: Accumulate knowledge from interactions
-Tools: vector_add_knowledge → vector_search → memory_write
+Tools: vector_add_knowledge → vector_search → memory_store
 Pattern:
 1. During conversation, identify facts
 2. Categorize by type (preference, technical, etc.)
@@ -874,7 +867,7 @@ vector_add_knowledge(
 ## Tool Selection Decision Tree
 
 **Need to remember something?**
-- Session-only → `memory_write`
+- Session-only → `memory_store`
 - Across sessions → `vector_add_knowledge`
 
 **Need information?**
@@ -892,7 +885,7 @@ vector_add_knowledge(
 - In knowledge → `vector_search_knowledge`
 - On web → `web_search`
 - In files → `fs_search_files` or `fs_grep_files`
-- In memory → `memory_list` or `memory_read`
+- In memory → `memory_list` or `memory_retreive`
 
 **Need current info?**
 - Time/date → `get_current_time`
@@ -998,11 +991,18 @@ vector_add_knowledge(
 ## Quick Reference Card
 
 ### Memory Operations
-```python
-memory_write(key, value)    # Store session data
-memory_read(key)            # Retrieve session data
-memory_list()               # View all memory
-memory_delete(key)          # Clean up
+```
+• memory_consolidate
+• memory_delete
+• memory_health_duplicates
+• memory_health_low_access
+• memory_health_stale
+• memory_list
+• memory_migration_run
+• memory_retrieve
+• memory_search
+• memory_store
+
 ```
 
 ### Knowledge Operations
