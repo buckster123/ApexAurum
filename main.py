@@ -425,6 +425,62 @@ class AppState:
         for conv_id in conv_ids:
             self._auto_index_conversation(conv_id)
 
+    def cleanup_single_message_conversations(self, min_messages: int = 2, dry_run: bool = False) -> Dict:
+        """
+        Find and optionally delete conversations with fewer than min_messages.
+
+        This cleans up orphaned single-message entries created by the old
+        per-message save bug.
+
+        Args:
+            min_messages: Minimum messages to keep (default 2)
+            dry_run: If True, just report what would be deleted
+
+        Returns:
+            Dict with cleanup results
+        """
+        conversations = self._load_conversations()
+
+        # Find conversations to delete
+        to_delete = []
+        to_keep = []
+
+        for conv in conversations:
+            msg_count = len(conv.get("messages", []))
+            if msg_count < min_messages:
+                to_delete.append({
+                    "id": conv.get("id"),
+                    "messages": msg_count,
+                    "preview": conv.get("messages", [{}])[0].get("content", "")[:50] if conv.get("messages") else ""
+                })
+            else:
+                to_keep.append(conv)
+
+        result = {
+            "total_conversations": len(conversations),
+            "to_delete": len(to_delete),
+            "to_keep": len(to_keep),
+            "deleted_previews": to_delete[:10],  # Sample of what's being deleted
+            "dry_run": dry_run
+        }
+
+        if not dry_run and to_delete:
+            # Actually delete
+            self._save_conversations(to_keep)
+
+            # Remove from index
+            try:
+                indexer = self._get_indexer()
+                for item in to_delete:
+                    indexer.remove_from_index(item["id"])
+            except Exception as e:
+                logger.warning(f"Failed to remove from index during cleanup: {e}")
+
+            result["deleted"] = True
+            logger.info(f"Cleanup: Deleted {len(to_delete)} single-message conversations")
+
+        return result
+
     # Phase 13.3: Manual Indexing Methods
 
     def index_all_conversations(self, force: bool = False, progress_callback: Optional[Callable] = None):
@@ -1210,6 +1266,20 @@ def init_session_state():
 
     if "selected_conversations" not in st.session_state:
         st.session_state.selected_conversations = []
+
+    # Conversation browser pagination
+    if "conv_page_size" not in st.session_state:
+        st.session_state.conv_page_size = 20  # Show 20 conversations per page
+
+    if "conv_display_count" not in st.session_state:
+        st.session_state.conv_display_count = 20  # Current number to display (grows with "Load More")
+
+    # Conversation cleanup state
+    if "show_cleanup_dialog" not in st.session_state:
+        st.session_state.show_cleanup_dialog = False
+
+    if "cleanup_preview" not in st.session_state:
+        st.session_state.cleanup_preview = None
 
     # Export/Import dialog state (Phase 12)
     if "show_export_dialog" not in st.session_state:
@@ -2199,8 +2269,16 @@ Use `vector_search_village()` to discover what others have shared.
                 # Sort by updated_at, newest first
                 conversations.sort(key=lambda c: c.get("updated_at", ""), reverse=True)
 
-                # Show result count
-                st.caption(f"Found {len(conversations)} conversation(s)")
+                # Pagination: limit displayed conversations
+                total_convs = len(conversations)
+                display_count = min(st.session_state.conv_display_count, total_convs)
+                conversations_to_show = conversations[:display_count]
+
+                # Show result count with pagination info
+                if total_convs > display_count:
+                    st.caption(f"Showing {display_count} of {total_convs} conversation(s)")
+                else:
+                    st.caption(f"Found {total_convs} conversation(s)")
 
                 # Batch operations UI
                 if st.session_state.batch_mode:
@@ -2240,8 +2318,8 @@ Use `vector_search_village()` to discover what others have shared.
 
                     st.divider()
 
-                # Display conversations
-                for conv in conversations:
+                # Display conversations (paginated)
+                for conv in conversations_to_show:
                     conv_id = conv.get("id", "")
                     created = conv.get("created_at", "")
                     msg_count = len(conv.get("messages", []))
@@ -2359,6 +2437,21 @@ Use `vector_search_village()` to discover what others have shared.
                                 st.rerun()
 
                     st.divider()
+
+                # Pagination: Load More button
+                if display_count < total_convs:
+                    remaining = total_convs - display_count
+                    col1, col2, col3 = st.columns([1, 2, 1])
+                    with col2:
+                        if st.button(f"📥 Load More ({remaining} remaining)", use_container_width=True, key="load_more_convs"):
+                            st.session_state.conv_display_count += st.session_state.conv_page_size
+                            st.rerun()
+                    # Reset button to collapse back
+                    if st.session_state.conv_display_count > st.session_state.conv_page_size:
+                        with col3:
+                            if st.button("↩️ Reset", key="reset_pagination", help="Show only first page"):
+                                st.session_state.conv_display_count = st.session_state.conv_page_size
+                                st.rerun()
             else:
                 if search_query or any(filters.values()):
                     st.info("No conversations match your search/filters")
@@ -2368,7 +2461,7 @@ Use `vector_search_village()` to discover what others have shared.
         # Export/Import/Config buttons (Phase 12)
         st.divider()
         st.subheader("💾 Data Management")
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             if st.button("📤 Export", use_container_width=True, help="Export conversations"):
                 st.session_state.show_export_dialog = True
@@ -2380,6 +2473,13 @@ Use `vector_search_village()` to discover what others have shared.
         with col3:
             if st.button("⚙️ Config", use_container_width=True, help="Manage settings"):
                 st.session_state.show_config_dialog = True
+                st.rerun()
+        with col4:
+            if st.button("🧹 Cleanup", use_container_width=True, help="Remove orphan entries"):
+                # Preview what would be deleted
+                preview = st.session_state.app_state.cleanup_single_message_conversations(dry_run=True)
+                st.session_state.cleanup_preview = preview
+                st.session_state.show_cleanup_dialog = True
                 st.rerun()
 
         # File browser
@@ -3219,21 +3319,8 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
                     "content": response_text
                 })
                 st.session_state.unsaved_changes = True
-
-                # Save to storage (extract text only for storage)
-                # Extract text from content array for cleaner storage
-                user_text = ""
-                if isinstance(content, list):
-                    for item in content:
-                        if item.get("type") == "text":
-                            user_text = item.get("text", "")
-                            break
-                else:
-                    user_text = str(content)
-
-                if user_text:
-                    st.session_state.app_state.save_message("user", user_text)
-                st.session_state.app_state.save_message("assistant", response_text)
+                # Note: Auto-save handles persistence via auto_save_current_conversation()
+                # Removed per-message saves that were creating duplicate conversation entries
 
             else:
                 error_msg = "I apologize, but I couldn't generate a response."
@@ -4136,6 +4223,57 @@ Votes:
                 except Exception as e:
                     st.error(f"❌ Import failed: {e}")
                     logger.error(f"Import error: {e}", exc_info=True)
+
+        st.markdown("---")
+
+    # Cleanup Dialog - Remove orphaned single-message conversations
+    if st.session_state.get("show_cleanup_dialog", False):
+        st.markdown("### 🧹 Conversation Cleanup")
+        st.write("Remove orphaned single-message conversation entries created by a previous bug.")
+
+        preview = st.session_state.cleanup_preview
+
+        if preview:
+            # Show stats
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Conversations", preview["total_conversations"])
+            with col2:
+                st.metric("To Delete", preview["to_delete"], delta=f"-{preview['to_delete']}" if preview["to_delete"] > 0 else None, delta_color="inverse")
+            with col3:
+                st.metric("To Keep", preview["to_keep"])
+
+            if preview["to_delete"] > 0:
+                st.warning(f"⚠️ This will permanently delete {preview['to_delete']} conversation(s) with less than 2 messages.")
+
+                # Show sample of what will be deleted
+                if preview.get("deleted_previews"):
+                    with st.expander("Preview items to delete (sample)", expanded=False):
+                        for item in preview["deleted_previews"]:
+                            preview_text = item.get("preview", "")[:60]
+                            st.caption(f"• {preview_text}..." if preview_text else "• (empty)")
+
+                # Confirm and execute
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🗑️ Delete Orphans", use_container_width=True, type="primary"):
+                        with st.spinner("Cleaning up..."):
+                            result = st.session_state.app_state.cleanup_single_message_conversations(dry_run=False)
+                        st.success(f"✅ Deleted {result['to_delete']} orphaned entries!")
+                        st.session_state.cleanup_preview = None
+                        st.session_state.show_cleanup_dialog = False
+                        st.session_state.conv_display_count = st.session_state.conv_page_size  # Reset pagination
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Cancel", use_container_width=True):
+                        st.session_state.cleanup_preview = None
+                        st.session_state.show_cleanup_dialog = False
+                        st.rerun()
+            else:
+                st.success("✅ No orphaned conversations found! Your data is clean.")
+                if st.button("Close", use_container_width=True):
+                    st.session_state.show_cleanup_dialog = False
+                    st.rerun()
 
         st.markdown("---")
 
