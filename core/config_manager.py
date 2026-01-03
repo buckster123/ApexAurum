@@ -121,14 +121,15 @@ class ConfigManager:
 
             # Validate max_tokens
             max_tokens = settings.get("max_tokens")
-            if max_tokens is not None and not (256 <= max_tokens <= 8192):
-                errors.append("max_tokens must be between 256 and 8192")
+            if max_tokens is not None and not (256 <= max_tokens <= 128000):
+                errors.append("max_tokens must be between 256 and 128000")
 
             # Validate model
             model = settings.get("model")
             valid_models = [
                 "claude-opus-4-5-20251101",
                 "claude-sonnet-4-5-20250929",
+                "claude-haiku-4-5-20251001",
                 "claude-sonnet-3-7-20250219",
                 "claude-3-5-haiku-20241022"
             ]
@@ -157,7 +158,7 @@ class ConfigManager:
         return {
             "model": getattr(session_state, "model", None),
             "temperature": getattr(session_state, "temperature", 0.7),
-            "max_tokens": getattr(session_state, "max_tokens", 4096),
+            "max_tokens": getattr(session_state, "max_tokens", 64000),
             "tools_enabled": getattr(session_state, "tools_enabled", True),
         }
 
@@ -241,7 +242,7 @@ class ConfigManager:
             "settings": {
                 "model": "claude-sonnet-4-5-20250929",
                 "temperature": 0.7,
-                "max_tokens": 4096,
+                "max_tokens": 64000,
                 "tools_enabled": True,
             },
             "system_prompts": [],

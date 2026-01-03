@@ -318,7 +318,7 @@ class ToolCallLoop:
         messages: List[Dict[str, Any]],
         system: Optional[str] = None,
         model: Optional[str] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 64000,
         tools: Optional[List[Dict[str, Any]]] = None,
         **kwargs
     ) -> Tuple[Any, List[Dict[str, Any]]]:
@@ -417,7 +417,7 @@ class ToolCallLoop:
         messages: List[Dict[str, Any]],
         system: Optional[str] = None,
         model: Optional[str] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 64000,
         tools: Optional[List[Dict[str, Any]]] = None,
         **kwargs
     ) -> Generator[Dict[str, Any], None, Tuple[Any, List[Dict[str, Any]]]]:

@@ -31,7 +31,7 @@ class ModelCapabilities:
     CAPABILITIES = {
         ClaudeModels.OPUS_4_5: {
             "name": "Claude Opus 4.5",
-            "max_tokens": 8192,
+            "max_tokens": 64000,  # Claude 4 supports up to 128k with extended output
             "context_window": 200000,
             "best_for": ["complex reasoning", "coding", "analysis", "multi-step tasks"],
             "speed": "slow",
@@ -40,7 +40,7 @@ class ModelCapabilities:
         },
         ClaudeModels.SONNET_4_5: {
             "name": "Claude Sonnet 4.5",
-            "max_tokens": 8192,
+            "max_tokens": 64000,  # Claude 4 supports up to 128k with extended output
             "context_window": 200000,
             "best_for": ["general purpose", "coding", "conversation", "balanced tasks"],
             "speed": "medium",
@@ -49,7 +49,7 @@ class ModelCapabilities:
         },
         ClaudeModels.SONNET_3_7: {
             "name": "Claude Sonnet 3.7",
-            "max_tokens": 8192,
+            "max_tokens": 8192,  # Legacy model limit
             "context_window": 200000,
             "best_for": ["fast responses", "simple tasks", "high throughput"],
             "speed": "fast",
@@ -58,7 +58,7 @@ class ModelCapabilities:
         },
         ClaudeModels.HAIKU_4_5: {
             "name": "Claude Haiku 4.5",
-            "max_tokens": 8192,
+            "max_tokens": 64000,  # Claude 4 supports up to 128k with extended output
             "context_window": 200000,
             "best_for": ["simple queries", "high volume", "testing"],
             "speed": "fastest",
@@ -67,7 +67,7 @@ class ModelCapabilities:
         },
         ClaudeModels.HAIKU_3_5: {
             "name": "Claude Haiku 3.5 (Legacy)",
-            "max_tokens": 8192,
+            "max_tokens": 8192,  # Legacy model limit
             "context_window": 200000,
             "best_for": ["legacy support"],
             "speed": "fastest",
@@ -84,7 +84,7 @@ class ModelCapabilities:
     @classmethod
     def get_max_tokens(cls, model: ClaudeModels) -> int:
         """Get max output tokens for a model"""
-        return cls.CAPABILITIES.get(model, {}).get("max_tokens", 8192)
+        return cls.CAPABILITIES.get(model, {}).get("max_tokens", 64000)
 
 
 class ModelSelector:
@@ -189,5 +189,5 @@ def get_model_display_name(model: ClaudeModels) -> str:
 
 # Default model configuration
 DEFAULT_MODEL = ClaudeModels.SONNET_4_5
-DEFAULT_MAX_TOKENS = 4096  # Conservative default (Claude max is 8192)
+DEFAULT_MAX_TOKENS = 64000  # Claude 4 models support up to 128k with extended output
 DEFAULT_TEMPERATURE = 1.0  # Claude's default
