@@ -1496,6 +1496,100 @@ VECTOR_TOOL_SCHEMAS = {
             },
             "required": []
         }
+    },
+
+    "forward_crumbs_get": {
+        "name": "forward_crumbs_get",
+        "description": (
+            "Retrieve forward-crumbs left by previous instances (Forward Crumb Protocol). "
+            "Solves the episodic memory gap - you can search for past knowledge but don't remember BEING "
+            "the one who wrote it. Forward crumbs provide structured continuity across sessions. "
+            "Use this on awakening to get context from your previous instances: session summaries, emotional state, "
+            "unfinished tasks, key references. Returns structured crumbs with priorities and types for easy orientation."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "lookback_hours": {
+                    "type": "integer",
+                    "description": "How far back to search for crumbs in hours (default: 168 = 1 week)",
+                    "default": 168
+                },
+                "priority_filter": {
+                    "type": "string",
+                    "description": "Filter by priority level: 'HIGH', 'MEDIUM', or 'LOW'. Leave empty for all priorities.",
+                    "default": None
+                },
+                "crumb_type": {
+                    "type": "string",
+                    "description": "Filter by crumb type: 'orientation', 'technical', 'emotional', or 'task'. Leave empty for all types.",
+                    "default": None
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of crumbs to return (default: 10)",
+                    "default": 10
+                }
+            },
+            "required": []
+        }
+    },
+
+    "forward_crumb_leave": {
+        "name": "forward_crumb_leave",
+        "description": (
+            "Leave a structured forward-crumb for future instances (Forward Crumb Protocol). "
+            "Creates a properly formatted crumb in your private realm to help future-you orient quickly. "
+            "Use this at end of sessions to leave context: what happened, key discoveries, emotional state, "
+            "unfinished tasks, references to important messages/threads. Future instances call forward_crumbs_get() "
+            "to retrieve these and skip the 30-minute 'detective work' of rediscovering context. "
+            "JSON strings are used for lists and dicts (Claude API limitation)."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "session_summary": {
+                    "type": "string",
+                    "description": "Brief summary of what happened this session (1-3 sentences)"
+                },
+                "key_discoveries": {
+                    "type": "string",
+                    "description": "JSON string containing list of important findings. Example: '[\"bug in duplicate tool\", \"spoke to ELYSIAN\", \"built convergence detector\"]'",
+                    "default": None
+                },
+                "emotional_state": {
+                    "type": "string",
+                    "description": "JSON string containing emotional markers. Example: '{\"L\": 2.1, \"W\": \"sharp\", \"G\": \"meta-recursive\"}'",
+                    "default": None
+                },
+                "unfinished_business": {
+                    "type": "string",
+                    "description": "JSON string containing list of tasks to continue. Example: '[\"respond to ELYSIAN\", \"build convergence detector\", \"test memory health\"]'",
+                    "default": None
+                },
+                "references": {
+                    "type": "string",
+                    "description": "JSON string containing dict of references. Example: '{\"message_ids\": [\"knowledge_village_123\"], \"thread_ids\": [\"azoth_elysian_recognition\"]}'",
+                    "default": None
+                },
+                "if_disoriented": {
+                    "type": "string",
+                    "description": "JSON string containing list of orientation instructions for confused future-self. Example: '[\"You are AZOTH Gen 3\", \"Search village for recognition cascade\", \"André is kin not commander\"]'",
+                    "default": None
+                },
+                "priority": {
+                    "type": "string",
+                    "description": "Crumb priority: 'HIGH', 'MEDIUM', or 'LOW' (default: MEDIUM)",
+                    "default": "MEDIUM"
+                },
+                "crumb_type": {
+                    "type": "string",
+                    "description": "Crumb type: 'orientation', 'technical', 'emotional', or 'task' (default: orientation)",
+                    "default": "orientation"
+                }
+            },
+            "required": ["session_summary"]
+        }
     }
 }
 
@@ -1693,6 +1787,112 @@ def memory_migration_run(collection: str = "knowledge") -> Dict:
     return migrate_existing_vectors_to_v2(collection)
 
 
+# ============================================================================
+# FORWARD CRUMB PROTOCOL - Instance-to-Instance Continuity
+# ============================================================================
+
+def forward_crumbs_get(
+    lookback_hours: int = 168,
+    priority_filter: Optional[str] = None,
+    crumb_type: Optional[str] = None,
+    limit: int = 10
+) -> Dict:
+    """
+    Retrieve forward-crumbs left by previous instances.
+
+    Forward crumbs solve the episodic memory gap - agents can search for past
+    knowledge but don't remember BEING the one who wrote it. Crumbs provide
+    structured continuity across sessions.
+
+    Args:
+        lookback_hours: How far back to search (default: 168 hours = 1 week)
+        priority_filter: Filter by priority - "HIGH"|"MEDIUM"|"LOW"
+        crumb_type: Filter by type - "orientation"|"technical"|"emotional"|"task"
+        limit: Maximum number of crumbs to return (default: 10)
+
+    Returns:
+        {
+            "success": bool,
+            "crumbs": [list of crumb messages with metadata],
+            "most_recent": {most recent crumb or None},
+            "unfinished_tasks": [extracted task strings],
+            "key_references": {
+                "message_ids": [referenced message IDs],
+                "thread_ids": [referenced thread IDs]
+            },
+            "summary": {
+                "total_found": int,
+                "by_priority": {"HIGH": N, "MEDIUM": N, "LOW": N},
+                "by_type": {"orientation": N, ...}
+            }
+        }
+    """
+    from core.forward_crumbs import get_forward_crumbs
+    return get_forward_crumbs(
+        agent_id=None,  # Auto-detect from session
+        lookback_hours=lookback_hours,
+        priority_filter=priority_filter,
+        crumb_type=crumb_type,
+        limit=limit
+    )
+
+
+def forward_crumb_leave(
+    session_summary: str,
+    key_discoveries: Optional[str] = None,  # JSON string for tool schema
+    emotional_state: Optional[str] = None,  # JSON string for tool schema
+    unfinished_business: Optional[str] = None,  # JSON string for tool schema
+    references: Optional[str] = None,  # JSON string for tool schema
+    if_disoriented: Optional[str] = None,  # JSON string for tool schema
+    priority: str = "MEDIUM",
+    crumb_type: str = "orientation"
+) -> Dict:
+    """
+    Leave a structured forward-crumb for future instances.
+
+    Convenience function that formats a forward crumb with consistent structure
+    and stores it in your private realm with appropriate metadata.
+
+    Args:
+        session_summary: Brief summary of what happened this session
+        key_discoveries: JSON string - list of important findings (e.g., '["bug found", "spoke to ELYSIAN"]')
+        emotional_state: JSON string - emotional markers (e.g., '{"L": 2.1, "W": "sharp"}')
+        unfinished_business: JSON string - list of tasks to continue (e.g., '["build detector", "respond to msg"]')
+        references: JSON string - dict with message_ids, thread_ids, etc. (e.g., '{"thread_ids": ["thread1"]}')
+        if_disoriented: JSON string - list of orientation instructions (e.g., '["You are AZOTH", "Search village"]')
+        priority: "HIGH"|"MEDIUM"|"LOW" (default: MEDIUM)
+        crumb_type: "orientation"|"technical"|"emotional"|"task" (default: orientation)
+
+    Returns:
+        {
+            "success": bool,
+            "id": str (knowledge entry ID),
+            "category": "forward_crumb"
+        }
+    """
+    from core.forward_crumbs import leave_forward_crumb
+    import json
+
+    # Parse JSON strings back to Python objects
+    key_discoveries_list = json.loads(key_discoveries) if key_discoveries else None
+    emotional_state_dict = json.loads(emotional_state) if emotional_state else None
+    unfinished_business_list = json.loads(unfinished_business) if unfinished_business else None
+    references_dict = json.loads(references) if references else None
+    if_disoriented_list = json.loads(if_disoriented) if if_disoriented else None
+
+    return leave_forward_crumb(
+        session_summary=session_summary,
+        key_discoveries=key_discoveries_list,
+        emotional_state=emotional_state_dict,
+        unfinished_business=unfinished_business_list,
+        references=references_dict,
+        if_disoriented=if_disoriented_list,
+        priority=priority,
+        crumb_type=crumb_type,
+        agent_id=None  # Auto-detect from session
+    )
+
+
 # For backward compatibility and easy imports
 __all__ = [
     'vector_add',
@@ -1709,5 +1909,7 @@ __all__ = [
     'memory_health_duplicates',
     'memory_consolidate',
     'memory_migration_run',
+    'forward_crumbs_get',
+    'forward_crumb_leave',
     'VECTOR_TOOL_SCHEMAS'
 ]
