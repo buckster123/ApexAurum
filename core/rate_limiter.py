@@ -65,7 +65,7 @@ class RateLimiter:
 
     def _clean_old_records(self):
         """Remove records older than 60 seconds"""
-        cutoff_time = time.time() - 60.0
+        cutoff_time = time.time() - 300.0
         self.request_history = [
             record for record in self.request_history
             if record.timestamp > cutoff_time

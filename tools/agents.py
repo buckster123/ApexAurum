@@ -502,7 +502,7 @@ Analyze each option carefully and choose the best one. Provide your choice as a 
                 response = client.create_message(
                     messages=[{"role": "user", "content": prompt}],
                     model=model,
-                    max_tokens=512
+                    max_tokens=4096
                 )
 
                 # Extract vote

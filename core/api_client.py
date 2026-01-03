@@ -40,7 +40,7 @@ class ClaudeAPIClient:
     - Token management
     """
 
-    def __init__(self, api_key: Optional[str] = None, timeout: float = 600.0):
+    def __init__(self, api_key: Optional[str] = None, timeout: float = 1200.0):
         """
         Initialize Claude API client
 

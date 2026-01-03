@@ -63,6 +63,12 @@ chroma_db/
 # Future additions / experimental
 future_additions/
 
+# Dev files and debug reports
+FORWARD_CRUMB_PROTOCOL.md
+sandbox/azoth/
+sandbox/*debug*.md
+sandbox/*FEEDBACK*.md
+
 # Test config files
 apex_config*.json
 *config).json

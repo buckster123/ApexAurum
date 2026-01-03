@@ -182,7 +182,7 @@ class StreamingResponseHandler:
         messages: List[Dict[str, Any]],
         system: Optional[str] = None,
         model: Optional[str] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 64000,
         temperature: float = 1.0,
         top_p: Optional[float] = None,
         tools: Optional[List[Dict[str, Any]]] = None,

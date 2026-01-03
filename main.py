@@ -1821,9 +1821,6 @@ Use `vector_search_village()` to discover what others have shared.
                 "claude-haiku-4-5-20251001": "Haiku 4.5",
                 "claude-sonnet-4-5-20250929": "Sonnet 4.5",
                 "claude-opus-4-5-20251101": "Opus 4.5",
-                # Legacy
-                "claude-3-5-haiku-20241022": "Haiku 3.5",
-                "claude-sonnet-3-7-20250219": "Sonnet 3.7"
             }
             model_name = model_display.get(settings['model'], settings['model'])
 
