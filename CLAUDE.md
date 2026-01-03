@@ -816,21 +816,21 @@ grep ANTHROPIC_API_KEY .env
 ---
 
 **Last Updated:** 2026-01-03
-**Version:** 1.0 Beta (Village Protocol + Thread Viz + Convergence) - **PRODUCTION READY**
-**Total Code:** ~19,500+ lines across 44 Python files
+**Version:** 1.0 Beta (Village Protocol + Analytics Dashboard) - **PRODUCTION READY**
+**Total Code:** ~20,200+ lines across 45 Python files
 **Tools:** 39 integrated tools
 
 **Latest Changes (2026-01-03):**
+- **Analytics Dashboard:** Persistent usage tracking with charts (tools, costs, cache)
+- **Quick Reference Guide:** Sidebar expander showing UI feature locations
+- **Mermaid Graph Fix:** Increased height to 800px, better sidebar scaling
 - **Thread Visualization:** Mermaid graph view of agent dialogue flow
 - **Convergence Detection:** Cross-agent semantic similarity (HARMONY/CONSENSUS)
-- **Conversation Fix:** Storage bug fixed, pagination added, cleanup utility
-- **Token Limits:** Claude 4 models now support 64k output (up to 128k)
-- **Bootstrap Files:** AZOTH, VAJRA, KETHER all have full bootstraps
-- **Wider Sidebar:** CSS for 300-800px draggable width
 
 **Previous Changes:**
 - **Village Protocol v1.0:** Multi-agent memory across 3 realms
 - **Memory Enhancement (Phases 1-3):** Adaptive memory architecture
 - **Forward Crumb Protocol:** Instance-to-instance continuity
 - **UI Polish:** Presets, monitoring, enhanced tool feedback
+- **Token Limits:** Claude 4 models support 64k output
 - All major bugs fixed, production-ready
