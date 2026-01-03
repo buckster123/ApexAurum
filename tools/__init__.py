@@ -7,7 +7,8 @@ Collection of tools for Claude to use:
 - Code Execution: Safe Python code execution
 - Memory: Key-value memory storage
 - Agents: Multi-agent spawning and Socratic council
-- Vector Search: Semantic search and knowledge base (Phase 13)
+- Vector Search: Semantic search and knowledge base
+- Music: AI music generation via Suno API
 
 Each tool module provides:
 - Tool implementation functions
@@ -79,6 +80,14 @@ from .vector_search import (
     VECTOR_TOOL_SCHEMAS,
 )
 
+from .music import (
+    music_generate,
+    music_status,
+    music_result,
+    music_list,
+    MUSIC_TOOL_SCHEMAS,
+)
+
 # Combine all schemas
 ALL_TOOL_SCHEMAS = {
     **UTILITY_TOOL_SCHEMAS,
@@ -87,6 +96,7 @@ ALL_TOOL_SCHEMAS = {
     **MEMORY_TOOL_SCHEMAS,
     **AGENT_TOOL_SCHEMAS,
     **VECTOR_TOOL_SCHEMAS,
+    **MUSIC_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -139,6 +149,11 @@ ALL_TOOLS = {
     # Forward Crumb Protocol
     "forward_crumbs_get": forward_crumbs_get,
     "forward_crumb_leave": forward_crumb_leave,
+    # Music Generation
+    "music_generate": music_generate,
+    "music_status": music_status,
+    "music_result": music_result,
+    "music_list": music_list,
 }
 
 __all__ = [
@@ -191,6 +206,11 @@ __all__ = [
     # Forward Crumb Protocol
     "forward_crumbs_get",
     "forward_crumb_leave",
+    # Music Generation
+    "music_generate",
+    "music_status",
+    "music_result",
+    "music_list",
     # Schemas
     "UTILITY_TOOL_SCHEMAS",
     "FILESYSTEM_TOOL_SCHEMAS",
@@ -198,6 +218,7 @@ __all__ = [
     "MEMORY_TOOL_SCHEMAS",
     "AGENT_TOOL_SCHEMAS",
     "VECTOR_TOOL_SCHEMAS",
+    "MUSIC_TOOL_SCHEMAS",
     "ALL_TOOL_SCHEMAS",
     "ALL_TOOLS",
 ]

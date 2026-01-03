@@ -1414,6 +1414,112 @@ def render_sidebar():
         with st.expander("📋 Quick Reference", expanded=False):
             render_cheat_sheet()
 
+        # ========== MUSIC PLAYER ==========
+        # Initialize music player session state
+        if 'music_current_track' not in st.session_state:
+            st.session_state.music_current_track = None
+        if 'music_player_expanded' not in st.session_state:
+            st.session_state.music_player_expanded = False
+        if 'music_blocking_mode' not in st.session_state:
+            st.session_state.music_blocking_mode = True  # Default: blocking (waits for completion)
+        if 'music_last_loaded_ts' not in st.session_state:
+            st.session_state.music_last_loaded_ts = None
+
+        # Check for new latest track (auto-load)
+        try:
+            from tools.music import _get_latest_track
+            latest = _get_latest_track()
+            if latest:
+                latest_ts = latest.get('timestamp')
+                # If there's a newer track than what we've loaded, auto-load it
+                if latest_ts and latest_ts != st.session_state.music_last_loaded_ts:
+                    filepath = latest.get('filepath')
+                    if filepath and Path(filepath).exists():
+                        st.session_state.music_current_track = latest
+                        st.session_state.music_last_loaded_ts = latest_ts
+                        st.session_state.music_player_expanded = True
+        except Exception:
+            pass
+
+        with st.expander("🎵 Music Player", expanded=st.session_state.music_player_expanded):
+            if st.session_state.music_current_track:
+                track = st.session_state.music_current_track
+                filepath = track.get('filepath') or track.get('audio_file')
+                title = track.get('title', 'Unknown Track')
+                duration = track.get('duration', 0)
+
+                if filepath and Path(filepath).exists():
+                    st.audio(filepath, format="audio/mpeg")
+                    st.caption(f"**{title}** ({duration:.1f}s)")
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("🔄 Refresh", key="music_refresh", use_container_width=True):
+                            st.rerun()
+                    with col2:
+                        if st.button("✖️ Clear", key="music_clear", use_container_width=True):
+                            st.session_state.music_current_track = None
+                            st.rerun()
+                else:
+                    st.warning("Track file not found")
+                    if st.button("Clear", key="music_clear_missing"):
+                        st.session_state.music_current_track = None
+                        st.rerun()
+            else:
+                st.caption("No track loaded")
+                st.markdown("""
+*Generate music with:*
+- `music_generate("prompt")`
+- Or ask the agent to create music
+""")
+
+                # Show recent tracks for quick load
+                try:
+                    from tools.music import _get_manager
+                    manager = _get_manager()
+                    recent = manager.list_tasks(3)
+                    completed = [t for t in recent if t.status.value == "completed" and t.audio_file]
+
+                    if completed:
+                        st.markdown("**Recent:**")
+                        for task in completed[:3]:
+                            col1, col2 = st.columns([3, 1])
+                            with col1:
+                                st.caption(f"🎵 {task.title or 'Untitled'}")
+                            with col2:
+                                if st.button("▶️", key=f"play_{task.task_id}", help="Load track"):
+                                    st.session_state.music_current_track = {
+                                        'filepath': task.audio_file,
+                                        'title': task.title,
+                                        'duration': task.duration,
+                                        'task_id': task.task_id
+                                    }
+                                    st.session_state.music_player_expanded = True
+                                    st.rerun()
+                except Exception:
+                    pass  # Music module not initialized yet
+
+            # Mode toggle
+            st.divider()
+            new_blocking_mode = st.checkbox(
+                "⏳ Blocking mode",
+                value=st.session_state.music_blocking_mode,
+                help="ON (default): Tool waits until music is ready. OFF: Returns immediately, poll with music_status()."
+            )
+            if new_blocking_mode != st.session_state.music_blocking_mode:
+                st.session_state.music_blocking_mode = new_blocking_mode
+                # Save to config file so tool can read it
+                try:
+                    from tools.music import _save_config
+                    _save_config({"blocking_mode": new_blocking_mode})
+                except Exception:
+                    pass
+
+            if st.session_state.music_blocking_mode:
+                st.caption("Tool will wait ~2-4 min for completion")
+            else:
+                st.caption("Non-blocking: use music_status() to poll")
+
         # ========== VILLAGE PROTOCOL: Agent Identity ==========
         st.divider()
         st.markdown("### 🏛️ Agent Identity")
