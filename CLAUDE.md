@@ -338,28 +338,30 @@ Model can be changed in sidebar during runtime.
 
 ## Recent Updates (January 2026)
 
-### Group Chat - Multi-Agent Parallel Dialogue - Complete ✅ (Live Testing Pending)
+### Group Chat - Multi-Agent Parallel Dialogue - Complete ✅
 
 **New Feature:** Full multi-agent group chat with parallel execution, tool access, and Village Protocol integration.
 
 **New File:**
-- `pages/group_chat.py` (812 lines) - Complete group chat implementation
+- `pages/group_chat.py` (1011 lines) - Complete group chat implementation
 
 **Key Features:**
-1. **Parallel Agent Execution** - ThreadPoolExecutor runs 2-4 agents simultaneously
+1. **Parallel Agent Execution** - ThreadPoolExecutor runs 1-4 agents simultaneously
 2. **Full Tool Access** - All 39 tools available to agents during conversation
 3. **Agent Presets** - Quick-add AZOTH, ELYSIAN, VAJRA, KETHER with one click
 4. **Custom Agents** - Create agents with custom name, color, temperature, system prompt
 5. **Per-Agent Cost Tracking** - `CostLedger` class tracks costs per agent in real-time
-6. **Human Override** - Inject messages mid-conversation via `st.chat_input()`
-7. **Village Protocol Integration** - All messages posted to `knowledge_village` for cross-agent discovery
-8. **History Display** - Grouped by round, expandable cards
+6. **Human Input as Chat** - Type messages and agents respond in new rounds
+7. **Run All Rounds** - Sequential multi-round execution with progress bar
+8. **Solo Agent Mode** - Works with just 1 agent for focused dialogue
+9. **Village Protocol Integration** - All messages posted to `knowledge_village`
+10. **Termination Detection** - Stops when agents reach "CONSENSUS REACHED"
 
 **UI Layout:**
 - Sidebar: Settings, agent roster, cost tracker, controls
-- Main: Topic input, parallel streaming containers, history, human override
+- Main: Topic input, parallel streaming containers, history, human input
 
-**Status:** UI verified, live API testing pending (awaiting tokens)
+**Status:** Fully tested and operational ✅
 
 ### Phase 2A: Settings Presets - Complete ✅
 
@@ -844,7 +846,7 @@ grep ANTHROPIC_API_KEY .env
 **Tools:** 39 integrated tools
 
 **Latest Changes (2026-01-03):**
-- **Group Chat:** Multi-agent parallel dialogue with full tool access (812 lines, live test pending)
+- **Group Chat:** Multi-agent parallel dialogue with full tool access (1011 lines) ✅
 - **Analytics Dashboard:** Persistent usage tracking with charts (tools, costs, cache)
 - **Quick Reference Guide:** Sidebar expander showing UI feature locations
 - **Mermaid Graph Fix:** Increased height to 800px, better sidebar scaling

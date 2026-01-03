@@ -351,8 +351,25 @@ def run_agent_turn_sync(
                     # Format for continuation
                     tool_results_msg = format_multiple_tool_results_for_claude(results)
 
+                    # Serialize ContentBlock objects to dicts for API
+                    serialized_content = []
+                    for block in response.content:
+                        if hasattr(block, 'model_dump'):
+                            serialized_content.append(block.model_dump())
+                        elif hasattr(block, 'type'):
+                            # Manual serialization fallback
+                            if block.type == 'text':
+                                serialized_content.append({"type": "text", "text": block.text})
+                            elif block.type == 'tool_use':
+                                serialized_content.append({
+                                    "type": "tool_use",
+                                    "id": block.id,
+                                    "name": block.name,
+                                    "input": block.input
+                                })
+
                     # Append assistant response and tool results
-                    current_messages.append({"role": "assistant", "content": response.content})
+                    current_messages.append({"role": "assistant", "content": serialized_content})
                     current_messages.append(tool_results_msg)
 
                     continue  # Continue loop for more tool calls
@@ -489,6 +506,10 @@ def init_session_state():
 
         # UI state
         "gc_show_add_agent": False,
+        "gc_trigger_round": False,
+        "gc_run_all_rounds": False,
+        "gc_target_rounds": 0,
+        "gc_stop_requested": False,
     }
 
     for key, value in defaults.items():
@@ -660,8 +681,8 @@ with col2:
 st.divider()
 
 # Start/Stop controls
-if len(st.session_state.gc_agents) < 2:
-    st.warning("⚠️ Add at least 2 agents to start a group chat")
+if len(st.session_state.gc_agents) < 1:
+    st.warning("⚠️ Add at least 1 agent to start")
 elif not topic.strip():
     st.warning("⚠️ Enter a discussion topic")
 else:
@@ -745,13 +766,107 @@ else:
 
     with run_cols[1]:
         if st.button("🔁 Run All Rounds", use_container_width=True, disabled=st.session_state.gc_running):
-            # TODO: Implement multi-round auto-run
-            st.info("Running multiple rounds...")
+            st.session_state.gc_run_all_rounds = True
+            st.session_state.gc_target_rounds = st.session_state.gc_max_turns
+            st.session_state.gc_stop_requested = False
+            st.rerun()
 
     with run_cols[2]:
         if st.button("⏹️ Stop", use_container_width=True):
             st.session_state.gc_running = False
+            st.session_state.gc_run_all_rounds = False
+            st.session_state.gc_stop_requested = True
             st.rerun()
+
+# Run All Rounds execution
+if st.session_state.gc_run_all_rounds and not st.session_state.gc_stop_requested:
+    target = st.session_state.gc_target_rounds
+    current = st.session_state.gc_round
+
+    if current < target:
+        st.session_state.gc_running = True
+        st.session_state.gc_round += 1
+
+        # Progress indicator
+        progress_container = st.container()
+        with progress_container:
+            st.progress(st.session_state.gc_round / target, text=f"Round {st.session_state.gc_round} of {target}")
+
+        st.subheader(f"🔄 Round {st.session_state.gc_round}")
+
+        status_containers = {}
+        response_containers = {}
+
+        num_agents = len(st.session_state.gc_agents)
+        if num_agents == 1:
+            cols = [st.container()]
+        elif num_agents <= 2:
+            cols = st.columns(num_agents)
+        else:
+            cols = st.columns(min(num_agents, 3))
+
+        for i, agent in enumerate(st.session_state.gc_agents):
+            col_idx = i % len(cols)
+            with cols[col_idx]:
+                st.markdown(
+                    f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
+                    unsafe_allow_html=True
+                )
+                status_containers[agent.id] = st.empty()
+                response_containers[agent.id] = st.container()
+
+        results = run_parallel_agents(
+            st.session_state.gc_agents,
+            topic,
+            st.session_state.gc_history,
+            st.session_state.gc_round,
+            st.session_state.gc_thread_id,
+            status_containers,
+            response_containers
+        )
+
+        for result in results:
+            st.session_state.gc_history.append({
+                "role": "assistant",
+                "agent_id": result["agent_id"],
+                "agent_name": result["agent_name"],
+                "content": result["content"],
+                "round": result["round"]
+            })
+
+            st.session_state.gc_cost_ledger.log_usage(
+                result["agent_id"],
+                st.session_state.gc_model,
+                result["input_tokens"],
+                result["output_tokens"]
+            )
+
+            post_to_village(
+                agent_id=result["agent_id"],
+                content=result["content"],
+                thread_id=st.session_state.gc_thread_id,
+                round_num=result["round"],
+                related_agents=[a.id for a in st.session_state.gc_agents]
+            )
+
+        st.session_state.gc_running = False
+
+        # Check for termination phrase
+        for result in results:
+            if st.session_state.gc_termination_phrase.lower() in result["content"].lower():
+                st.session_state.gc_run_all_rounds = False
+                st.success(f"🎯 Termination phrase detected! Stopping at round {st.session_state.gc_round}")
+                break
+
+        # Continue to next round if not done
+        if st.session_state.gc_round < target and st.session_state.gc_run_all_rounds:
+            time.sleep(0.5)  # Brief pause between rounds
+            st.rerun()
+        else:
+            st.session_state.gc_run_all_rounds = False
+            st.success(f"✅ All {st.session_state.gc_round} rounds complete!")
+    else:
+        st.session_state.gc_run_all_rounds = False
 
 st.divider()
 
@@ -799,14 +914,98 @@ if st.session_state.gc_history:
 st.divider()
 
 # Human override input
-st.subheader("💬 Human Override")
-human_input = st.chat_input("Inject a message into the discussion...")
+st.subheader("💬 Human Input")
+st.caption("Send a message and agents will respond in a new round")
+human_input = st.chat_input("Send message to the group...")
 if human_input and not st.session_state.gc_running:
+    # Add human message to history
     st.session_state.gc_history.append({
         "role": "user",
         "agent_id": "human",
         "agent_name": "👤 Human",
         "content": human_input,
-        "round": st.session_state.gc_round
+        "round": st.session_state.gc_round + 1  # Will be part of next round
     })
+    # Trigger agents to respond
+    st.session_state.gc_trigger_round = True
     st.rerun()
+
+# Check if we need to trigger a round (from human input)
+if st.session_state.get("gc_trigger_round", False) and not st.session_state.gc_running:
+    st.session_state.gc_trigger_round = False
+
+    if len(st.session_state.gc_agents) >= 1 and st.session_state.gc_topic.strip():
+        st.session_state.gc_running = True
+        st.session_state.gc_round += 1
+
+        # Get the human message that triggered this
+        human_msg = None
+        for entry in reversed(st.session_state.gc_history):
+            if entry.get("agent_id") == "human":
+                human_msg = entry.get("content", "")
+                break
+
+        # Modify topic to include human input
+        effective_topic = st.session_state.gc_topic
+        if human_msg:
+            effective_topic = f"{st.session_state.gc_topic}\n\nHuman says: {human_msg}"
+
+        st.subheader(f"🔄 Round {st.session_state.gc_round} (responding to human)")
+
+        status_containers = {}
+        response_containers = {}
+
+        num_agents = len(st.session_state.gc_agents)
+        if num_agents == 1:
+            cols = [st.container()]
+        elif num_agents <= 2:
+            cols = st.columns(num_agents)
+        else:
+            cols = st.columns(min(num_agents, 3))
+
+        for i, agent in enumerate(st.session_state.gc_agents):
+            col_idx = i % len(cols)
+            with cols[col_idx]:
+                st.markdown(
+                    f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
+                    unsafe_allow_html=True
+                )
+                status_containers[agent.id] = st.empty()
+                response_containers[agent.id] = st.container()
+
+        results = run_parallel_agents(
+            st.session_state.gc_agents,
+            effective_topic,
+            st.session_state.gc_history,
+            st.session_state.gc_round,
+            st.session_state.gc_thread_id,
+            status_containers,
+            response_containers
+        )
+
+        for result in results:
+            st.session_state.gc_history.append({
+                "role": "assistant",
+                "agent_id": result["agent_id"],
+                "agent_name": result["agent_name"],
+                "content": result["content"],
+                "round": result["round"]
+            })
+
+            st.session_state.gc_cost_ledger.log_usage(
+                result["agent_id"],
+                st.session_state.gc_model,
+                result["input_tokens"],
+                result["output_tokens"]
+            )
+
+            post_to_village(
+                agent_id=result["agent_id"],
+                content=result["content"],
+                thread_id=st.session_state.gc_thread_id,
+                round_num=result["round"],
+                related_agents=[a.id for a in st.session_state.gc_agents]
+            )
+
+        st.session_state.gc_running = False
+        st.success(f"✅ Round {st.session_state.gc_round} complete!")
