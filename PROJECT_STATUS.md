@@ -49,7 +49,7 @@ Core Modules:        core/*.py       ~11,400 lines (27 files) [+410 analytics_st
 Tool Modules:        tools/*.py       ~2,500 lines (7 files)
 UI Modules:          ui/*.py           ~610 lines (3 files) [+57 keyboard_shortcuts.py]
 ----------------------------------------
-Total Code:                         ~21,000+ lines
+Total Code:                         ~22,000+ lines
 
 Documentation:                        45+ files
 Phase Docs:                           22 complete phases
