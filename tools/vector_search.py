@@ -963,9 +963,12 @@ def vector_search_knowledge(
     """
     Search the knowledge base with optional access tracking (Phase 2).
 
-    Search for relevant facts in the knowledge base, optionally filtered
-    by category and confidence. By default, tracks access to build memory
-    health analytics (can be disabled with track_access=False).
+    Search for relevant facts in the private realm (knowledge_private collection),
+    optionally filtered by category and confidence. By default, tracks access to
+    build memory health analytics (can be disabled with track_access=False).
+
+    NOTE: Post-Village Protocol, this searches knowledge_private (your private realm).
+    Use vector_search_village() for cross-agent searches.
 
     Args:
         query: What to search for
@@ -985,7 +988,7 @@ def vector_search_knowledge(
         ... )
         [
             {
-                "id": "knowledge_123",
+                "id": "knowledge_private_123",
                 "text": "User prefers functional programming",
                 "metadata": {"category": "preferences", "confidence": 0.9},
                 "similarity": 0.87
@@ -993,16 +996,26 @@ def vector_search_knowledge(
             ...
         ]
     """
+    # Auto-detect agent_id from session state for filtering
+    agent_id = None
+    try:
+        import streamlit as st
+        agent_id = st.session_state.get("selected_agent", None)
+    except:
+        pass
+
     # Build filter
     filter_dict = {}
     if category:
         filter_dict["category"] = category
     if min_confidence > 0:
         filter_dict["confidence"] = {"$gte": min_confidence}
+    if agent_id:
+        filter_dict["agent_id"] = agent_id  # Filter to current agent's private realm
 
     results = vector_search(
         query=query,
-        collection="knowledge",
+        collection="knowledge_private",  # ✅ FIXED: Search new private realm
         top_k=top_k,
         filter=filter_dict if filter_dict else None
     )
@@ -1012,7 +1025,7 @@ def vector_search_knowledge(
         try:
             db = _get_vector_db()
             if db:
-                coll = db.get_or_create_collection("knowledge")
+                coll = db.get_or_create_collection("knowledge_private")
                 vector_ids = [r["id"] for r in results]
                 coll.track_access(vector_ids)
                 logger.debug(f"Tracked access for {len(vector_ids)} knowledge vectors")
