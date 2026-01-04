@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 47 integrated tools, music generation via Suno AI with village memory integration, and context management with auto-summarization.
+ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 49 integrated tools, music generation via Suno AI with village memory integration, dataset creation for agent knowledge, and context management with auto-summarization.
 
-**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Thread Visualization (~24,000+ lines of code)
+**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator + Thread Visualization (~24,500+ lines of code)
 
 ## Essential Reading Before Starting
 
@@ -121,18 +121,20 @@ cat .env
 - `conversation_indexer.py` - Conversation search indexing
 - `tool_processor.py` - Tool registry and execution engine
 
-**tools/ (8 modules)** - 43 tool implementations
+**tools/ (9 modules)** - 49 tool implementations
 - `utilities.py` - Time, calculator, web fetch/search, string ops
 - `filesystem.py` - Sandboxed file operations (read/write/list/delete)
 - `memory.py` - Key-value memory storage across conversations
 - `agents.py` - Multi-agent spawning, status tracking, Socratic council
 - `code_execution.py` - Safe Python code execution in sandbox
 - `vector_search.py` - Vector operations and knowledge base (4 categories)
-- `music.py` - **NEW: Suno AI music generation (Phase 1)**
+- `music.py` - Suno AI music generation + curation (Phase 1.5)
+- `datasets.py` - **NEW: Dataset query tools for agent access**
 
 **sandbox/** - Runtime storage
 - `conversations.json` - Saved conversation history
 - `agents.json` - Agent state (created on first agent spawn)
+- `datasets/` - Vector datasets created via Dataset Creator page
 - `memory.json` - Persistent key-value memory
 - `music/` - Generated music files (MP3)
 - `music_tasks.json` - Music generation task history
@@ -340,6 +342,57 @@ Available models (defined in `core/models.py`):
 Model can be changed in sidebar during runtime.
 
 ## Recent Updates (January 2026)
+
+### Dataset Creator - Complete ✅
+
+**Feature:** Create lightweight vector datasets from documents that agents can query semantically.
+
+**Files:**
+- `pages/dataset_creator.py` (390 lines) - Streamlit page with Creator + Manager tabs
+- `tools/datasets.py` (197 lines) - Agent-accessible query tools
+
+**Dataset Tools (2):**
+1. `dataset_list()` - List all available datasets with metadata
+2. `dataset_query(dataset_name, query, top_k)` - Semantic search within a dataset
+
+**Page Features:**
+- **Create Tab:** Upload documents → chunk → embed → store as searchable dataset
+- **Manage Tab:** Browse datasets, view stats, preview search, delete
+- **Supported formats:** PDF (with optional OCR), TXT, MD, DOCX, HTML
+- **OCR Support:** For scanned/image-based PDFs (requires tesseract-ocr, ghostscript)
+- **Model selector:** MiniLM variants (fast) or mpnet (higher quality)
+- **Configurable chunking:** Size and overlap settings
+
+**Storage:** `sandbox/datasets/{dataset_name}/`
+
+**Metadata tracked:**
+- Description, tags, source files
+- Embedding model used, chunk settings
+- OCR enabled flag, creation timestamp
+
+**Use Cases:**
+- Reference documentation for agents
+- Research paper collections
+- Technical manuals, specifications
+- Any text corpus agents should be able to search
+
+**Agent Usage:**
+```python
+# Discover available datasets
+dataset_list()
+
+# Search a dataset
+dataset_query("python_docs", "how to handle exceptions", top_k=5)
+```
+
+**Dependencies:**
+- `pypdf`, `docx2txt`, `beautifulsoup4` (Python packages)
+- `sentence-transformers` (embedding models)
+- `tesseract-ocr`, `ghostscript` (system packages, for OCR)
+
+**Status:** Fully tested and operational ✅
+
+---
 
 ### Music Pipeline - Phase 1.5 Complete ✅
 
@@ -886,17 +939,17 @@ grep ANTHROPIC_API_KEY .env
 ---
 
 **Last Updated:** 2026-01-04
-**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5) - **PRODUCTION READY**
-**Total Code:** ~24,000+ lines across 47 Python files
-**Tools:** 47 integrated tools
+**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator) - **PRODUCTION READY**
+**Total Code:** ~24,500+ lines across 48 Python files
+**Tools:** 49 integrated tools
 
 **Latest Changes (2026-01-04):**
-- **Music Pipeline Phase 1.5:** Village memory integration + 4 new curation tools (1367 lines total) ✅
-  - `music_favorite`, `music_library`, `music_search`, `music_play`
-  - Completed songs auto-posted to village knowledge
-  - Agent attribution, play counts, favorites
-  - Enhanced sidebar player with curation controls
-- **Previous (2026-01-03):** Music Phase 1, Group Chat, Analytics Dashboard
+- **Dataset Creator:** Vector dataset creation + agent query tools ✅
+  - `pages/dataset_creator.py` (390 lines) - Create/manage datasets
+  - `tools/datasets.py` (197 lines) - `dataset_list`, `dataset_query` tools
+  - PDF (with OCR), TXT, MD, DOCX, HTML support
+  - Sentence-transformers embeddings (MiniLM/mpnet)
+- **Music Pipeline Phase 1.5:** Village memory integration + curation tools ✅
 
 **Previous Changes:**
 - **Village Protocol v1.0:** Multi-agent memory across 3 realms
@@ -904,5 +957,7 @@ grep ANTHROPIC_API_KEY .env
 - **Forward Crumb Protocol:** Instance-to-instance continuity
 - **Thread Visualization:** Mermaid graph view of agent dialogue flow
 - **Convergence Detection:** Cross-agent semantic similarity (HARMONY/CONSENSUS)
+- **Music Pipeline:** Suno AI generation + sidebar player
+- **Group Chat:** Multi-agent parallel dialogue with tools
 - **UI Polish:** Presets, monitoring, enhanced tool feedback
 - All major bugs fixed, production-ready

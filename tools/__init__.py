@@ -93,6 +93,19 @@ from .music import (
     MUSIC_TOOL_SCHEMAS,
 )
 
+from .datasets import (
+    dataset_list,
+    dataset_query,
+    DATASET_LIST_SCHEMA,
+    DATASET_QUERY_SCHEMA,
+)
+
+# Dataset tool schemas
+DATASET_TOOL_SCHEMAS = {
+    "dataset_list": DATASET_LIST_SCHEMA,
+    "dataset_query": DATASET_QUERY_SCHEMA,
+}
+
 # Combine all schemas
 ALL_TOOL_SCHEMAS = {
     **UTILITY_TOOL_SCHEMAS,
@@ -102,6 +115,7 @@ ALL_TOOL_SCHEMAS = {
     **AGENT_TOOL_SCHEMAS,
     **VECTOR_TOOL_SCHEMAS,
     **MUSIC_TOOL_SCHEMAS,
+    **DATASET_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -164,6 +178,9 @@ ALL_TOOLS = {
     "music_library": music_library,
     "music_search": music_search,
     "music_play": music_play,
+    # Dataset Tools
+    "dataset_list": dataset_list,
+    "dataset_query": dataset_query,
 }
 
 __all__ = [
@@ -226,6 +243,9 @@ __all__ = [
     "music_library",
     "music_search",
     "music_play",
+    # Dataset Tools
+    "dataset_list",
+    "dataset_query",
     # Schemas
     "UTILITY_TOOL_SCHEMAS",
     "FILESYSTEM_TOOL_SCHEMAS",
@@ -234,6 +254,7 @@ __all__ = [
     "AGENT_TOOL_SCHEMAS",
     "VECTOR_TOOL_SCHEMAS",
     "MUSIC_TOOL_SCHEMAS",
+    "DATASET_TOOL_SCHEMAS",
     "ALL_TOOL_SCHEMAS",
     "ALL_TOOLS",
 ]

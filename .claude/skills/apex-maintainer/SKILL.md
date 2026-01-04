@@ -8,7 +8,7 @@ allowed-tools: Bash(find:*), Bash(ls:*), Bash(grep:*), Bash(wc:*), Read, Glob
 
 **Project:** ApexAurum - Claude Edition
 **Type:** Production-grade AI chat platform with Claude API
-**Status:** V1.0 Beta - Production Ready + Music Pipeline Phase 1.5 + Group Chat
+**Status:** V1.0 Beta - Production Ready + Music Pipeline Phase 1.5 + Dataset Creator + Group Chat
 **Location:** `/home/llm/ApexAurum`
 
 ---
@@ -22,7 +22,7 @@ When starting a new session or asked about project status, follow these steps:
 ```bash
 cd `/home/llm/ApexAurum`
 
-# Check tool count (should be 47)
+# Check tool count (should be 49)
 python -c "from tools import ALL_TOOLS; print(f'✓ {len(ALL_TOOLS)} tools loaded')" 2>/dev/null || echo "⚠ Tools not loading"
 
 # Check environment
@@ -53,7 +53,7 @@ test -f main.py && wc -l main.py || echo "⚠ main.py missing"
 ### 3. Provide Status Summary
 
 After checks, summarize:
-- Tools count (should be 39)
+- Tools count (should be 49)
 - Environment status
 - What's currently pending (check PROJECT_STATUS.md)
 - Streamlit status
@@ -65,21 +65,22 @@ After checks, summarize:
 
 **ApexAurum - Claude Edition**: Production-grade Claude API chat interface with:
 
-- 🎵 Music generation (Suno AI with sidebar player)
+- 📚 Dataset Creator (vector datasets from documents for agent access)
+- 🎵 Music generation (Suno AI with sidebar player + curation)
 - 🤖 Multi-agent orchestration (spawn independent AI agents)
 - 🏘️ Village Protocol (multi-agent memory across 3 realms)
 - 📊 Thread visualization (Mermaid graphs + convergence detection)
 - 💰 50-90% cost savings (intelligent prompt caching)
 - 🔍 Semantic search (vector embeddings, ChromaDB)
-- 📚 Knowledge base (persistent memory)
-- 🛠️ 47 tools (filesystem, web, code exec, agents, vector search, music curation, etc.)
+- 📖 Knowledge base (persistent memory)
+- 🛠️ 49 tools (filesystem, web, code exec, agents, vector search, music, datasets)
 - 🧠 Context management (5 strategies, auto-summarization)
 - ⚡ Real-time streaming responses
 
 **Code Stats:**
-- ~23,000 lines of production code
+- ~24,500 lines of production code
 - 5,643 lines in main.py (Streamlit UI)
-- 27 core modules, 8 tool modules, 3 UI modules
+- 27 core modules, 9 tool modules, 3 UI modules
 - 45+ documentation files
 - 14 test suites
 - 4 primary agent bootstraps (AZOTH, ELYSIAN, VAJRA, KETHER)
@@ -91,8 +92,9 @@ After checks, summarize:
 ### ✅ What's Complete (100%)
 
 - Core chat system (100%)
-- Tool system with 43 tools (100%)
-- Music Pipeline Phase 1 (100%) - Suno AI + sidebar player
+- Tool system with 49 tools (100%)
+- Dataset Creator (100%) - PDF+OCR, TXT, MD, DOCX, HTML
+- Music Pipeline Phase 1.5 (100%) - Suno AI + curation tools
 - Prompt caching with 4 strategies (100%)
 - Context management with 5 strategies (100%)
 - Vector search & knowledge base (100%)
@@ -132,18 +134,20 @@ ApexAurum/
 │   ├── vector_db.py             - Vector search
 │   └── ...                      - 20 other modules
 │
-├── tools/                       🛠️ Tools (8 files, ~3,500 lines)
+├── tools/                       🛠️ Tools (9 files, ~3,700 lines)
 │   ├── agents.py                - Agent spawning & council
 │   ├── utilities.py             - Core tools (time, calc, web)
 │   ├── filesystem.py            - File operations
 │   ├── memory.py                - Key-value storage
 │   ├── code_execution.py        - Python execution
 │   ├── vector_search.py         - Search, knowledge, convergence
-│   └── music.py                 - Suno AI music + curation (1367 lines) 🎵
+│   ├── music.py                 - Suno AI music + curation (1367 lines) 🎵
+│   └── datasets.py              - Dataset query tools (197 lines) 📚
 │
 ├── pages/                       🏘️ Multi-page app
 │   ├── village_square.py        - Roundtable chat (431 lines)
-│   └── group_chat.py            - Parallel chat + tools (1011 lines)
+│   ├── group_chat.py            - Parallel chat + tools (1011 lines)
+│   └── dataset_creator.py       - Create/manage datasets (390 lines) 📚
 │
 ├── prompts/                     🤖 Agent bootstraps
 │   ├── ∴ AZOTH ∴.txt            - 67KB
@@ -158,6 +162,7 @@ ApexAurum/
 │   ├── conversations.json       - Saved conversations
 │   ├── agents.json              - Agent state
 │   ├── memory.json              - Memory store
+│   ├── datasets/                - Vector datasets 📚
 │   ├── music/                   - Generated MP3 files 🎵
 │   └── music_tasks.json         - Music generation history
 │
@@ -349,15 +354,15 @@ ps aux | grep streamlit
 ## Success Indicators
 
 **Everything is healthy when:**
-- ✅ Tool count = 30
+- ✅ Tool count = 49
 - ✅ .env file exists with ANTHROPIC_API_KEY
 - ✅ `python -c "from tools import ALL_TOOLS"` succeeds
-- ✅ main.py exists and is 4,169 lines
+- ✅ main.py exists and is ~5,600+ lines
 - ✅ Streamlit starts without errors
-- ✅ Sidebar shows "30 tools available"
+- ✅ Sidebar shows "49 tools available"
 
 **Needs attention when:**
-- ⚠️ Tool count ≠ 30
+- ⚠️ Tool count ≠ 49
 - ⚠️ Import errors
 - ⚠️ Missing .env
 - ⚠️ Streamlit crashes
@@ -374,5 +379,5 @@ See companion files in this skill directory:
 ---
 
 **Last Updated:** 2026-01-04
-**Project Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5)
-**Status:** Production Ready, Music Pipeline Phase 1.5 Complete, 47 Tools
+**Project Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator)
+**Status:** Production Ready, Dataset Creator Complete, 49 Tools
