@@ -1424,8 +1424,15 @@ def render_sidebar():
             st.session_state.music_blocking_mode = True  # Default: blocking (waits for completion)
         if 'music_last_loaded_ts' not in st.session_state:
             st.session_state.music_last_loaded_ts = None
+        if 'music_needs_refresh' not in st.session_state:
+            st.session_state.music_needs_refresh = False
 
-        # Check for new latest track (auto-load)
+        # Check if music_play tool set the refresh flag
+        if st.session_state.music_needs_refresh:
+            st.session_state.music_needs_refresh = False
+            st.rerun()  # Rerun to show the loaded track
+
+        # Check for new latest track (auto-load from file)
         try:
             from tools.music import _get_latest_track
             latest = _get_latest_track()
@@ -3646,13 +3653,16 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
                     if latest:
                         latest_ts = latest.get('timestamp')
                         current_ts = st.session_state.get('music_last_loaded_ts')
+                        logger.info(f"Music check: latest_ts={latest_ts}, current_ts={current_ts}")
                         # If there's a newer track, update state and rerun to show player
                         if latest_ts and latest_ts != current_ts:
+                            logger.info("Music update detected - triggering rerun")
                             st.session_state.music_current_track = latest
                             st.session_state.music_last_loaded_ts = latest_ts
                             st.session_state.music_player_expanded = True
                             st.rerun()  # Refresh to show updated player
-                except Exception:
+                except Exception as e:
+                    logger.error(f"Music check error: {e}")
                     pass  # Non-critical, don't break chat flow
 
             else:

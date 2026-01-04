@@ -1147,6 +1147,22 @@ def music_play(task_id: str) -> Dict[str, Any]:
             "task_id": task_id
         })
 
+        # Try to set Streamlit session state directly for immediate update
+        try:
+            import streamlit as st
+            if hasattr(st, 'session_state'):
+                st.session_state.music_current_track = {
+                    "filepath": task.audio_file,
+                    "title": task.title,
+                    "duration": task.duration,
+                    "task_id": task_id
+                }
+                st.session_state.music_player_expanded = True
+                st.session_state.music_needs_refresh = True
+                logger.info(f"Set session state for music_play: {task.title}")
+        except Exception as e:
+            logger.debug(f"Could not set session state directly: {e}")
+
         return {
             "success": True,
             "task_id": task_id,
