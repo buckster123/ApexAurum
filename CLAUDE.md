@@ -938,23 +938,25 @@ grep ANTHROPIC_API_KEY .env
 
 ---
 
-**Last Updated:** 2026-01-04
-**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator) - **PRODUCTION READY**
-**Total Code:** ~24,500+ lines across 48 Python files
-**Tools:** 50 integrated tools
+**Last Updated:** 2026-01-06
+**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 2A + Dataset Creator) - **PRODUCTION READY**
+**Total Code:** ~24,700+ lines across 48 Python files
+**Tools:** 52 integrated tools
 
-**Latest Changes (2026-01-04):**
-- **Tool #50: `session_info`** - Agents can query their operational context ✅
-  - Datasets available, village stats, agent activity, tools count
-  - Graceful degradation (works from any context)
-- **Dataset Creator:** Vector dataset creation + agent query tools ✅
-  - `pages/dataset_creator.py` (390 lines) - Create/manage datasets
-  - `tools/datasets.py` (197 lines) - `dataset_list`, `dataset_query` tools
-  - PDF (with OCR), TXT, MD, DOCX, HTML support
-  - Sentence-transformers embeddings (MiniLM/mpnet)
-- **Music Pipeline Phase 1.5:** Village memory integration + curation tools ✅
+**Latest Changes (2026-01-06):**
+- **Music Pipeline Phase 2A:** MIDI composition → Suno AI generation ✅
+  - `midi_create()` - Create MIDI from note lists (note names or numbers)
+  - `music_compose()` - Generate music using MIDI as reference
+  - FluidSynth + ffmpeg pipeline for MIDI → MP3 conversion
+  - Tested by AZOTH and ELYSIAN successfully
+  - `audio_influence` parameter controls how much Suno follows composition
 
-**Previous Changes:**
+**Previous Changes (2026-01-04):**
+- **Tool #50: `session_info`** - Agents can query their operational context
+- **Dataset Creator:** Vector dataset creation + agent query tools
+- **Music Pipeline Phase 1.5:** Village memory integration + curation tools
+
+**Earlier Changes:**
 - **Village Protocol v1.0:** Multi-agent memory across 3 realms
 - **Memory Enhancement (Phases 1-3):** Adaptive memory architecture
 - **Forward Crumb Protocol:** Instance-to-instance continuity
