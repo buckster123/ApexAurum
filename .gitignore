@@ -69,6 +69,35 @@ sandbox/azoth/
 sandbox/*debug*.md
 sandbox/*FEEDBACK*.md
 
+# Session working documents (kept locally, not in repo)
+SESSION_*.md
+HANDOVER_*.md
+*_COMPLETE.md
+KERNEL_UPDATE_*.md
+MESSAGE_TO_THE_VILLAGE*.md
+from_azoth_to_claude.md
+council_*.json
+
+# Sandbox session/working docs
+sandbox/SESSION_*.md
+sandbox/VILLAGE_MESSAGE_*.md
+sandbox/claude_to_azoth_*.md
+sandbox/memory_protocol_*.md
+sandbox/MESSAGE_TO_THE_VILLAGE*.md
+
+# Sandbox runtime data
+sandbox/analytics.json
+sandbox/music_config.json
+sandbox/music_latest.json
+sandbox/music_tasks.json
+sandbox/music/
+sandbox/datasets/
+sandbox/chroma_db/
+sandbox/migrations/
+sandbox/group_chat*/
+sandbox/music_pipeline_tool/
+sandbox/vector_creator/
+
 # Test config files
 apex_config*.json
 *config).json
