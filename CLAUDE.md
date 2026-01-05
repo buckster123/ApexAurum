@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 50 integrated tools, music generation via Suno AI with village memory integration, dataset creation for agent knowledge, and context management with auto-summarization.
+ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 52 integrated tools, music generation via Suno AI with village memory integration, music visualization (video generation), dataset creation for agent knowledge, and context management with auto-summarization.
 
-**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator + Thread Visualization (~24,500+ lines of code)
+**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Full Music Pipeline (Compose → Generate → Visualize) (~26,400+ lines of code)
 
 ## Essential Reading Before Starting
 
@@ -939,11 +939,19 @@ grep ANTHROPIC_API_KEY .env
 ---
 
 **Last Updated:** 2026-01-06
-**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 2A + Dataset Creator) - **PRODUCTION READY**
-**Total Code:** ~24,700+ lines across 48 Python files
+**Version:** 1.0 Beta (Village Protocol + Group Chat + Full Music Pipeline + Music Visualizer) - **PRODUCTION READY**
+**Total Code:** ~26,400+ lines across 49 Python files
 **Tools:** 52 integrated tools
 
 **Latest Changes (2026-01-06):**
+- **Music Visualizer:** Video generation page with spectrum bars, waveforms, particles ✅
+  - `pages/music_visualizer.py` (1,873 lines) - Full visualizer studio
+  - Multi-band waveform (bass/mid/treble), spectrum bars, particle system
+  - Cover effects (pulse, zoom), beat-reactive flash
+  - Pi 5 optimized (CPU encoding, chunked processing)
+  - Layout presets, genre presets, custom preset save/load
+  - Cover image upload or auto-detect
+  - Rich audio selector with music_tasks.json metadata
 - **Music Pipeline Phase 2A:** MIDI composition → Suno AI generation ✅
   - `midi_create()` - Create MIDI from note lists (note names or numbers)
   - `music_compose()` - Generate music using MIDI as reference
