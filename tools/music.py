@@ -621,6 +621,299 @@ def _get_manager() -> MusicTaskManager:
 
 
 # ============================================================================
+# PHASE 2: MIDI COMPOSITION PIPELINE
+# ============================================================================
+
+# Soundfont paths (in order of preference)
+SOUNDFONT_PATHS = [
+    "/usr/share/sounds/sf2/FluidR3_GM.sf2",
+    "/usr/share/sounds/sf2/default-GM.sf2",
+    "/usr/share/sounds/sf2/TimGM6mb.sf2",
+    "/usr/share/soundfonts/default.sf2",
+]
+
+
+def _find_soundfont() -> Optional[str]:
+    """Find an available soundfont file"""
+    for sf_path in SOUNDFONT_PATHS:
+        if os.path.exists(sf_path):
+            return sf_path
+    return None
+
+
+def _midi_to_audio(midi_path: str, output_path: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Convert MIDI file to MP3 audio using FluidSynth.
+
+    Args:
+        midi_path: Path to the MIDI file
+        output_path: Optional output path. If None, generates based on midi_path.
+
+    Returns:
+        Dict with success status and audio_path or error
+    """
+    try:
+        from midi2audio import FluidSynth
+        import subprocess
+
+        # Find soundfont
+        soundfont = _find_soundfont()
+        if not soundfont:
+            return {
+                "success": False,
+                "error": "No soundfont found. Install fluid-soundfont-gm: sudo apt install fluid-soundfont-gm"
+            }
+
+        # Generate output paths
+        midi_file = Path(midi_path)
+        if output_path:
+            mp3_path = Path(output_path)
+        else:
+            mp3_path = midi_file.with_suffix('.mp3')
+        wav_path = mp3_path.with_suffix('.wav')
+
+        # Convert MIDI to WAV
+        logger.info(f"Converting MIDI to WAV: {midi_path} -> {wav_path}")
+        fs = FluidSynth(soundfont)
+        fs.midi_to_audio(str(midi_path), str(wav_path))
+
+        if not wav_path.exists():
+            return {"success": False, "error": "FluidSynth failed to create WAV file"}
+
+        # Convert WAV to MP3
+        logger.info(f"Converting WAV to MP3: {wav_path} -> {mp3_path}")
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-i", str(wav_path), "-b:a", "192k", str(mp3_path)],
+            capture_output=True, text=True
+        )
+
+        if result.returncode != 0:
+            return {"success": False, "error": f"FFmpeg failed: {result.stderr[:200]}"}
+
+        # Clean up WAV
+        try:
+            wav_path.unlink()
+        except Exception:
+            pass
+
+        file_size = mp3_path.stat().st_size
+        logger.info(f"MIDI->Audio complete: {mp3_path} ({file_size} bytes)")
+
+        return {
+            "success": True,
+            "audio_path": str(mp3_path),
+            "size_bytes": file_size
+        }
+
+    except ImportError:
+        return {
+            "success": False,
+            "error": "midi2audio not installed. Run: pip install midi2audio"
+        }
+    except Exception as e:
+        logger.error(f"MIDI to audio conversion failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def _upload_audio_to_suno(audio_path: str) -> Dict[str, Any]:
+    """
+    Upload an audio file to Suno and get the uploadUrl for use in generate calls.
+
+    Args:
+        audio_path: Path to the audio file (MP3 or WAV)
+
+    Returns:
+        Dict with success status and uploadUrl or error
+    """
+    try:
+        import base64
+
+        if not SUNO_API_KEY:
+            return {"success": False, "error": "SUNO_API_KEY not configured"}
+
+        audio_file = Path(audio_path)
+        if not audio_file.exists():
+            return {"success": False, "error": f"Audio file not found: {audio_path}"}
+
+        # Read and encode file as base64
+        with open(audio_file, 'rb') as f:
+            audio_data = f.read()
+        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+
+        # Determine MIME type
+        suffix = audio_file.suffix.lower()
+        mime_types = {
+            '.mp3': 'audio/mpeg',
+            '.wav': 'audio/wav',
+            '.m4a': 'audio/mp4',
+            '.ogg': 'audio/ogg'
+        }
+        mime_type = mime_types.get(suffix, 'audio/mpeg')
+
+        # Upload via base64 endpoint
+        headers = {
+            "Authorization": f"Bearer {SUNO_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "base64Data": f"data:{mime_type};base64,{audio_base64}",
+            "uploadPath": "music_compose",
+            "fileName": audio_file.name
+        }
+
+        logger.info(f"Uploading audio to Suno ({len(audio_data)} bytes)...")
+
+        # File upload uses a different base URL than the generate API
+        SUNO_FILE_UPLOAD_BASE = "https://sunoapiorg.redpandaai.co/api"
+
+        response = requests.post(
+            f"{SUNO_FILE_UPLOAD_BASE}/file-base64-upload",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+
+        if response.status_code != 200:
+            return {
+                "success": False,
+                "error": f"Upload failed: HTTP {response.status_code}: {response.text[:200]}"
+            }
+
+        result = response.json()
+        if result.get("code") != 200:
+            return {
+                "success": False,
+                "error": f"Upload API error: {result.get('msg', 'Unknown error')}"
+            }
+
+        # Try both possible field names for the URL
+        data = result.get("data", {})
+        upload_url = data.get("downloadUrl") or data.get("fileUrl") or data.get("url")
+        if not upload_url:
+            return {"success": False, "error": f"No URL in upload response. Got: {list(data.keys())}"}
+
+        logger.info(f"Audio uploaded successfully: {upload_url[:50]}...")
+        return {
+            "success": True,
+            "upload_url": upload_url,
+            "file_size": len(audio_data)
+        }
+
+    except Exception as e:
+        logger.error(f"Audio upload failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def _call_upload_cover(
+    upload_url: str,
+    style: str,
+    title: str,
+    prompt: str = "",
+    instrumental: bool = True,
+    audio_weight: float = 0.5,
+    style_weight: float = 0.5,
+    weirdness: float = 0.3,
+    model: str = "V5",
+    vocal_gender: str = ""
+) -> Dict[str, Any]:
+    """
+    Call Suno's upload-cover endpoint to transform reference audio.
+
+    Args:
+        upload_url: URL of the uploaded reference audio
+        style: Style tags for the output
+        title: Track title
+        prompt: Additional lyrics/description (used as lyrics if not instrumental)
+        instrumental: Whether to generate instrumental only
+        audio_weight: How much the reference affects output (0.0-1.0)
+                     Low (0.2-0.4) = blend more with style prompt
+                     High (0.8-1.0) = stick close to reference
+        style_weight: Weight of style guidance (0.0-1.0)
+        weirdness: Creative deviation (0.0-1.0)
+        model: Suno model version
+        vocal_gender: 'm' or 'f' for vocal gender (only if not instrumental)
+
+    Returns:
+        Dict with taskId or error
+    """
+    try:
+        if not SUNO_API_KEY:
+            return {"success": False, "error": "SUNO_API_KEY not configured"}
+
+        # Clamp weights to valid range
+        audio_weight = max(0.0, min(1.0, audio_weight))
+        style_weight = max(0.0, min(1.0, style_weight))
+        weirdness = max(0.0, min(1.0, weirdness))
+
+        headers = {
+            "Authorization": f"Bearer {SUNO_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        # Use model name directly (same as generate API)
+        payload = {
+            "uploadUrl": upload_url,
+            "customMode": True,
+            "instrumental": instrumental,
+            "model": model,  # V3_5, V4, V4_5, V5
+            "style": style[:1000],  # Max 1000 chars
+            "title": title[:100],  # Max 100 chars
+            "audioWeight": round(audio_weight, 2),
+            "styleWeight": round(style_weight, 2),
+            "weirdnessConstraint": round(weirdness, 2),
+            # Callback URL - we poll instead but API requires it
+            "callBackUrl": "https://example.com/suno-callback"
+        }
+
+        # Add prompt if provided (used as lyrics for vocal tracks)
+        if prompt:
+            payload["prompt"] = prompt[:5000]  # Max 5000 chars
+
+        # Add vocal gender if specified and not instrumental
+        if not instrumental and vocal_gender in ('m', 'f'):
+            payload["vocalGender"] = vocal_gender
+
+        logger.info(f"Calling upload-cover: style='{style[:30]}...', audio_weight={audio_weight}")
+
+        response = requests.post(
+            f"{SUNO_API_BASE}/generate/upload-cover",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+
+        if response.status_code != 200:
+            return {
+                "success": False,
+                "error": f"API error: HTTP {response.status_code}: {response.text[:200]}"
+            }
+
+        result = response.json()
+        if result.get("code") != 200:
+            return {
+                "success": False,
+                "error": f"Suno error: {result.get('msg', 'Unknown error')}"
+            }
+
+        task_id = result.get("data", {}).get("taskId")
+        if not task_id:
+            return {"success": False, "error": "No taskId in response"}
+
+        logger.info(f"Upload-cover task created: {task_id}")
+        return {
+            "success": True,
+            "suno_task_id": task_id,
+            "audio_weight": audio_weight,
+            "style_weight": style_weight
+        }
+
+    except Exception as e:
+        logger.error(f"Upload-cover call failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
+# ============================================================================
 # TOOL FUNCTIONS
 # ============================================================================
 
@@ -1179,6 +1472,186 @@ def music_play(task_id: str) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
+def music_compose(
+    midi_file: str,
+    style: str,
+    title: str,
+    audio_influence: float = 0.5,
+    prompt: str = "",
+    instrumental: bool = True,
+    style_weight: float = 0.5,
+    weirdness: float = 0.3,
+    model: str = "V5",
+    blocking: Optional[bool] = None,
+    agent_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Generate music using a MIDI file as compositional reference.
+
+    This is the Phase 2 composition pipeline: your MIDI file (melody, chords, rhythm)
+    is converted to audio, uploaded to Suno, and used as a reference for AI generation.
+    The audio_influence parameter controls how much Suno follows your composition vs
+    creates its own interpretation based on style/prompt.
+
+    Args:
+        midi_file: Path to a MIDI file to use as reference composition
+        style: Style tags for Suno (e.g., 'dark electronic ambient', 'jazz piano')
+        title: Track title
+        audio_influence: How much the MIDI reference affects output (0.0-1.0)
+                        0.2-0.4 = light reference, Suno interprets freely
+                        0.5-0.7 = balanced blend of your composition + Suno style
+                        0.8-1.0 = Suno closely follows your composition
+        prompt: Additional description (becomes lyrics if not instrumental)
+        instrumental: True for instrumental, False to add AI vocals
+        style_weight: How strongly to apply style tags (0.0-1.0)
+        weirdness: Creative deviation / experimental factor (0.0-1.0)
+        model: Suno model (V3_5, V4, V4_5, V5)
+        blocking: Wait for completion (True) or return task_id (False)
+        agent_id: ID of the creating agent for attribution
+
+    Returns:
+        If blocking=True: Dict with audio_file path when complete
+        If blocking=False: Dict with task_id for polling
+
+    Example:
+        >>> music_compose(
+        ...     midi_file="/tmp/my_melody.mid",
+        ...     style="cinematic orchestral dark",
+        ...     title="Midnight Protocol",
+        ...     audio_influence=0.4
+        ... )
+        {"success": True, "audio_file": "sandbox/music/Midnight_Protocol_xxx.mp3", ...}
+    """
+    try:
+        # Use config default if blocking not explicitly set
+        if blocking is None:
+            config = _get_config()
+            blocking = config.get("blocking_mode", True)
+
+        # Validate API key
+        if not SUNO_API_KEY:
+            return {
+                "success": False,
+                "error": "SUNO_API_KEY not configured in .env"
+            }
+
+        # Check MIDI file exists
+        midi_path = Path(midi_file)
+        if not midi_path.exists():
+            return {
+                "success": False,
+                "error": f"MIDI file not found: {midi_file}"
+            }
+
+        # Step 1: Convert MIDI to MP3
+        logger.info(f"[music_compose] Step 1: Converting MIDI to audio...")
+        temp_mp3 = MUSIC_FOLDER / f"_compose_ref_{int(time.time())}.mp3"
+        convert_result = _midi_to_audio(str(midi_path), str(temp_mp3))
+
+        if not convert_result.get("success"):
+            return {
+                "success": False,
+                "error": f"MIDI conversion failed: {convert_result.get('error')}"
+            }
+
+        # Step 2: Upload to Suno
+        logger.info(f"[music_compose] Step 2: Uploading reference audio to Suno...")
+        upload_result = _upload_audio_to_suno(convert_result["audio_path"])
+
+        if not upload_result.get("success"):
+            # Clean up temp file
+            try:
+                temp_mp3.unlink()
+            except Exception:
+                pass
+            return {
+                "success": False,
+                "error": f"Upload failed: {upload_result.get('error')}"
+            }
+
+        # Step 3: Call upload-cover
+        logger.info(f"[music_compose] Step 3: Calling Suno upload-cover API...")
+        cover_result = _call_upload_cover(
+            upload_url=upload_result["upload_url"],
+            style=style,
+            title=title,
+            prompt=prompt,
+            instrumental=instrumental,
+            audio_weight=audio_influence,
+            style_weight=style_weight,
+            weirdness=weirdness,
+            model=model
+        )
+
+        if not cover_result.get("success"):
+            return {
+                "success": False,
+                "error": f"Upload-cover failed: {cover_result.get('error')}"
+            }
+
+        # Clean up temp reference file
+        try:
+            temp_mp3.unlink()
+        except Exception:
+            pass
+
+        # Create a task to track this
+        manager = _get_manager()
+        task = manager.create_task(
+            prompt=f"[COMPOSED] {prompt}" if prompt else f"[COMPOSED] {style}",
+            style=style,
+            title=title,
+            model=model,
+            is_instrumental=instrumental,
+            agent_id=agent_id
+        )
+        task.suno_task_id = cover_result["suno_task_id"]
+        task.status = MusicTaskStatus.GENERATING
+        task.started_at = datetime.now().isoformat()
+        task.progress = f"Composing with audio_influence={audio_influence:.2f}..."
+        manager._save_tasks()
+
+        if blocking:
+            # Wait for completion
+            logger.info(f"[music_compose] Step 4: Waiting for generation to complete...")
+            result = manager.run_task(task.task_id)
+
+            if result.get("success"):
+                task = manager.get_task(task.task_id)
+                return {
+                    "success": True,
+                    "task_id": task.task_id,
+                    "audio_file": task.audio_file,
+                    "audio_url": task.audio_url,
+                    "title": task.title,
+                    "duration": task.duration,
+                    "audio_influence": audio_influence,
+                    "style": style,
+                    "agent_id": agent_id,
+                    "message": f"Composition complete: {task.title}"
+                }
+            else:
+                return {
+                    "success": False,
+                    "task_id": task.task_id,
+                    "error": result.get("error", "Generation failed")
+                }
+        else:
+            # Return immediately for polling
+            return {
+                "success": True,
+                "task_id": task.task_id,
+                "suno_task_id": cover_result["suno_task_id"],
+                "status": "generating",
+                "audio_influence": audio_influence,
+                "message": f"Composition started. Poll with music_status('{task.task_id}')"
+            }
+
+    except Exception as e:
+        logger.error(f"Error in music_compose: {e}")
+        return {"success": False, "error": str(e)}
+
+
 # ============================================================================
 # TOOL SCHEMAS
 # ============================================================================
@@ -1378,6 +1851,76 @@ MUSIC_TOOL_SCHEMAS = {
                 }
             },
             "required": ["task_id"]
+        }
+    },
+    # Phase 2: Composition Tool
+    "music_compose": {
+        "name": "music_compose",
+        "description": (
+            "Generate music using a MIDI file as compositional reference (Phase 2 Pipeline). "
+            "Your MIDI file (melody, chords, rhythm) is converted to audio and used as a reference "
+            "for Suno AI generation. The audio_influence parameter controls how much Suno follows "
+            "your composition (low = interpret freely, high = follow closely). "
+            "Use when you want precise compositional control over the output."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "midi_file": {
+                    "type": "string",
+                    "description": "Path to a MIDI file to use as reference composition"
+                },
+                "style": {
+                    "type": "string",
+                    "description": "Style tags for Suno (e.g., 'dark electronic ambient', 'jazz piano')"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Track title"
+                },
+                "audio_influence": {
+                    "type": "number",
+                    "description": "How much MIDI reference affects output (0.0-1.0). 0.2-0.4=light reference, 0.5-0.7=balanced, 0.8-1.0=follow closely",
+                    "default": 0.5
+                },
+                "prompt": {
+                    "type": "string",
+                    "description": "Additional description (becomes lyrics if not instrumental)",
+                    "default": ""
+                },
+                "instrumental": {
+                    "type": "boolean",
+                    "description": "True for instrumental, False to add AI vocals",
+                    "default": True
+                },
+                "style_weight": {
+                    "type": "number",
+                    "description": "How strongly to apply style tags (0.0-1.0)",
+                    "default": 0.5
+                },
+                "weirdness": {
+                    "type": "number",
+                    "description": "Creative deviation / experimental factor (0.0-1.0)",
+                    "default": 0.3
+                },
+                "model": {
+                    "type": "string",
+                    "enum": ["V3_5", "V4", "V4_5", "V5"],
+                    "description": "Suno model version. V5 is newest.",
+                    "default": "V5"
+                },
+                "blocking": {
+                    "type": "boolean",
+                    "description": "Wait for completion (True) or return task_id for polling (False)",
+                    "default": True
+                },
+                "agent_id": {
+                    "type": "string",
+                    "description": "ID of the creating agent for attribution",
+                    "default": ""
+                }
+            },
+            "required": ["midi_file", "style", "title"]
         }
     }
 }
