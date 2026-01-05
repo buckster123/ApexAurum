@@ -4,7 +4,7 @@
 
 ### *The Philosopher's Stone of AI Interfaces*
 
-**A production-grade Claude platform with multi-agent orchestration, persistent memory architecture, and 50 integrated tools**
+**A Claude platform with multi-agent orchestration, persistent memory architecture, and 50 integrated tools**
 
 [![Status](https://img.shields.io/badge/status-production%20ready-gold?style=for-the-badge)]()
 [![Tools](https://img.shields.io/badge/tools-50-blueviolet?style=for-the-badge)]()
@@ -17,7 +17,6 @@
 *"From base metal to gold — transforming Claude into something extraordinary."*
 
 </div>
-[![ApexAurum Banner](https://github.com/buckster123/ApexAurum/blob/main/logo.jpg)]()
 ---
 
 ## What Is This?
