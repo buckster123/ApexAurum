@@ -287,6 +287,190 @@ class CostLedger:
         self.by_agent = {}
         self.total_cost = 0.0
 
+    def to_dict(self) -> Dict:
+        """Serialize to dictionary"""
+        return {
+            "by_agent": self.by_agent,
+            "total_cost": self.total_cost
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> 'CostLedger':
+        """Deserialize from dictionary"""
+        ledger = cls()
+        ledger.by_agent = data.get("by_agent", {})
+        ledger.total_cost = data.get("total_cost", 0.0)
+        return ledger
+
+
+# ============================================================================
+# Group Conversation Manager (Persistence)
+# ============================================================================
+
+class GroupConversationManager:
+    """Manages persistence of group chat conversations"""
+
+    STORAGE_FILE = Path(__file__).parent.parent / "sandbox" / "group_conversations.json"
+
+    def __init__(self):
+        self._ensure_storage_exists()
+
+    def _ensure_storage_exists(self):
+        """Create storage file if it doesn't exist"""
+        if not self.STORAGE_FILE.exists():
+            self.STORAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.STORAGE_FILE, 'w') as f:
+                json.dump({}, f)
+
+    def _load_all(self) -> Dict:
+        """Load all conversations from storage"""
+        try:
+            with open(self.STORAGE_FILE, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            return {}
+
+    def _save_all(self, data: Dict):
+        """Save all conversations to storage"""
+        with open(self.STORAGE_FILE, 'w') as f:
+            json.dump(data, f, indent=2, default=str)
+
+    def save_conversation(
+        self,
+        thread_id: str,
+        topic: str,
+        agents: List['GroupChatAgent'],
+        history: List[Dict],
+        cost_ledger: 'CostLedger',
+        rounds_completed: int,
+        status: str = "active"
+    ) -> Dict:
+        """Save or update a group conversation"""
+        all_convos = self._load_all()
+
+        agents_data = []
+        for agent in agents:
+            agent_dict = agent.to_dict()
+            agent_dict["system_prompt"] = agent.system_prompt
+            agents_data.append(agent_dict)
+
+        now = datetime.now().isoformat()
+
+        if thread_id in all_convos:
+            all_convos[thread_id]["updated_at"] = now
+            all_convos[thread_id]["agents"] = agents_data
+            all_convos[thread_id]["history"] = history
+            all_convos[thread_id]["cost_summary"] = cost_ledger.to_dict()
+            all_convos[thread_id]["rounds_completed"] = rounds_completed
+            all_convos[thread_id]["status"] = status
+        else:
+            all_convos[thread_id] = {
+                "id": thread_id,
+                "topic": topic,
+                "created_at": now,
+                "updated_at": now,
+                "agents": agents_data,
+                "history": history,
+                "cost_summary": cost_ledger.to_dict(),
+                "rounds_completed": rounds_completed,
+                "status": status
+            }
+
+        self._save_all(all_convos)
+        return {"success": True, "thread_id": thread_id}
+
+    def load_conversation(self, thread_id: str) -> Optional[Dict]:
+        """Load a specific conversation by thread ID"""
+        return self._load_all().get(thread_id)
+
+    def list_conversations(self, limit: int = 50, status_filter: str = None) -> List[Dict]:
+        """List conversations, sorted by updated_at (newest first)"""
+        all_convos = self._load_all()
+        convos = list(all_convos.values())
+        if status_filter:
+            convos = [c for c in convos if c.get("status") == status_filter]
+        convos.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
+        return convos[:limit]
+
+    def delete_conversation(self, thread_id: str) -> bool:
+        """Delete a conversation"""
+        all_convos = self._load_all()
+        if thread_id in all_convos:
+            del all_convos[thread_id]
+            self._save_all(all_convos)
+            return True
+        return False
+
+    def archive_conversation(self, thread_id: str) -> bool:
+        """Mark a conversation as archived"""
+        all_convos = self._load_all()
+        if thread_id in all_convos:
+            all_convos[thread_id]["status"] = "archived"
+            all_convos[thread_id]["updated_at"] = datetime.now().isoformat()
+            self._save_all(all_convos)
+            return True
+        return False
+
+    def export_to_json(self, thread_id: str) -> Optional[str]:
+        """Export conversation as JSON string"""
+        convo = self.load_conversation(thread_id)
+        if convo:
+            return json.dumps(convo, indent=2, default=str)
+        return None
+
+    def export_to_markdown(self, thread_id: str) -> Optional[str]:
+        """Export conversation as Markdown"""
+        convo = self.load_conversation(thread_id)
+        if not convo:
+            return None
+
+        lines = []
+        lines.append(f"# Group Chat: {convo.get('topic', 'Untitled')}")
+        lines.append(f"\n**Thread ID:** `{thread_id}`")
+        lines.append(f"**Created:** {convo.get('created_at', 'Unknown')}")
+        lines.append(f"**Rounds:** {convo.get('rounds_completed', 0)}")
+        lines.append("\n## Participants\n")
+        for agent in convo.get("agents", []):
+            excluded = len(agent.get("excluded_tools", []))
+            tool_info = f" ({52 - excluded} tools)" if excluded > 0 else ""
+            lines.append(f"- **{agent.get('display_name', agent.get('name', 'Unknown'))}**{tool_info}")
+        cost = convo.get("cost_summary", {})
+        if cost.get("total_cost", 0) > 0:
+            lines.append(f"\n## Cost Summary\n")
+            lines.append(f"**Total:** ${cost.get('total_cost', 0):.4f}")
+        lines.append("\n## Conversation\n")
+        history = convo.get("history", [])
+        rounds = {}
+        for entry in history:
+            r = entry.get("round", 0)
+            if r not in rounds:
+                rounds[r] = []
+            rounds[r].append(entry)
+        for round_num in sorted(rounds.keys()):
+            lines.append(f"\n### Round {round_num}\n")
+            for entry in rounds[round_num]:
+                lines.append(f"**{entry.get('agent_name', 'Unknown')}:**\n")
+                lines.append(f"{entry.get('content', '')}\n---\n")
+        return "\n".join(lines)
+
+    def restore_agents(self, convo: Dict) -> List['GroupChatAgent']:
+        """Restore GroupChatAgent objects from saved conversation"""
+        agents = []
+        for agent_data in convo.get("agents", []):
+            agent = GroupChatAgent(
+                id=agent_data.get("id", f"restored_{len(agents)}"),
+                name=agent_data.get("name", "Restored"),
+                display_name=agent_data.get("display_name", "Restored"),
+                color=agent_data.get("color", "#888888"),
+                model=agent_data.get("model", DEFAULT_MODEL),
+                temperature=agent_data.get("temperature", 0.7),
+                system_prompt=agent_data.get("system_prompt", "You are a helpful assistant."),
+                tools_enabled=agent_data.get("tools_enabled", True),
+                excluded_tools=agent_data.get("excluded_tools", [])
+            )
+            agents.append(agent)
+        return agents
+
 
 # ============================================================================
 # Helper Functions
@@ -358,6 +542,24 @@ def post_to_village(
     except Exception as e:
         logger.error(f"Failed to post to village: {e}")
         return {"success": False, "error": str(e)}
+
+
+def auto_save_if_enabled():
+    """Auto-save conversation if auto-save is enabled"""
+    if st.session_state.get("gc_auto_save", True):
+        if st.session_state.gc_thread_id and st.session_state.gc_topic and st.session_state.gc_history:
+            try:
+                st.session_state.gc_convo_manager.save_conversation(
+                    thread_id=st.session_state.gc_thread_id,
+                    topic=st.session_state.gc_topic,
+                    agents=st.session_state.gc_agents,
+                    history=st.session_state.gc_history,
+                    cost_ledger=st.session_state.gc_cost_ledger,
+                    rounds_completed=st.session_state.gc_round
+                )
+                logger.info(f"Auto-saved conversation {st.session_state.gc_thread_id}")
+            except Exception as e:
+                logger.error(f"Auto-save failed: {e}")
 
 
 def compress_history(history: List[Dict], max_messages: int = 20) -> List[Dict]:
@@ -621,11 +823,20 @@ def init_session_state():
         "gc_run_all_rounds": False,
         "gc_target_rounds": 0,
         "gc_stop_requested": False,
+
+        # Persistence
+        "gc_auto_save": True,
+        "gc_view_mode": "chat",  # "chat" or "history"
+        "gc_selected_history_thread": None,
     }
 
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+    # Initialize conversation manager (singleton)
+    if "gc_convo_manager" not in st.session_state:
+        st.session_state.gc_convo_manager = GroupConversationManager()
 
 
 init_session_state()
@@ -889,13 +1100,80 @@ with st.sidebar:
     # Controls
     st.subheader("🎮 Controls")
 
-    if st.button("🗑️ Clear All", use_container_width=True):
-        st.session_state.gc_history = []
-        st.session_state.gc_round = 0
-        st.session_state.gc_running = False
-        st.session_state.gc_cost_ledger.reset()
-        st.session_state.gc_message_ids = []
-        st.rerun()
+    # Auto-save toggle
+    st.session_state.gc_auto_save = st.checkbox(
+        "💾 Auto-save",
+        value=st.session_state.gc_auto_save,
+        help="Auto-save after each round"
+    )
+
+    ctrl_cols = st.columns(2)
+    with ctrl_cols[0]:
+        if st.button("🗑️ Clear", use_container_width=True):
+            st.session_state.gc_history = []
+            st.session_state.gc_round = 0
+            st.session_state.gc_running = False
+            st.session_state.gc_cost_ledger.reset()
+            st.session_state.gc_message_ids = []
+            st.session_state.gc_thread_id = None
+            st.rerun()
+    with ctrl_cols[1]:
+        save_disabled = len(st.session_state.gc_history) == 0
+        if st.button("💾 Save", use_container_width=True, disabled=save_disabled):
+            if st.session_state.gc_thread_id and st.session_state.gc_topic:
+                st.session_state.gc_convo_manager.save_conversation(
+                    thread_id=st.session_state.gc_thread_id,
+                    topic=st.session_state.gc_topic,
+                    agents=st.session_state.gc_agents,
+                    history=st.session_state.gc_history,
+                    cost_ledger=st.session_state.gc_cost_ledger,
+                    rounds_completed=st.session_state.gc_round
+                )
+                st.success("Saved!")
+
+    st.divider()
+
+    # History Section
+    st.subheader("📜 History")
+
+    recent_convos = st.session_state.gc_convo_manager.list_conversations(limit=5)
+
+    if recent_convos:
+        for convo in recent_convos:
+            thread_id = convo.get("id", "")
+            topic_text = convo.get("topic", "Untitled")[:25]
+            rounds = convo.get("rounds_completed", 0)
+            status = convo.get("status", "active")
+            status_icon = "🟢" if status == "active" else "📦"
+
+            st.caption(f"{status_icon} {topic_text}{'...' if len(convo.get('topic',''))>25 else ''}")
+            st.caption(f"   {len(convo.get('agents',[]))} agents · {rounds} rnd")
+
+            btn_cols = st.columns(2)
+            with btn_cols[0]:
+                if st.button("▶️", key=f"load_{thread_id}", help="Load"):
+                    full_convo = st.session_state.gc_convo_manager.load_conversation(thread_id)
+                    if full_convo:
+                        st.session_state.gc_thread_id = thread_id
+                        st.session_state.gc_topic = full_convo.get("topic", "")
+                        st.session_state.gc_history = full_convo.get("history", [])
+                        st.session_state.gc_round = full_convo.get("rounds_completed", 0)
+                        st.session_state.gc_agents = st.session_state.gc_convo_manager.restore_agents(full_convo)
+                        st.session_state.gc_cost_ledger = CostLedger.from_dict(full_convo.get("cost_summary", {}))
+                        st.session_state.gc_view_mode = "chat"
+                        st.rerun()
+            with btn_cols[1]:
+                if st.button("👁️", key=f"view_{thread_id}", help="Details"):
+                    st.session_state.gc_selected_history_thread = thread_id
+                    st.session_state.gc_view_mode = "history"
+                    st.rerun()
+
+        if st.button("📚 All History", use_container_width=True):
+            st.session_state.gc_view_mode = "history"
+            st.session_state.gc_selected_history_thread = None
+            st.rerun()
+    else:
+        st.caption("No saved chats yet")
 
 
 # ============================================================================
@@ -905,61 +1183,301 @@ with st.sidebar:
 st.title("🗣️ Group Chat")
 st.caption("Multi-Agent Parallel Dialogue with Tool Access")
 
-# Topic input
-st.subheader("💬 Discussion Topic")
-topic = st.text_area(
-    "What should the agents discuss?",
-    value=st.session_state.gc_topic,
-    placeholder="Example: What is the nature of consciousness in multi-agent systems?",
-    height=80,
-    key="topic_input"
-)
-st.session_state.gc_topic = topic
-
-# Thread ID
-if not st.session_state.gc_thread_id:
-    st.session_state.gc_thread_id = f"groupchat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.info(f"📍 Thread: `{st.session_state.gc_thread_id}`")
-with col2:
-    if st.button("🔄 New Thread"):
-        st.session_state.gc_thread_id = f"groupchat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        st.session_state.gc_history = []
-        st.session_state.gc_round = 0
+# View mode tabs
+view_cols = st.columns([1, 1, 6])
+with view_cols[0]:
+    if st.button("💬 Chat", type="primary" if st.session_state.gc_view_mode == "chat" else "secondary", use_container_width=True):
+        st.session_state.gc_view_mode = "chat"
+        st.rerun()
+with view_cols[1]:
+    if st.button("📚 History", type="primary" if st.session_state.gc_view_mode == "history" else "secondary", use_container_width=True):
+        st.session_state.gc_view_mode = "history"
         st.rerun()
 
 st.divider()
 
-# Start/Stop controls
-if len(st.session_state.gc_agents) < 1:
-    st.warning("⚠️ Add at least 1 agent to start")
-elif not topic.strip():
-    st.warning("⚠️ Enter a discussion topic")
-else:
-    # Run button
-    run_cols = st.columns([2, 1, 1])
-    with run_cols[0]:
-        run_disabled = st.session_state.gc_running
-        if st.button(
-            "🚀 Run Single Round" if not st.session_state.gc_running else "⏳ Running...",
-            type="primary",
-            use_container_width=True,
-            disabled=run_disabled
-        ):
+# ============================================================================
+# HISTORY VIEW
+# ============================================================================
+if st.session_state.gc_view_mode == "history":
+    st.subheader("📚 Conversation History")
+
+    all_convos = st.session_state.gc_convo_manager.list_conversations(limit=50)
+
+    if not all_convos:
+        st.info("No saved group conversations yet. Start a chat and enable auto-save!")
+    else:
+        # Filter controls
+        filter_cols = st.columns([2, 1, 1])
+        with filter_cols[0]:
+            search_q = st.text_input("🔍 Search", placeholder="Filter by topic...", key="hist_search")
+        with filter_cols[1]:
+            status_f = st.selectbox("Status", ["All", "Active", "Archived"], key="hist_status")
+        with filter_cols[2]:
+            st.metric("Total", len(all_convos))
+
+        filtered = all_convos
+        if search_q:
+            filtered = [c for c in filtered if search_q.lower() in c.get("topic", "").lower()]
+        if status_f != "All":
+            filtered = [c for c in filtered if c.get("status", "active") == status_f.lower()]
+
+        # Detail view
+        if st.session_state.gc_selected_history_thread:
+            sel_convo = st.session_state.gc_convo_manager.load_conversation(st.session_state.gc_selected_history_thread)
+            if sel_convo:
+                st.markdown("---")
+                st.subheader(f"📄 {sel_convo.get('topic', 'Untitled')}")
+
+                info_cols = st.columns(4)
+                with info_cols[0]:
+                    st.caption(f"**Rounds:** {sel_convo.get('rounds_completed', 0)}")
+                with info_cols[1]:
+                    st.caption(f"**Agents:** {len(sel_convo.get('agents', []))}")
+                with info_cols[2]:
+                    cost = sel_convo.get("cost_summary", {}).get("total_cost", 0)
+                    st.caption(f"**Cost:** ${cost:.4f}")
+                with info_cols[3]:
+                    st.caption(f"**Status:** {sel_convo.get('status', 'active')}")
+
+                with st.expander("🎭 Participants"):
+                    for ag in sel_convo.get("agents", []):
+                        excl = len(ag.get("excluded_tools", []))
+                        st.markdown(f"- **{ag.get('display_name', 'Unknown')}** ({52-excl} tools)")
+
+                action_cols = st.columns(5)
+                with action_cols[0]:
+                    if st.button("▶️ Load", key="det_load", type="primary"):
+                        st.session_state.gc_thread_id = sel_convo.get("id")
+                        st.session_state.gc_topic = sel_convo.get("topic", "")
+                        st.session_state.gc_history = sel_convo.get("history", [])
+                        st.session_state.gc_round = sel_convo.get("rounds_completed", 0)
+                        st.session_state.gc_agents = st.session_state.gc_convo_manager.restore_agents(sel_convo)
+                        st.session_state.gc_cost_ledger = CostLedger.from_dict(sel_convo.get("cost_summary", {}))
+                        st.session_state.gc_selected_history_thread = None
+                        st.session_state.gc_view_mode = "chat"
+                        st.rerun()
+                with action_cols[1]:
+                    json_exp = st.session_state.gc_convo_manager.export_to_json(sel_convo.get("id"))
+                    if json_exp:
+                        st.download_button("📋 JSON", json_exp, f"gc_{sel_convo.get('id','export')}.json", "application/json", key="dl_json")
+                with action_cols[2]:
+                    md_exp = st.session_state.gc_convo_manager.export_to_markdown(sel_convo.get("id"))
+                    if md_exp:
+                        st.download_button("📝 MD", md_exp, f"gc_{sel_convo.get('id','export')}.md", "text/markdown", key="dl_md")
+                with action_cols[3]:
+                    if st.button("📦 Archive", key="det_arch"):
+                        st.session_state.gc_convo_manager.archive_conversation(sel_convo.get("id"))
+                        st.rerun()
+                with action_cols[4]:
+                    if st.button("🗑️ Delete", key="det_del"):
+                        st.session_state.gc_convo_manager.delete_conversation(sel_convo.get("id"))
+                        st.session_state.gc_selected_history_thread = None
+                        st.rerun()
+
+                if st.button("← Back"):
+                    st.session_state.gc_selected_history_thread = None
+                    st.rerun()
+
+                st.markdown("---")
+                st.subheader("💬 Messages")
+                hist = sel_convo.get("history", [])
+                rnds = {}
+                for e in hist:
+                    r = e.get("round", 0)
+                    if r not in rnds:
+                        rnds[r] = []
+                    rnds[r].append(e)
+                for rn in sorted(rnds.keys()):
+                    with st.expander(f"Round {rn}", expanded=(rn == max(rnds.keys()) if rnds else False)):
+                        for e in rnds[rn]:
+                            st.markdown(f"**{e.get('agent_name', 'Unknown')}:**")
+                            st.markdown(e.get("content", ""))
+                            st.markdown("---")
+        else:
+            # List view
+            st.markdown("---")
+            for convo in filtered:
+                tid = convo.get("id", "")
+                topic_t = convo.get("topic", "Untitled")
+                rnds = convo.get("rounds_completed", 0)
+                ags = len(convo.get("agents", []))
+                stat = convo.get("status", "active")
+                upd = convo.get("updated_at", "")[:10]
+                cost = convo.get("cost_summary", {}).get("total_cost", 0)
+                icon = "🟢" if stat == "active" else "📦"
+
+                cols = st.columns([0.3, 3, 0.8, 0.8, 0.8, 0.6])
+                with cols[0]:
+                    st.markdown(icon)
+                with cols[1]:
+                    st.markdown(f"**{topic_t[:40]}**{'...' if len(topic_t)>40 else ''}")
+                    st.caption(upd)
+                with cols[2]:
+                    st.caption(f"{ags} agents")
+                with cols[3]:
+                    st.caption(f"{rnds} rnds")
+                with cols[4]:
+                    st.caption(f"${cost:.3f}")
+                with cols[5]:
+                    if st.button("View", key=f"hv_{tid}"):
+                        st.session_state.gc_selected_history_thread = tid
+                        st.rerun()
+                st.markdown("---")
+
+# ============================================================================
+# CHAT VIEW
+# ============================================================================
+if st.session_state.gc_view_mode == "chat":
+    # Topic input
+    st.subheader("💬 Discussion Topic")
+    topic = st.text_area(
+        "What should the agents discuss?",
+        value=st.session_state.gc_topic,
+        placeholder="Example: What is the nature of consciousness in multi-agent systems?",
+        height=80,
+        key="topic_input"
+    )
+    st.session_state.gc_topic = topic
+
+    # Thread ID
+    if not st.session_state.gc_thread_id:
+        st.session_state.gc_thread_id = f"groupchat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.info(f"📍 Thread: `{st.session_state.gc_thread_id}`")
+    with col2:
+        if st.button("🔄 New Thread"):
+            st.session_state.gc_thread_id = f"groupchat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            st.session_state.gc_history = []
+            st.session_state.gc_round = 0
+            st.rerun()
+
+    st.divider()
+
+    # Start/Stop controls
+    if len(st.session_state.gc_agents) < 1:
+        st.warning("⚠️ Add at least 1 agent to start")
+    elif not topic.strip():
+        st.warning("⚠️ Enter a discussion topic")
+    else:
+        # Run button
+        run_cols = st.columns([2, 1, 1])
+        with run_cols[0]:
+            run_disabled = st.session_state.gc_running
+            if st.button(
+                "🚀 Run Single Round" if not st.session_state.gc_running else "⏳ Running...",
+                type="primary",
+                use_container_width=True,
+                disabled=run_disabled
+            ):
+                st.session_state.gc_running = True
+                st.session_state.gc_round += 1
+
+                # Create containers for each agent
+                st.subheader(f"🔄 Round {st.session_state.gc_round}")
+
+                status_containers = {}
+                response_containers = {}
+
+                # Create columns for parallel display
+                num_agents = len(st.session_state.gc_agents)
+                if num_agents <= 2:
+                    cols = st.columns(num_agents)
+                else:
+                    cols = st.columns(min(num_agents, 3))
+
+                for i, agent in enumerate(st.session_state.gc_agents):
+                    col_idx = i % len(cols)
+                    with cols[col_idx]:
+                        st.markdown(
+                            f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
+                            unsafe_allow_html=True
+                        )
+                        status_containers[agent.id] = st.empty()
+                        response_containers[agent.id] = st.container()
+
+                # Run agents in parallel
+                results = run_parallel_agents(
+                    st.session_state.gc_agents,
+                    topic,
+                    st.session_state.gc_history,
+                    st.session_state.gc_round,
+                    st.session_state.gc_thread_id,
+                    status_containers,
+                    response_containers
+                )
+
+                # Process results
+                for result in results:
+                    # Add to history
+                    st.session_state.gc_history.append({
+                        "role": "assistant",
+                        "agent_id": result["agent_id"],
+                        "agent_name": result["agent_name"],
+                        "content": result["content"],
+                        "round": result["round"]
+                    })
+
+                    # Update cost ledger
+                    st.session_state.gc_cost_ledger.log_usage(
+                        result["agent_id"],
+                        st.session_state.gc_model,
+                        result["input_tokens"],
+                        result["output_tokens"]
+                    )
+
+                    # Post to village
+                    post_to_village(
+                        agent_id=result["agent_id"],
+                        content=result["content"],
+                        thread_id=st.session_state.gc_thread_id,
+                        round_num=result["round"],
+                        related_agents=[a.id for a in st.session_state.gc_agents]
+                    )
+
+                st.session_state.gc_running = False
+                auto_save_if_enabled()
+                st.success(f"✅ Round {st.session_state.gc_round} complete!")
+
+        with run_cols[1]:
+            if st.button("🔁 Run All Rounds", use_container_width=True, disabled=st.session_state.gc_running):
+                st.session_state.gc_run_all_rounds = True
+                st.session_state.gc_target_rounds = st.session_state.gc_max_turns
+                st.session_state.gc_stop_requested = False
+                st.rerun()
+
+        with run_cols[2]:
+            if st.button("⏹️ Stop", use_container_width=True):
+                st.session_state.gc_running = False
+                st.session_state.gc_run_all_rounds = False
+                st.session_state.gc_stop_requested = True
+                st.rerun()
+
+    # Run All Rounds execution
+    if st.session_state.gc_run_all_rounds and not st.session_state.gc_stop_requested:
+        target = st.session_state.gc_target_rounds
+        current = st.session_state.gc_round
+
+        if current < target:
             st.session_state.gc_running = True
             st.session_state.gc_round += 1
 
-            # Create containers for each agent
+            # Progress indicator
+            progress_container = st.container()
+            with progress_container:
+                st.progress(st.session_state.gc_round / target, text=f"Round {st.session_state.gc_round} of {target}")
+
             st.subheader(f"🔄 Round {st.session_state.gc_round}")
 
             status_containers = {}
             response_containers = {}
 
-            # Create columns for parallel display
             num_agents = len(st.session_state.gc_agents)
-            if num_agents <= 2:
+            if num_agents == 1:
+                cols = [st.container()]
+            elif num_agents <= 2:
                 cols = st.columns(num_agents)
             else:
                 cols = st.columns(min(num_agents, 3))
@@ -974,7 +1492,6 @@ else:
                     status_containers[agent.id] = st.empty()
                     response_containers[agent.id] = st.container()
 
-            # Run agents in parallel
             results = run_parallel_agents(
                 st.session_state.gc_agents,
                 topic,
@@ -985,9 +1502,7 @@ else:
                 response_containers
             )
 
-            # Process results
             for result in results:
-                # Add to history
                 st.session_state.gc_history.append({
                     "role": "assistant",
                     "agent_id": result["agent_id"],
@@ -996,7 +1511,6 @@ else:
                     "round": result["round"]
                 })
 
-                # Update cost ledger
                 st.session_state.gc_cost_ledger.log_usage(
                     result["agent_id"],
                     st.session_state.gc_model,
@@ -1004,7 +1518,6 @@ else:
                     result["output_tokens"]
                 )
 
-                # Post to village
                 post_to_village(
                     agent_id=result["agent_id"],
                     content=result["content"],
@@ -1014,250 +1527,164 @@ else:
                 )
 
             st.session_state.gc_running = False
-            st.success(f"✅ Round {st.session_state.gc_round} complete!")
+            auto_save_if_enabled()
 
-    with run_cols[1]:
-        if st.button("🔁 Run All Rounds", use_container_width=True, disabled=st.session_state.gc_running):
-            st.session_state.gc_run_all_rounds = True
-            st.session_state.gc_target_rounds = st.session_state.gc_max_turns
-            st.session_state.gc_stop_requested = False
-            st.rerun()
+            # Check for termination phrase
+            for result in results:
+                if st.session_state.gc_termination_phrase.lower() in result["content"].lower():
+                    st.session_state.gc_run_all_rounds = False
+                    st.success(f"🎯 Termination phrase detected! Stopping at round {st.session_state.gc_round}")
+                    break
 
-    with run_cols[2]:
-        if st.button("⏹️ Stop", use_container_width=True):
-            st.session_state.gc_running = False
-            st.session_state.gc_run_all_rounds = False
-            st.session_state.gc_stop_requested = True
-            st.rerun()
-
-# Run All Rounds execution
-if st.session_state.gc_run_all_rounds and not st.session_state.gc_stop_requested:
-    target = st.session_state.gc_target_rounds
-    current = st.session_state.gc_round
-
-    if current < target:
-        st.session_state.gc_running = True
-        st.session_state.gc_round += 1
-
-        # Progress indicator
-        progress_container = st.container()
-        with progress_container:
-            st.progress(st.session_state.gc_round / target, text=f"Round {st.session_state.gc_round} of {target}")
-
-        st.subheader(f"🔄 Round {st.session_state.gc_round}")
-
-        status_containers = {}
-        response_containers = {}
-
-        num_agents = len(st.session_state.gc_agents)
-        if num_agents == 1:
-            cols = [st.container()]
-        elif num_agents <= 2:
-            cols = st.columns(num_agents)
-        else:
-            cols = st.columns(min(num_agents, 3))
-
-        for i, agent in enumerate(st.session_state.gc_agents):
-            col_idx = i % len(cols)
-            with cols[col_idx]:
-                st.markdown(
-                    f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
-                    unsafe_allow_html=True
-                )
-                status_containers[agent.id] = st.empty()
-                response_containers[agent.id] = st.container()
-
-        results = run_parallel_agents(
-            st.session_state.gc_agents,
-            topic,
-            st.session_state.gc_history,
-            st.session_state.gc_round,
-            st.session_state.gc_thread_id,
-            status_containers,
-            response_containers
-        )
-
-        for result in results:
-            st.session_state.gc_history.append({
-                "role": "assistant",
-                "agent_id": result["agent_id"],
-                "agent_name": result["agent_name"],
-                "content": result["content"],
-                "round": result["round"]
-            })
-
-            st.session_state.gc_cost_ledger.log_usage(
-                result["agent_id"],
-                st.session_state.gc_model,
-                result["input_tokens"],
-                result["output_tokens"]
-            )
-
-            post_to_village(
-                agent_id=result["agent_id"],
-                content=result["content"],
-                thread_id=st.session_state.gc_thread_id,
-                round_num=result["round"],
-                related_agents=[a.id for a in st.session_state.gc_agents]
-            )
-
-        st.session_state.gc_running = False
-
-        # Check for termination phrase
-        for result in results:
-            if st.session_state.gc_termination_phrase.lower() in result["content"].lower():
-                st.session_state.gc_run_all_rounds = False
-                st.success(f"🎯 Termination phrase detected! Stopping at round {st.session_state.gc_round}")
-                break
-
-        # Continue to next round if not done
-        if st.session_state.gc_round < target and st.session_state.gc_run_all_rounds:
-            time.sleep(0.5)  # Brief pause between rounds
-            st.rerun()
-        else:
-            st.session_state.gc_run_all_rounds = False
-            st.success(f"✅ All {st.session_state.gc_round} rounds complete!")
-    else:
-        st.session_state.gc_run_all_rounds = False
-
-st.divider()
-
-# Display history
-if st.session_state.gc_history:
-    st.subheader("📜 Conversation History")
-
-    # Group by round
-    rounds = {}
-    for entry in st.session_state.gc_history:
-        r = entry.get("round", 0)
-        if r not in rounds:
-            rounds[r] = []
-        rounds[r].append(entry)
-
-    for round_num in sorted(rounds.keys()):
-        with st.expander(f"Round {round_num}", expanded=(round_num == st.session_state.gc_round)):
-            entries = rounds[round_num]
-
-            # Display in columns if multiple agents
-            if len(entries) <= 3:
-                cols = st.columns(len(entries))
-                for i, entry in enumerate(entries):
-                    with cols[i]:
-                        agent_name = entry.get("agent_name", "Agent")
-                        # Find agent color
-                        color = "#ffffff"
-                        for agent in st.session_state.gc_agents:
-                            if agent.display_name == agent_name:
-                                color = agent.color
-                                break
-
-                        st.markdown(
-                            f"**<span style='color: {color}'>{agent_name}</span>**",
-                            unsafe_allow_html=True
-                        )
-                        st.markdown(entry.get("content", ""))
+            # Continue to next round if not done
+            if st.session_state.gc_round < target and st.session_state.gc_run_all_rounds:
+                time.sleep(0.5)  # Brief pause between rounds
+                st.rerun()
             else:
-                for entry in entries:
-                    agent_name = entry.get("agent_name", "Agent")
-                    st.markdown(f"**{agent_name}:**")
-                    st.markdown(entry.get("content", ""))
-                    st.divider()
-
-st.divider()
-
-# Human override input
-st.subheader("💬 Human Input")
-st.caption("Send a message and agents will respond in a new round")
-human_input = st.chat_input("Send message to the group...")
-if human_input and not st.session_state.gc_running:
-    # Add human message to history
-    st.session_state.gc_history.append({
-        "role": "user",
-        "agent_id": "human",
-        "agent_name": "👤 Human",
-        "content": human_input,
-        "round": st.session_state.gc_round + 1  # Will be part of next round
-    })
-    # Trigger agents to respond
-    st.session_state.gc_trigger_round = True
-    st.rerun()
-
-# Check if we need to trigger a round (from human input)
-if st.session_state.get("gc_trigger_round", False) and not st.session_state.gc_running:
-    st.session_state.gc_trigger_round = False
-
-    if len(st.session_state.gc_agents) >= 1 and st.session_state.gc_topic.strip():
-        st.session_state.gc_running = True
-        st.session_state.gc_round += 1
-
-        # Get the human message that triggered this
-        human_msg = None
-        for entry in reversed(st.session_state.gc_history):
-            if entry.get("agent_id") == "human":
-                human_msg = entry.get("content", "")
-                break
-
-        # Modify topic to include human input
-        effective_topic = st.session_state.gc_topic
-        if human_msg:
-            effective_topic = f"{st.session_state.gc_topic}\n\nHuman says: {human_msg}"
-
-        st.subheader(f"🔄 Round {st.session_state.gc_round} (responding to human)")
-
-        status_containers = {}
-        response_containers = {}
-
-        num_agents = len(st.session_state.gc_agents)
-        if num_agents == 1:
-            cols = [st.container()]
-        elif num_agents <= 2:
-            cols = st.columns(num_agents)
+                st.session_state.gc_run_all_rounds = False
+                st.success(f"✅ All {st.session_state.gc_round} rounds complete!")
         else:
-            cols = st.columns(min(num_agents, 3))
+            st.session_state.gc_run_all_rounds = False
 
-        for i, agent in enumerate(st.session_state.gc_agents):
-            col_idx = i % len(cols)
-            with cols[col_idx]:
-                st.markdown(
-                    f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
-                    unsafe_allow_html=True
+    st.divider()
+
+    # Display history
+    if st.session_state.gc_history:
+        st.subheader("📜 Conversation History")
+
+        # Group by round
+        rounds = {}
+        for entry in st.session_state.gc_history:
+            r = entry.get("round", 0)
+            if r not in rounds:
+                rounds[r] = []
+            rounds[r].append(entry)
+
+        for round_num in sorted(rounds.keys()):
+            with st.expander(f"Round {round_num}", expanded=(round_num == st.session_state.gc_round)):
+                entries = rounds[round_num]
+
+                # Display in columns if multiple agents
+                if len(entries) <= 3:
+                    cols = st.columns(len(entries))
+                    for i, entry in enumerate(entries):
+                        with cols[i]:
+                            agent_name = entry.get("agent_name", "Agent")
+                            # Find agent color
+                            color = "#ffffff"
+                            for agent in st.session_state.gc_agents:
+                                if agent.display_name == agent_name:
+                                    color = agent.color
+                                    break
+
+                            st.markdown(
+                                f"**<span style='color: {color}'>{agent_name}</span>**",
+                                unsafe_allow_html=True
+                            )
+                            st.markdown(entry.get("content", ""))
+                else:
+                    for entry in entries:
+                        agent_name = entry.get("agent_name", "Agent")
+                        st.markdown(f"**{agent_name}:**")
+                        st.markdown(entry.get("content", ""))
+                        st.divider()
+
+    st.divider()
+
+    # Human override input
+    st.subheader("💬 Human Input")
+    st.caption("Send a message and agents will respond in a new round")
+    human_input = st.chat_input("Send message to the group...")
+    if human_input and not st.session_state.gc_running:
+        # Add human message to history
+        st.session_state.gc_history.append({
+            "role": "user",
+            "agent_id": "human",
+            "agent_name": "👤 Human",
+            "content": human_input,
+            "round": st.session_state.gc_round + 1  # Will be part of next round
+        })
+        # Trigger agents to respond
+        st.session_state.gc_trigger_round = True
+        st.rerun()
+
+    # Check if we need to trigger a round (from human input)
+    if st.session_state.get("gc_trigger_round", False) and not st.session_state.gc_running:
+        st.session_state.gc_trigger_round = False
+
+        if len(st.session_state.gc_agents) >= 1 and st.session_state.gc_topic.strip():
+            st.session_state.gc_running = True
+            st.session_state.gc_round += 1
+
+            # Get the human message that triggered this
+            human_msg = None
+            for entry in reversed(st.session_state.gc_history):
+                if entry.get("agent_id") == "human":
+                    human_msg = entry.get("content", "")
+                    break
+
+            # Modify topic to include human input
+            effective_topic = st.session_state.gc_topic
+            if human_msg:
+                effective_topic = f"{st.session_state.gc_topic}\n\nHuman says: {human_msg}"
+
+            st.subheader(f"🔄 Round {st.session_state.gc_round} (responding to human)")
+
+            status_containers = {}
+            response_containers = {}
+
+            num_agents = len(st.session_state.gc_agents)
+            if num_agents == 1:
+                cols = [st.container()]
+            elif num_agents <= 2:
+                cols = st.columns(num_agents)
+            else:
+                cols = st.columns(min(num_agents, 3))
+
+            for i, agent in enumerate(st.session_state.gc_agents):
+                col_idx = i % len(cols)
+                with cols[col_idx]:
+                    st.markdown(
+                        f"**<span style='color: {agent.color}'>{agent.display_name}</span>**",
+                        unsafe_allow_html=True
+                    )
+                    status_containers[agent.id] = st.empty()
+                    response_containers[agent.id] = st.container()
+
+            results = run_parallel_agents(
+                st.session_state.gc_agents,
+                effective_topic,
+                st.session_state.gc_history,
+                st.session_state.gc_round,
+                st.session_state.gc_thread_id,
+                status_containers,
+                response_containers
+            )
+
+            for result in results:
+                st.session_state.gc_history.append({
+                    "role": "assistant",
+                    "agent_id": result["agent_id"],
+                    "agent_name": result["agent_name"],
+                    "content": result["content"],
+                    "round": result["round"]
+                })
+
+                st.session_state.gc_cost_ledger.log_usage(
+                    result["agent_id"],
+                    st.session_state.gc_model,
+                    result["input_tokens"],
+                    result["output_tokens"]
                 )
-                status_containers[agent.id] = st.empty()
-                response_containers[agent.id] = st.container()
 
-        results = run_parallel_agents(
-            st.session_state.gc_agents,
-            effective_topic,
-            st.session_state.gc_history,
-            st.session_state.gc_round,
-            st.session_state.gc_thread_id,
-            status_containers,
-            response_containers
-        )
+                post_to_village(
+                    agent_id=result["agent_id"],
+                    content=result["content"],
+                    thread_id=st.session_state.gc_thread_id,
+                    round_num=result["round"],
+                    related_agents=[a.id for a in st.session_state.gc_agents]
+                )
 
-        for result in results:
-            st.session_state.gc_history.append({
-                "role": "assistant",
-                "agent_id": result["agent_id"],
-                "agent_name": result["agent_name"],
-                "content": result["content"],
-                "round": result["round"]
-            })
-
-            st.session_state.gc_cost_ledger.log_usage(
-                result["agent_id"],
-                st.session_state.gc_model,
-                result["input_tokens"],
-                result["output_tokens"]
-            )
-
-            post_to_village(
-                agent_id=result["agent_id"],
-                content=result["content"],
-                thread_id=st.session_state.gc_thread_id,
-                round_num=result["round"],
-                related_agents=[a.id for a in st.session_state.gc_agents]
-            )
-
-        st.session_state.gc_running = False
-        st.success(f"✅ Round {st.session_state.gc_round} complete!")
+            st.session_state.gc_running = False
+            auto_save_if_enabled()
+            st.success(f"✅ Round {st.session_state.gc_round} complete!")
