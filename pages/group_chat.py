@@ -108,8 +108,9 @@ TOOL_CATEGORIES = {
     },
     'filesystem': {
         'label': '📁 File System',
-        'description': 'Read/write files and directories',
-        'tools': ['fs_read_file', 'fs_write_file', 'fs_list_files', 'fs_mkdir', 'fs_delete', 'fs_exists', 'fs_get_info']
+        'description': 'Read/write/edit files and directories',
+        'tools': ['fs_read_file', 'fs_write_file', 'fs_list_files', 'fs_mkdir', 'fs_delete', 'fs_exists', 'fs_get_info',
+                  'fs_read_lines', 'fs_edit']
     },
     'sandbox': {
         'label': '💻 Sandbox/Code',
@@ -162,13 +163,13 @@ TOOL_CATEGORIES = {
 EXCLUSION_PRESETS = {
     'full_access': {
         'label': '🔓 Full Access',
-        'description': 'All 57 tools enabled',
+        'description': 'All 59 tools enabled',
         'excluded': []
     },
     'read_only': {
         'label': '👁️ Read-Only',
         'description': 'No write/delete/create operations',
-        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete',
+        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete', 'fs_edit',
                      'execute_python', 'execute_python_safe', 'execute_python_sandbox',
                      'sandbox_workspace_write',
                      'memory_store', 'memory_delete', 'vector_add', 'vector_delete',
@@ -188,7 +189,7 @@ EXCLUSION_PRESETS = {
     'no_file_write': {
         'label': '📖 No File Write',
         'description': 'Read files but cannot modify',
-        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete', 'sandbox_workspace_write']
+        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete', 'fs_edit', 'sandbox_workspace_write']
     },
     'no_music': {
         'label': '🔇 No Music',

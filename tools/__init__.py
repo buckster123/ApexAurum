@@ -34,6 +34,8 @@ from .filesystem import (
     fs_delete,
     fs_exists,
     fs_get_info,
+    fs_read_lines,
+    fs_edit,
     FILESYSTEM_TOOL_SCHEMAS,
 )
 
@@ -144,6 +146,8 @@ ALL_TOOLS = {
     "fs_delete": fs_delete,
     "fs_exists": fs_exists,
     "fs_get_info": fs_get_info,
+    "fs_read_lines": fs_read_lines,
+    "fs_edit": fs_edit,
     # Code execution & Sandbox
     "execute_python": execute_python,
     "execute_python_safe": execute_python_safe,
@@ -217,6 +221,8 @@ __all__ = [
     "fs_delete",
     "fs_exists",
     "fs_get_info",
+    "fs_read_lines",
+    "fs_edit",
     # Code execution & Sandbox
     "execute_python",
     "execute_python_safe",

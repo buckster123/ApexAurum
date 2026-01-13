@@ -363,6 +363,179 @@ def fs_get_info(path: str) -> dict:
         return {"error": str(e)}
 
 
+def fs_read_lines(
+    path: str,
+    start_line: int = 1,
+    end_line: int = None,
+    encoding: str = "utf-8"
+) -> dict:
+    """
+    Read specific lines from a file with line numbers.
+
+    Args:
+        path: Path to file (relative to sandbox)
+        start_line: First line to read (1-indexed, default: 1)
+        end_line: Last line to read (inclusive, default: end of file)
+        encoding: File encoding (default: utf-8)
+
+    Returns:
+        Dict with content (numbered lines), total_lines, and range info
+
+    Example:
+        >>> fs_read_lines("main.py", start_line=10, end_line=20)
+        {
+            "success": True,
+            "content": "10: def foo():\\n11:     return bar\\n...",
+            "start_line": 10,
+            "end_line": 20,
+            "total_lines": 150
+        }
+    """
+    try:
+        target = _sandbox._resolve_path(path)
+
+        if not target.exists():
+            return {"error": f"File not found: {path}", "success": False}
+
+        if not target.is_file():
+            return {"error": f"Not a file: {path}", "success": False}
+
+        with open(target, "r", encoding=encoding) as f:
+            all_lines = f.readlines()
+
+        total_lines = len(all_lines)
+
+        # Validate line numbers
+        if start_line < 1:
+            start_line = 1
+        if end_line is None or end_line > total_lines:
+            end_line = total_lines
+        if start_line > total_lines:
+            return {
+                "success": True,
+                "content": "",
+                "start_line": start_line,
+                "end_line": end_line,
+                "total_lines": total_lines,
+                "message": f"Start line {start_line} exceeds file length ({total_lines} lines)"
+            }
+
+        # Extract requested lines (convert to 0-indexed)
+        selected_lines = all_lines[start_line - 1:end_line]
+
+        # Format with line numbers
+        numbered_content = ""
+        for i, line in enumerate(selected_lines, start=start_line):
+            # Remove trailing newline for consistent formatting, then add back
+            line_text = line.rstrip('\n\r')
+            numbered_content += f"{i:>6}: {line_text}\n"
+
+        logger.info(f"Read lines {start_line}-{end_line} from {path} ({total_lines} total)")
+
+        return {
+            "success": True,
+            "content": numbered_content,
+            "start_line": start_line,
+            "end_line": end_line,
+            "lines_returned": len(selected_lines),
+            "total_lines": total_lines,
+            "path": path
+        }
+
+    except Exception as e:
+        logger.error(f"Error reading lines from {path}: {e}")
+        return {"error": str(e), "success": False}
+
+
+def fs_edit(
+    path: str,
+    old_string: str,
+    new_string: str,
+    replace_all: bool = False,
+    encoding: str = "utf-8"
+) -> dict:
+    """
+    Edit a file by replacing a string with another string.
+
+    This enables surgical edits without rewriting entire files.
+    The old_string must be unique in the file (unless replace_all=True).
+
+    Args:
+        path: Path to file (relative to sandbox)
+        old_string: Text to find and replace (must match exactly)
+        new_string: Text to replace with (can be empty to delete)
+        replace_all: Replace all occurrences (default: False, requires unique match)
+        encoding: File encoding (default: utf-8)
+
+    Returns:
+        Dict with success status and edit details
+
+    Example:
+        >>> fs_edit("main.py", old_string="def foo():", new_string="def bar():")
+        {"success": True, "replacements": 1, "path": "main.py"}
+
+        >>> fs_edit("config.py", old_string="DEBUG = True", new_string="DEBUG = False")
+        {"success": True, "replacements": 1}
+
+        >>> fs_edit("main.py", old_string="old_var", new_string="new_var", replace_all=True)
+        {"success": True, "replacements": 5}
+    """
+    try:
+        target = _sandbox._resolve_path(path)
+
+        if not target.exists():
+            return {"error": f"File not found: {path}", "success": False}
+
+        if not target.is_file():
+            return {"error": f"Not a file: {path}", "success": False}
+
+        # Read current content
+        with open(target, "r", encoding=encoding) as f:
+            content = f.read()
+
+        # Check if old_string exists
+        occurrences = content.count(old_string)
+
+        if occurrences == 0:
+            return {
+                "error": f"String not found in file: '{old_string[:50]}{'...' if len(old_string) > 50 else ''}'",
+                "success": False
+            }
+
+        if occurrences > 1 and not replace_all:
+            return {
+                "error": f"String found {occurrences} times. Use replace_all=True to replace all, or provide more context to make it unique.",
+                "success": False,
+                "occurrences": occurrences
+            }
+
+        # Perform replacement
+        if replace_all:
+            new_content = content.replace(old_string, new_string)
+            replacements = occurrences
+        else:
+            new_content = content.replace(old_string, new_string, 1)
+            replacements = 1
+
+        # Write back
+        with open(target, "w", encoding=encoding) as f:
+            f.write(new_content)
+
+        logger.info(f"Edited {path}: {replacements} replacement(s)")
+
+        return {
+            "success": True,
+            "path": path,
+            "replacements": replacements,
+            "bytes_before": len(content),
+            "bytes_after": len(new_content)
+        }
+
+    except Exception as e:
+        logger.error(f"Error editing {path}: {e}")
+        return {"error": str(e), "success": False}
+
+
 # Tool schemas for registration
 FILESYSTEM_TOOL_SCHEMAS = {
     "fs_read_file": {
@@ -497,6 +670,89 @@ FILESYSTEM_TOOL_SCHEMAS = {
                 }
             },
             "required": ["path"]
+        }
+    },
+    "fs_read_lines": {
+        "name": "fs_read_lines",
+        "description": """Read specific lines from a file with line numbers.
+
+Use this to inspect parts of a file without loading the entire content.
+Lines are returned with line numbers for easy reference.
+
+Examples:
+- Read first 50 lines: fs_read_lines(path="main.py", end_line=50)
+- Read lines 100-150: fs_read_lines(path="main.py", start_line=100, end_line=150)
+- Read from line 200 to end: fs_read_lines(path="main.py", start_line=200)""",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Path to the file (relative to sandbox)"
+                },
+                "start_line": {
+                    "type": "integer",
+                    "description": "First line to read (1-indexed, default: 1)",
+                    "default": 1
+                },
+                "end_line": {
+                    "type": "integer",
+                    "description": "Last line to read (inclusive, default: end of file)"
+                },
+                "encoding": {
+                    "type": "string",
+                    "description": "File encoding (default: utf-8)",
+                    "default": "utf-8"
+                }
+            },
+            "required": ["path"]
+        }
+    },
+    "fs_edit": {
+        "name": "fs_edit",
+        "description": """Edit a file by finding and replacing a string.
+
+This enables surgical edits without rewriting entire files. The old_string
+must be unique in the file unless replace_all=True.
+
+Tips:
+- Include surrounding context (nearby lines) to ensure uniqueness
+- Use replace_all=True for renaming variables across a file
+- Set new_string="" to delete text
+- Preserves file encoding and line endings
+
+Examples:
+- Rename function: fs_edit(path="main.py", old_string="def foo():", new_string="def bar():")
+- Fix a bug: fs_edit(path="config.py", old_string="DEBUG = True", new_string="DEBUG = False")
+- Delete code: fs_edit(path="main.py", old_string="# TODO: remove this\\nold_code()", new_string="")
+- Rename all: fs_edit(path="main.py", old_string="old_name", new_string="new_name", replace_all=True)""",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Path to the file (relative to sandbox)"
+                },
+                "old_string": {
+                    "type": "string",
+                    "description": "Exact text to find and replace"
+                },
+                "new_string": {
+                    "type": "string",
+                    "description": "Text to replace with (empty string to delete)"
+                },
+                "replace_all": {
+                    "type": "boolean",
+                    "description": "Replace all occurrences (default: false, requires unique match)",
+                    "default": False
+                },
+                "encoding": {
+                    "type": "string",
+                    "description": "File encoding (default: utf-8)",
+                    "default": "utf-8"
+                }
+            },
+            "required": ["path", "old_string", "new_string"]
         }
     }
 }
