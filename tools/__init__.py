@@ -39,6 +39,11 @@ from .filesystem import (
 
 from .code_execution import (
     execute_python,
+    execute_python_safe,
+    execute_python_sandbox,
+    sandbox_workspace_list,
+    sandbox_workspace_read,
+    sandbox_workspace_write,
     CODE_EXECUTION_TOOL_SCHEMAS,
 )
 
@@ -139,8 +144,13 @@ ALL_TOOLS = {
     "fs_delete": fs_delete,
     "fs_exists": fs_exists,
     "fs_get_info": fs_get_info,
-    # Code execution
+    # Code execution & Sandbox
     "execute_python": execute_python,
+    "execute_python_safe": execute_python_safe,
+    "execute_python_sandbox": execute_python_sandbox,
+    "sandbox_workspace_list": sandbox_workspace_list,
+    "sandbox_workspace_read": sandbox_workspace_read,
+    "sandbox_workspace_write": sandbox_workspace_write,
     # Memory
     "memory_store": memory_store,
     "memory_retrieve": memory_retrieve,
@@ -207,8 +217,13 @@ __all__ = [
     "fs_delete",
     "fs_exists",
     "fs_get_info",
-    # Code execution
+    # Code execution & Sandbox
     "execute_python",
+    "execute_python_safe",
+    "execute_python_sandbox",
+    "sandbox_workspace_list",
+    "sandbox_workspace_read",
+    "sandbox_workspace_write",
     # Memory
     "memory_store",
     "memory_retrieve",

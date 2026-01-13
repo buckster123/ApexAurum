@@ -57,6 +57,14 @@ from .streaming import (
     estimate_stream_progress,
 )
 
+from .sandbox_manager import (
+    SandboxManager,
+    SandboxConfig,
+    ExecutionMode,
+    ExecutionResult,
+    get_sandbox_manager,
+)
+
 __all__ = [
     # API Client
     "ClaudeAPIClient",
@@ -99,4 +107,10 @@ __all__ = [
     "ProgressIndicator",
     "format_tool_display",
     "estimate_stream_progress",
+    # Sandbox
+    "SandboxManager",
+    "SandboxConfig",
+    "ExecutionMode",
+    "ExecutionResult",
+    "get_sandbox_manager",
 ]

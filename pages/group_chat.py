@@ -111,10 +111,11 @@ TOOL_CATEGORIES = {
         'description': 'Read/write files and directories',
         'tools': ['fs_read_file', 'fs_write_file', 'fs_list_files', 'fs_mkdir', 'fs_delete', 'fs_exists', 'fs_get_info']
     },
-    'code_execution': {
-        'label': '💻 Code Execution',
-        'description': 'Run Python code (security sensitive)',
-        'tools': ['execute_python']
+    'sandbox': {
+        'label': '💻 Sandbox/Code',
+        'description': 'Python execution (safe REPL + Docker sandbox)',
+        'tools': ['execute_python', 'execute_python_safe', 'execute_python_sandbox',
+                  'sandbox_workspace_list', 'sandbox_workspace_read', 'sandbox_workspace_write']
     },
     'memory': {
         'label': '🧠 Memory (KV)',
@@ -161,13 +162,15 @@ TOOL_CATEGORIES = {
 EXCLUSION_PRESETS = {
     'full_access': {
         'label': '🔓 Full Access',
-        'description': 'All 52 tools enabled',
+        'description': 'All 57 tools enabled',
         'excluded': []
     },
     'read_only': {
         'label': '👁️ Read-Only',
         'description': 'No write/delete/create operations',
-        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete', 'execute_python',
+        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete',
+                     'execute_python', 'execute_python_safe', 'execute_python_sandbox',
+                     'sandbox_workspace_write',
                      'memory_store', 'memory_delete', 'vector_add', 'vector_delete',
                      'vector_add_knowledge', 'memory_consolidate', 'forward_crumb_leave',
                      'music_generate', 'midi_create', 'music_compose', 'agent_spawn']
@@ -179,13 +182,13 @@ EXCLUSION_PRESETS = {
     },
     'no_code': {
         'label': '🔒 No Code Execution',
-        'description': 'No Python execution',
-        'excluded': ['execute_python']
+        'description': 'No Python execution (safe or sandbox)',
+        'excluded': ['execute_python', 'execute_python_safe', 'execute_python_sandbox']
     },
     'no_file_write': {
         'label': '📖 No File Write',
         'description': 'Read files but cannot modify',
-        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete']
+        'excluded': ['fs_write_file', 'fs_mkdir', 'fs_delete', 'sandbox_workspace_write']
     },
     'no_music': {
         'label': '🔇 No Music',
