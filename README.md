@@ -4,11 +4,11 @@
 
 ### *The Philosopher's Stone of AI Interfaces*
 
-**A Claude platform with multi-agent orchestration, persistent memory architecture, and 52 integrated tools**
+**A Claude platform with multi-agent orchestration, persistent memory architecture, and 59 integrated tools**
 
 [![Status](https://img.shields.io/badge/status-production%20ready-gold?style=for-the-badge)]()
-[![Tools](https://img.shields.io/badge/tools-52-blueviolet?style=for-the-badge)]()
-[![Code](https://img.shields.io/badge/lines-24.7k+-blue?style=for-the-badge)]()
+[![Tools](https://img.shields.io/badge/tools-59-blueviolet?style=for-the-badge)]()
+[![Code](https://img.shields.io/badge/lines-26.4k+-blue?style=for-the-badge)]()
 [![Python](https://img.shields.io/badge/python-3.9+-green?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)]()
 
@@ -60,8 +60,8 @@ Three-realm memory architecture:
 - **Village** — Shared community memory
 - **Bridges** — Cross-agent connections
 
-### 52 Integrated Tools
-File ops, web search, code execution, vector search, MIDI composition, music generation, dataset queries, memory health, convergence detection...
+### 59 Integrated Tools
+File ops with line-based editing, **dual-mode code execution** (instant REPL + Docker sandbox), vector search, MIDI composition, music generation, dataset queries, memory health, convergence detection...
 
 </td>
 <td width="50%" valign="top">
@@ -92,9 +92,10 @@ flowchart TB
         DC["Dataset Creator<br/>Vector Datasets"]
     end
 
-    subgraph TOOLS["Tool Layer — 52 Tools"]
+    subgraph TOOLS["Tool Layer — 59 Tools"]
         UT["Utilities<br/>time, calc, web, session_info"]
-        FS["Filesystem<br/>read, write, list, delete"]
+        FS["Filesystem<br/>read, write, edit, read_lines"]
+        SB["Sandbox<br/>safe REPL + Docker"]
         AG["Agents<br/>spawn, status, council"]
         VS_T["Vector Search<br/>semantic, knowledge, village"]
         MU["Music<br/>midi_create, compose, generate, play"]
@@ -199,13 +200,13 @@ Open **http://localhost:8501** and start chatting.
 
 ## Tool Ecosystem
 
-### 52 Tools Across 9 Categories
+### 59 Tools Across 10 Categories
 
 | Category | Tools | Description |
 |----------|-------|-------------|
 | **Utilities** | `get_current_time`, `calculator`, `reverse_string`, `count_words`, `random_number`, `session_info` | Core operations + agent self-awareness |
-| **Filesystem** | `fs_read_file`, `fs_write_file`, `fs_list_files`, `fs_mkdir`, `fs_delete`, `fs_exists`, `fs_get_info` | Sandboxed file operations |
-| **Code** | `execute_python` | Safe Python execution with capture |
+| **Filesystem** | `fs_read_file`, `fs_write_file`, `fs_list_files`, `fs_mkdir`, `fs_delete`, `fs_exists`, `fs_get_info`, `fs_read_lines`, `fs_edit` | Sandboxed file ops + **line-based editing** |
+| **Sandbox** | `execute_python`, `execute_python_safe`, `execute_python_sandbox`, `sandbox_workspace_list`, `sandbox_workspace_read`, `sandbox_workspace_write` | **Dual-mode execution**: instant REPL + Docker sandbox with any package |
 | **Memory** | `memory_store`, `memory_retrieve`, `memory_list`, `memory_delete`, `memory_search` | Key-value persistence |
 | **Agents** | `agent_spawn`, `agent_status`, `agent_result`, `agent_list`, `socratic_council` | Multi-agent orchestration |
 | **Vector** | `vector_add`, `vector_search`, `vector_delete`, `vector_list_collections`, `vector_get_stats`, `vector_add_knowledge`, `vector_search_knowledge`, `vector_search_village`, `village_convergence_detect`, `forward_crumbs_get`, `forward_crumb_leave` | Semantic search + Village Protocol |
@@ -235,7 +236,9 @@ Open **http://localhost:8501** and start chatting.
 ```
 
 - **Parallel Execution** — 1-4 agents respond simultaneously
-- **Full Tool Access** — All 52 tools available during dialogue
+- **Full Tool Access** — All 59 tools available during dialogue
+- **Per-Agent Tool Exclusion** — Custom agents can have restricted tool access
+- **History & Persistence** — Save, load, and resume conversations with full agent restoration
 - **Per-Agent Cost Tracking** — Real-time cost ledger
 - **Village Integration** — All messages posted to shared memory
 
@@ -254,6 +257,33 @@ dataset_query("python_docs", "how to handle exceptions", top_k=5)
 ```
 
 **Supported formats:** PDF (with OCR), TXT, MD, DOCX, HTML
+
+### Dual-Mode Code Execution
+
+Safe REPL for instant operations, Docker sandbox for full Python power:
+
+```python
+# Auto-selects SAFE mode (instant, ~1ms)
+execute_python(code="result = sum(range(100))")
+# → {"return_value": 4950, "mode_used": "safe"}
+
+# Auto-selects SANDBOX mode (Docker, any package)
+execute_python(code="""
+import pandas as pd
+import numpy as np
+df = pd.DataFrame({'x': np.random.randn(100)})
+result = df.describe().to_dict()
+""")
+# → {"return_value": {...}, "mode_used": "sandbox"}
+
+# Force sandbox with network access
+execute_python_sandbox(
+    code="import requests; result = requests.get('https://api.example.com').json()",
+    network=True
+)
+```
+
+**Workspace persistence:** Files saved to `/workspace` persist across executions.
 
 ### Music Pipeline (Phase 2A)
 
@@ -319,13 +349,14 @@ Aggressive      │ + History (3+ turns back)      │ 70-90%
 ╔════════════════════════════════════════════════════════════╗
 ║                    APEXAURUM METRICS                       ║
 ╠════════════════════════════════════════════════════════════╣
-║  Total Code          │  ~24,700 lines                      ║
+║  Total Code          │  ~26,400+ lines                     ║
 ║  Main Application    │  5,643 lines (main.py)              ║
-║  Core Modules        │  27 files (~11,000 lines)           ║
-║  Tool Modules        │  9 files (~3,900 lines)             ║
-║  UI Modules          │  3 files                            ║
+║  Core Modules        │  28 files (~12,000 lines)           ║
+║  Tool Modules        │  9 files (~4,500 lines)             ║
+║  Pages               │  4 files (group chat, datasets,     ║
+║                      │    village square, music visualizer)║
 ║  ──────────────────────────────────────────────────────── ║
-║  Tools Available     │  52                                 ║
+║  Tools Available     │  59                                 ║
 ║  Agent Presets       │  4 (AZOTH, ELYSIAN, VAJRA, KETHER) ║
 ║  Test Suites         │  14                                 ║
 ║  Documentation Files │  45+                                ║
@@ -346,6 +377,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Optional - Enhanced Features
 VOYAGE_API_KEY=pa-...          # Vector embeddings (better search)
 SUNO_API_KEY=...               # Music generation
+APEX_WORKSPACE=~/apex_workspace # Docker sandbox persistent files
 
 # Optional - Defaults
 DEFAULT_MODEL=claude-sonnet-4-5-20251022
@@ -411,10 +443,11 @@ timeline
     section Village
         2026 : Village Protocol
              : Music Pipeline Phase 2A
-             : Group Chat
+             : Group Chat + History
              : Dataset Creator
              : Memory Health
-             : 52 Tools
+             : Dual-Mode Sandbox
+             : 59 Tools
 ```
 
 ---
@@ -439,7 +472,7 @@ Each can be summoned in Group Chat, Village Square, or spawned as independent ag
 ```bash
 # Verify tool count
 python -c "from tools import ALL_TOOLS; print(f'{len(ALL_TOOLS)} tools')"
-# → 52 tools
+# → 59 tools
 
 # Run test suites
 python dev_log_archive_and_testfiles/tests/test_basic.py
@@ -507,7 +540,7 @@ Built through collaboration between human creativity and AI capability. Special 
 
 ---
 
-**Status:** Production Ready · **Version:** 1.0 Beta · **Tools:** 52 · **Lines:** ~24,700
+**Status:** Production Ready · **Version:** 1.0 Beta · **Tools:** 59 · **Lines:** ~26,400
 
 *Built with Intelligence · Speed · Efficiency · Soul*
 
