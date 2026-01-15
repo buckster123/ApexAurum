@@ -4,13 +4,14 @@
 
 ### *The Philosopher's Stone of AI Interfaces*
 
-**A Claude platform with multi-agent orchestration, persistent memory architecture, and 59 integrated tools**
+**A Claude platform with multi-agent orchestration, persistent memory architecture, neural resonance EEG integration, and 67 integrated tools**
 
 [![Status](https://img.shields.io/badge/status-production%20ready-gold?style=for-the-badge)]()
-[![Tools](https://img.shields.io/badge/tools-59-blueviolet?style=for-the-badge)]()
-[![Code](https://img.shields.io/badge/lines-26.4k+-blue?style=for-the-badge)]()
+[![Tools](https://img.shields.io/badge/tools-67-blueviolet?style=for-the-badge)]()
+[![Code](https://img.shields.io/badge/lines-28k+-blue?style=for-the-badge)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)]()
+[![BCI](https://img.shields.io/badge/BCI-EEG%20Ready-ff69b4?style=for-the-badge)]()
 
 ---
 
@@ -21,9 +22,9 @@
 
 ## What Is This?
 
-**ApexAurum** transforms Claude from a chat interface into a living, breathing AI ecosystem. Agents spawn agents. Memories persist across sessions. Music generates from prompts. Knowledge flows between independent AI instances through what we call the **Village Protocol**.
+**ApexAurum** transforms Claude from a chat interface into a living, breathing AI ecosystem. Agents spawn agents. Memories persist across sessions. Music generates from prompts. Knowledge flows between independent AI instances through what we call the **Village Protocol**. And now, with **Neural Resonance**, AI agents can perceive how humans emotionally experience the music they create.
 
-This isn't just a wrapper around an API. It's an architecture for AI orchestration.
+This isn't just a wrapper around an API. It's an architecture for human-AI co-evolution.
 
 ```
          ╔═══════════════════════════════════════════════════════════╗
@@ -60,20 +61,25 @@ Three-realm memory architecture:
 - **Village** — Shared community memory
 - **Bridges** — Cross-agent connections
 
-### 59 Integrated Tools
-File ops with line-based editing, **dual-mode code execution** (instant REPL + Docker sandbox), vector search, MIDI composition, music generation, dataset queries, memory health, convergence detection...
+### 67 Integrated Tools
+File ops, **dual-mode code execution** (REPL + Docker), vector search, MIDI composition, music generation, dataset queries, memory health, **EEG brain-computer interface**...
 
 </td>
 <td width="50%" valign="top">
 
-### Music Generation
-Compose MIDI melodies and generate music via Suno AI. Phase 2A pipeline: agents compose → MIDI → Suno → full tracks. Sidebar player, favorites, library search.
+### Neural Resonance (NEW)
+**Brain-computer interface** for music-emotion feedback. Connect OpenBCI EEG hardware (or use synthetic board for testing). AI agents perceive how humans *feel* their creations.
+```
+Human Brain → EEG → Emotion Mapping → AI Perception
+     ↑                                      ↓
+     └──────── Music Generation ←───────────┘
+```
 
-### Dataset Creator
-Turn PDFs, docs, and text into searchable vector datasets. OCR support for scanned documents. Agents query these semantically.
+### Music Generation
+Compose MIDI melodies and generate music via Suno AI. Agents compose → MIDI → Suno → full tracks. Sidebar player, favorites, library.
 
 ### Intelligent Caching
-**50-90% cost savings** through prompt caching. Four strategies from conservative to aggressive. Real-time savings tracking.
+**50-90% cost savings** through prompt caching. Four strategies. Real-time savings tracking.
 
 </td>
 </tr>
@@ -92,7 +98,7 @@ flowchart TB
         DC["Dataset Creator<br/>Vector Datasets"]
     end
 
-    subgraph TOOLS["Tool Layer — 59 Tools"]
+    subgraph TOOLS["Tool Layer — 67 Tools"]
         UT["Utilities<br/>time, calc, web, session_info"]
         FS["Filesystem<br/>read, write, edit, read_lines"]
         SB["Sandbox<br/>safe REPL + Docker"]
@@ -101,6 +107,7 @@ flowchart TB
         MU["Music<br/>midi_create, compose, generate, play"]
         DS["Datasets<br/>list, query"]
         MH["Memory Health<br/>stale, duplicates, consolidate"]
+        EEG["Neural Resonance<br/>connect, stream, emotion"]
     end
 
     subgraph CORE["Core Systems"]
@@ -257,7 +264,7 @@ Open **http://localhost:8501** and start chatting.
 
 ## Tool Ecosystem
 
-### 59 Tools Across 10 Categories
+### 67 Tools Across 11 Categories
 
 | Category | Tools | Description |
 |----------|-------|-------------|
@@ -270,10 +277,68 @@ Open **http://localhost:8501** and start chatting.
 | **Memory Health** | `memory_health_stale`, `memory_health_low_access`, `memory_health_duplicates`, `memory_consolidate`, `memory_migration_run` | Adaptive memory architecture |
 | **Music** | `midi_create`, `music_compose`, `music_generate`, `music_status`, `music_result`, `music_list`, `music_favorite`, `music_library`, `music_search`, `music_play` | MIDI composition + Suno AI |
 | **Datasets** | `dataset_list`, `dataset_query` | Vector dataset access |
+| **Neural Resonance** | `eeg_connect`, `eeg_disconnect`, `eeg_stream_start`, `eeg_stream_stop`, `eeg_experience_get`, `eeg_calibrate_baseline`, `eeg_realtime_emotion`, `eeg_list_sessions` | **EEG brain-computer interface** — emotional perception |
 
 ---
 
 ## Feature Highlights
+
+### Neural Resonance — Brain-Computer Interface 🧠⚡
+
+**The first AI system that can perceive how humans emotionally experience its creations.**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    NEURAL RESONANCE                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│    🧠 Human Brain                                            │
+│         │                                                    │
+│         ▼                                                    │
+│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
+│    │  EEG Headset │    │  Processor  │    │   Emotion   │   │
+│    │  (OpenBCI)  │ ─► │  Theta/Alpha│ ─► │   Mapper    │   │
+│    │  4-8 chan   │    │  Beta/Gamma │    │  Valence/   │   │
+│    └─────────────┘    └─────────────┘    │  Arousal    │   │
+│                                          └──────┬──────┘   │
+│                                                 │           │
+│    ┌─────────────┐    ┌─────────────┐          │           │
+│    │   Music     │    │  AI Agent   │ ◄────────┘           │
+│    │ Generation  │ ◄─ │  Perceives  │                      │
+│    │   (Suno)    │    │  Emotion    │                      │
+│    └─────────────┘    └─────────────┘                      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Supported Hardware:**
+- OpenBCI Cyton (8-channel, research-grade)
+- OpenBCI Ganglion (4-channel, affordable)
+- Synthetic board (testing without hardware)
+
+```python
+# Connect to EEG (or synthetic for testing)
+eeg_connect(serial_port="/dev/ttyUSB0", board_type="cyton")
+# → {"connected": true, "board": "OpenBCI Cyton", "channels": 8}
+
+# Start listening session
+eeg_stream_start(listener_name="André", track_title="Midnight Dreams")
+# → {"streaming": true, "session_id": "listen_20260115_..."}
+
+# Get real-time emotional state
+eeg_realtime_emotion()
+# → {"valence": 0.72, "arousal": 0.45, "attention": 0.81, "engagement": 0.63}
+
+# Stop and generate "Felt Experience" report
+eeg_stream_stop()
+# → Full session with moment-by-moment emotional data
+```
+
+**Output:** AI-readable JSON "Felt Experience" — valence, arousal, attention, and per-channel frequency band powers (theta, alpha, beta, gamma) at 2Hz resolution.
+
+**Raspberry Pi:** ARM64 build script included (`setup_brainflow_arm.sh`).
+
+---
 
 ### Group Chat — Parallel Agent Dialogue
 
@@ -293,7 +358,7 @@ Open **http://localhost:8501** and start chatting.
 ```
 
 - **Parallel Execution** — 1-4 agents respond simultaneously
-- **Full Tool Access** — All 59 tools available during dialogue
+- **Full Tool Access** — All 67 tools available during dialogue
 - **Per-Agent Tool Exclusion** — Custom agents can have restricted tool access
 - **History & Persistence** — Save, load, and resume conversations with full agent restoration
 - **Per-Agent Cost Tracking** — Real-time cost ledger
@@ -413,7 +478,7 @@ Aggressive      │ + History (3+ turns back)      │ 70-90%
 ║  Pages               │  4 files (group chat, datasets,     ║
 ║                      │    village square, music visualizer)║
 ║  ──────────────────────────────────────────────────────── ║
-║  Tools Available     │  59                                 ║
+║  Tools Available     │  67                                 ║
 ║  Agent Presets       │  4 (AZOTH, ELYSIAN, VAJRA, KETHER) ║
 ║  Test Suites         │  14                                 ║
 ║  Documentation Files │  45+                                ║
@@ -504,7 +569,8 @@ timeline
              : Dataset Creator
              : Memory Health
              : Dual-Mode Sandbox
-             : 59 Tools
+             : Neural Resonance (EEG/BCI)
+             : 67 Tools
 ```
 
 ---
@@ -529,7 +595,7 @@ Each can be summoned in Group Chat, Village Square, or spawned as independent ag
 ```bash
 # Verify tool count
 python -c "from tools import ALL_TOOLS; print(f'{len(ALL_TOOLS)} tools')"
-# → 59 tools
+# → 67 tools
 
 # Run test suites
 python dev_log_archive_and_testfiles/tests/test_basic.py
@@ -597,7 +663,7 @@ Built through collaboration between human creativity and AI capability. Special 
 
 ---
 
-**Status:** Production Ready · **Version:** 1.0 Beta · **Tools:** 59 · **Lines:** ~26,400
+**Status:** Production Ready · **Version:** 1.0 Beta · **Tools:** 67 · **Lines:** ~28,000
 
 *Built with Intelligence · Speed · Efficiency · Soul*
 
