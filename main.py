@@ -2325,6 +2325,36 @@ Use `vector_search_village()` to discover what others have shared.
                 help="Maximum response length"
             )
 
+            # Extended Thinking (Claude's deep reasoning mode)
+            st.divider()
+            st.markdown("**🧠 Extended Thinking**")
+            st.caption("Enable Claude to reason step-by-step before answering")
+
+            # Initialize thinking state if not present
+            if "thinking_enabled" not in st.session_state:
+                st.session_state.thinking_enabled = False
+            if "thinking_budget" not in st.session_state:
+                st.session_state.thinking_budget = 10000
+
+            st.session_state.thinking_enabled = st.checkbox(
+                "Enable extended thinking",
+                value=st.session_state.thinking_enabled,
+                help="Claude will think through complex problems step-by-step (requires temperature=1.0)"
+            )
+
+            if st.session_state.thinking_enabled:
+                st.session_state.thinking_budget = st.slider(
+                    "Thinking budget (tokens)",
+                    min_value=1024,
+                    max_value=32000,
+                    value=st.session_state.thinking_budget,
+                    step=1024,
+                    help="Higher = deeper reasoning, but costs more. Billed at output token rate."
+                )
+                st.caption(f"💭 Up to {st.session_state.thinking_budget:,} tokens for reasoning")
+                if st.session_state.temperature != 1.0:
+                    st.warning("⚠️ Extended thinking requires temperature=1.0 (will be overridden)")
+
         # Sub-agent settings
         with st.expander("🤖 Sub-Agent Settings", expanded=False):
             st.markdown("**Default Sub-Agent Model:**")
@@ -3535,6 +3565,7 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
 
                 # Create display containers
                 tool_container = st.empty() if st.session_state.show_tool_execution else None
+                thinking_container = st.empty()  # For extended thinking expander
                 text_container = st.empty()
 
                 # Initialize displays
@@ -3542,6 +3573,13 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
                 tool_display = ToolExecutionDisplay(tool_container) if tool_container else None
 
                 response_text = ""
+                thinking_text = ""  # Accumulate thinking content
+                thinking_active = False
+
+                # Get thinking budget if enabled
+                thinking_budget = None
+                if st.session_state.get("thinking_enabled", False):
+                    thinking_budget = st.session_state.get("thinking_budget", 10000)
 
                 # Run streaming loop
                 stream_gen = st.session_state.loop.run_streaming(
@@ -3551,7 +3589,8 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
                     max_tokens=st.session_state.max_tokens,
                     temperature=st.session_state.temperature,
                     top_p=st.session_state.top_p,
-                    tools=tools
+                    tools=tools,
+                    thinking_budget=thinking_budget
                 )
 
                 # Process stream events
@@ -3563,9 +3602,33 @@ def process_message(user_message: str, uploaded_images: Optional[List] = None):
                         text_display.append(event["data"])
                         response_text += event["data"]
 
+                    elif event_type == "thinking_start":
+                        # Extended thinking started
+                        thinking_active = True
+                        thinking_text = ""
+                        with thinking_container:
+                            with st.expander("🧠 Thinking...", expanded=True):
+                                st.markdown("*Claude is reasoning through the problem...*")
+
+                    elif event_type == "thinking_delta":
+                        # Extended thinking content streaming
+                        thinking_text += event["data"]
+                        # Update the thinking expander with accumulated content
+                        with thinking_container:
+                            with st.expander("🧠 Thinking...", expanded=True):
+                                st.markdown(thinking_text)
+
+                    elif event_type == "thinking_end":
+                        # Extended thinking complete
+                        thinking_active = False
+                        # Show final thinking in collapsed expander
+                        with thinking_container:
+                            with st.expander("🧠 Extended Thinking (click to expand)", expanded=False):
+                                st.markdown(thinking_text)
+
                     elif event_type == "thinking":
-                        # Show thinking status
-                        if not response_text:  # Only show if no text yet
+                        # Legacy thinking status (processing indicator)
+                        if not response_text and not thinking_active:
                             text_display.show_status(event["data"])
 
                     elif event_type == "tool_start" and tool_display:

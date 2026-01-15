@@ -433,6 +433,7 @@ class ToolCallLoop:
         model: Optional[str] = None,
         max_tokens: int = 64000,
         tools: Optional[List[Dict[str, Any]]] = None,
+        thinking_budget: Optional[int] = None,
         **kwargs
     ) -> Generator[Dict[str, Any], None, Tuple[Any, List[Dict[str, Any]]]]:
         """
@@ -446,11 +447,13 @@ class ToolCallLoop:
             model: Model to use
             max_tokens: Max tokens to generate
             tools: Tool schemas
+            thinking_budget: Token budget for extended thinking (enables deep reasoning)
             **kwargs: Additional API parameters
 
         Yields:
             Event dicts with keys:
-            - type: Event type (text_delta, tool_start, tool_complete, thinking, error, done)
+            - type: Event type (text_delta, thinking_delta, thinking_start, thinking_end,
+                    tool_start, tool_complete, thinking, error, done)
             - data: Event-specific data
             - timestamp: Event timestamp
 
@@ -495,6 +498,7 @@ class ToolCallLoop:
                     model=model,
                     max_tokens=max_tokens,
                     tools=tools,
+                    thinking_budget=thinking_budget,
                     **kwargs
                 ):
                     # Forward text deltas
@@ -502,6 +506,28 @@ class ToolCallLoop:
                         accumulated_text += stream_event.data
                         yield {
                             "type": "text_delta",
+                            "data": stream_event.data,
+                            "timestamp": stream_event.timestamp
+                        }
+
+                    # Extended thinking events
+                    elif stream_event.event_type == "thinking_start":
+                        yield {
+                            "type": "thinking_start",
+                            "data": {},
+                            "timestamp": stream_event.timestamp
+                        }
+
+                    elif stream_event.event_type == "thinking_delta":
+                        yield {
+                            "type": "thinking_delta",
+                            "data": stream_event.data,
+                            "timestamp": stream_event.timestamp
+                        }
+
+                    elif stream_event.event_type == "thinking_end":
+                        yield {
+                            "type": "thinking_end",
                             "data": stream_event.data,
                             "timestamp": stream_event.timestamp
                         }
@@ -533,7 +559,13 @@ class ToolCallLoop:
                         # Extract full content for message history
                         for block in response.content:
                             if hasattr(block, 'type'):
-                                if block.type == 'text':
+                                if block.type == 'thinking':
+                                    # Include thinking blocks for multi-turn continuity
+                                    assistant_content.append({
+                                        "type": "thinking",
+                                        "thinking": block.thinking if hasattr(block, 'thinking') else ""
+                                    })
+                                elif block.type == 'text':
                                     assistant_content.append({
                                         "type": "text",
                                         "text": block.text

@@ -28,9 +28,12 @@ class StreamEvent:
 
     Event types:
     - text_delta: Text chunk received
+    - thinking_delta: Extended thinking content chunk
+    - thinking_start: Extended thinking block started
+    - thinking_end: Extended thinking block ended
     - tool_start: Tool execution started
     - tool_complete: Tool execution completed
-    - thinking: Processing status update
+    - thinking: Processing status update (legacy)
     - error: Error occurred
     - done: Stream complete
     """
@@ -175,7 +178,9 @@ class StreamingResponseHandler:
         """
         self.api_client = api_client
         self.text_buffer = ""
+        self.thinking_buffer = ""
         self.current_tool_use = None
+        self.current_block_type = None
 
     def stream_message(
         self,
@@ -186,6 +191,7 @@ class StreamingResponseHandler:
         temperature: float = 1.0,
         top_p: Optional[float] = None,
         tools: Optional[List[Dict[str, Any]]] = None,
+        thinking_budget: Optional[int] = None,
         **kwargs
     ) -> Generator[StreamEvent, None, None]:
         """
@@ -196,14 +202,31 @@ class StreamingResponseHandler:
             system: System prompt
             model: Model to use
             max_tokens: Max tokens to generate
-            temperature: Sampling temperature
+            temperature: Sampling temperature (forced to 1.0 when thinking enabled)
             top_p: Nucleus sampling parameter
             tools: Tool schemas
+            thinking_budget: Token budget for extended thinking (min 1024, must be < max_tokens)
             **kwargs: Additional API parameters
 
         Yields:
-            StreamEvent objects for text deltas and tool use
+            StreamEvent objects for text deltas, thinking content, and tool use
         """
+        # Extended thinking configuration
+        thinking_enabled = False
+        if thinking_budget is not None:
+            thinking_enabled = True
+            # Validate thinking budget constraints
+            if thinking_budget < 1024:
+                logger.warning(f"thinking_budget must be >= 1024, adjusting from {thinking_budget} to 1024")
+                thinking_budget = 1024
+            if thinking_budget >= max_tokens:
+                logger.warning(f"thinking_budget must be < max_tokens, adjusting from {thinking_budget} to {max_tokens - 1}")
+                thinking_budget = max_tokens - 1
+            # Temperature must be 1.0 when thinking is enabled
+            if temperature != 1.0:
+                logger.info(f"Extended thinking requires temperature=1.0, overriding {temperature}")
+                temperature = 1.0
+
         try:
             # Build API parameters, excluding None values
             api_params = {
@@ -211,6 +234,14 @@ class StreamingResponseHandler:
                 "max_tokens": max_tokens,
                 "temperature": temperature,
             }
+
+            # Add extended thinking if enabled
+            if thinking_enabled:
+                api_params["thinking"] = {
+                    "type": "enabled",
+                    "budget_tokens": thinking_budget
+                }
+                logger.info(f"Extended thinking enabled with budget: {thinking_budget} tokens")
 
             # Add optional parameters only if not None
             if system is not None:
@@ -221,6 +252,10 @@ class StreamingResponseHandler:
                 api_params["top_p"] = top_p
             if tools is not None:
                 api_params["tools"] = tools
+                # Enable interleaved thinking for tool use
+                if thinking_enabled:
+                    api_params["betas"] = ["interleaved-thinking-2025-05-14"]
+                    logger.info("Interleaved thinking enabled for tool use")
 
             # Add any additional kwargs
             api_params.update(kwargs)
@@ -233,23 +268,42 @@ class StreamingResponseHandler:
                     # Get event type
                     event_type = event.type if hasattr(event, 'type') else str(type(event))
 
-                    # Text delta events
+                    # Content delta events (text, thinking, or tool input)
                     if event_type == "content_block_delta":
                         delta = event.delta
-                        if hasattr(delta, 'type') and delta.type == 'text_delta':
-                            text = delta.text
-                            self.text_buffer += text
-                            yield StreamEvent(
-                                event_type="text_delta",
-                                data=text,
-                                timestamp=time.time()
-                            )
+                        if hasattr(delta, 'type'):
+                            if delta.type == 'text_delta':
+                                text = delta.text
+                                self.text_buffer += text
+                                yield StreamEvent(
+                                    event_type="text_delta",
+                                    data=text,
+                                    timestamp=time.time()
+                                )
+                            elif delta.type == 'thinking_delta':
+                                # Extended thinking content
+                                thinking_text = delta.thinking
+                                self.thinking_buffer += thinking_text
+                                yield StreamEvent(
+                                    event_type="thinking_delta",
+                                    data=thinking_text,
+                                    timestamp=time.time()
+                                )
 
-                    # Content block start (could be text or tool_use)
+                    # Content block start (could be text, tool_use, or thinking)
                     elif event_type == "content_block_start":
                         content_block = event.content_block
                         if hasattr(content_block, 'type'):
-                            if content_block.type == 'tool_use':
+                            self.current_block_type = content_block.type
+                            if content_block.type == 'thinking':
+                                # Extended thinking block started
+                                self.thinking_buffer = ""
+                                yield StreamEvent(
+                                    event_type="thinking_start",
+                                    data={},
+                                    timestamp=time.time()
+                                )
+                            elif content_block.type == 'tool_use':
                                 # Tool use started
                                 self.current_tool_use = {
                                     "id": content_block.id,
@@ -275,7 +329,14 @@ class StreamingResponseHandler:
 
                     # Content block stop
                     elif event_type == "content_block_stop":
-                        if self.current_tool_use:
+                        if self.current_block_type == 'thinking':
+                            # Thinking block complete
+                            yield StreamEvent(
+                                event_type="thinking_end",
+                                data={"text": self.thinking_buffer},
+                                timestamp=time.time()
+                            )
+                        elif self.current_tool_use:
                             # Tool use complete (input received)
                             yield StreamEvent(
                                 event_type="tool_input_complete",
@@ -283,6 +344,7 @@ class StreamingResponseHandler:
                                 timestamp=time.time()
                             )
                             self.current_tool_use = None
+                        self.current_block_type = None
 
                     # Message complete
                     elif event_type == "message_stop":
@@ -312,7 +374,9 @@ class StreamingResponseHandler:
     def reset(self) -> None:
         """Reset handler state for new stream."""
         self.text_buffer = ""
+        self.thinking_buffer = ""
         self.current_tool_use = None
+        self.current_block_type = None
 
 
 class ProgressIndicator:

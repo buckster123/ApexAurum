@@ -109,6 +109,7 @@ class ClaudeAPIClient:
         top_p: Optional[float] = None,
         tools: Optional[List[Dict[str, Any]]] = None,
         stream: bool = False,
+        thinking_budget: Optional[int] = None,
     ) -> Any:
         """
         Create a message with Claude API
@@ -118,10 +119,11 @@ class ClaudeAPIClient:
             model: Model ID (defaults to Sonnet 4.5)
             system: System prompt (optional - will extract from messages if not provided)
             max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature (0-1)
+            temperature: Sampling temperature (0-1) - forced to 1.0 when thinking enabled
             top_p: Nucleus sampling parameter (0-1, optional - Claude default if None)
             tools: List of tool definitions (Claude format)
             stream: Whether to stream the response
+            thinking_budget: Token budget for extended thinking (min 1024, must be < max_tokens)
 
         Returns:
             Message object (if not streaming) or generator (if streaming)
@@ -150,6 +152,22 @@ class ClaudeAPIClient:
             )
             logger.debug(f"Cache controls applied (strategy: {self.cache_strategy.value})")
 
+        # Extended thinking configuration
+        thinking_enabled = False
+        if thinking_budget is not None:
+            thinking_enabled = True
+            # Validate thinking budget constraints
+            if thinking_budget < 1024:
+                logger.warning(f"thinking_budget must be >= 1024, adjusting from {thinking_budget} to 1024")
+                thinking_budget = 1024
+            if thinking_budget >= max_tokens:
+                logger.warning(f"thinking_budget must be < max_tokens, adjusting from {thinking_budget} to {max_tokens - 1}")
+                thinking_budget = max_tokens - 1
+            # Temperature must be 1.0 when thinking is enabled
+            if temperature != 1.0:
+                logger.info(f"Extended thinking requires temperature=1.0, overriding {temperature}")
+                temperature = 1.0
+
         # Build request parameters
         request_params = {
             "model": model_id,
@@ -157,6 +175,14 @@ class ClaudeAPIClient:
             "max_tokens": max_tokens,
             "temperature": temperature,
         }
+
+        # Add extended thinking if enabled
+        if thinking_enabled:
+            request_params["thinking"] = {
+                "type": "enabled",
+                "budget_tokens": thinking_budget
+            }
+            logger.info(f"Extended thinking enabled with budget: {thinking_budget} tokens")
 
         # Add top_p if provided (optional parameter)
         if top_p is not None:
@@ -169,6 +195,10 @@ class ClaudeAPIClient:
         # Add tools if provided
         if tools:
             request_params["tools"] = tools
+            # Enable interleaved thinking for tool use (allows thinking between tool calls)
+            if thinking_enabled:
+                request_params["betas"] = ["interleaved-thinking-2025-05-14"]
+                logger.info("Interleaved thinking enabled for tool use")
 
         # Add streaming flag
         if stream:
@@ -295,23 +325,30 @@ class ClaudeAPIClient:
         temperature: float = 1.0,
         top_p: Optional[float] = None,
         tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Generator[str, None, None]:
+        thinking_budget: Optional[int] = None,
+    ) -> Generator[Dict[str, Any], None, None]:
         """
         Create a streaming message with Claude API
 
-        Yields text chunks as they arrive. Also handles tool use blocks.
+        Yields dictionaries with type and content as they arrive.
+        Supports extended thinking blocks when thinking_budget is provided.
 
         Args:
             messages: List of message dicts
             model: Model ID
             system: System prompt
             max_tokens: Maximum tokens
-            temperature: Sampling temperature
+            temperature: Sampling temperature (forced to 1.0 when thinking enabled)
             top_p: Nucleus sampling parameter (optional)
             tools: Tool definitions
+            thinking_budget: Token budget for extended thinking (enables interleaved thinking with tools)
 
         Yields:
-            Text chunks from the response
+            Dictionaries with keys:
+            - {"type": "text", "text": "..."} - Regular response text
+            - {"type": "thinking", "text": "..."} - Extended thinking content
+            - {"type": "tool_call", "name": "...", "text": "..."} - Tool call indicator
+            - {"type": "error", "text": "..."} - Error messages
         """
         try:
             response = self.create_message(
@@ -323,27 +360,40 @@ class ClaudeAPIClient:
                 top_p=top_p,
                 tools=tools,
                 stream=True,
+                thinking_budget=thinking_budget,
             )
+
+            current_block_type = None
 
             # Process streaming events
             for event in response:
                 if event.type == "content_block_start":
                     # New content block started
                     if hasattr(event, "content_block"):
-                        if event.content_block.type == "text":
+                        block_type = event.content_block.type
+                        current_block_type = block_type
+
+                        if block_type == "thinking":
+                            # Thinking block starting - signal UI
+                            yield {"type": "thinking_start", "text": ""}
+                        elif block_type == "text":
                             # Text block starting
                             pass
-                        elif event.content_block.type == "tool_use":
+                        elif block_type == "tool_use":
                             # Tool use block starting
-                            yield f"\n> **Calling tool:** `{event.content_block.name}`\n"
+                            yield {"type": "tool_call", "name": event.content_block.name, "text": f"\n> **Calling tool:** `{event.content_block.name}`\n"}
 
                 elif event.type == "content_block_delta":
                     # Content chunk arrived
                     delta = event.delta
 
-                    if delta.type == "text_delta":
-                        # Text content
-                        yield delta.text
+                    if delta.type == "thinking_delta":
+                        # Extended thinking content
+                        yield {"type": "thinking", "text": delta.thinking}
+
+                    elif delta.type == "text_delta":
+                        # Regular text content
+                        yield {"type": "text", "text": delta.text}
 
                     elif delta.type == "input_json_delta":
                         # Tool input being streamed (we'll handle this after completion)
@@ -351,7 +401,9 @@ class ClaudeAPIClient:
 
                 elif event.type == "content_block_stop":
                     # Content block finished
-                    pass
+                    if current_block_type == "thinking":
+                        yield {"type": "thinking_end", "text": ""}
+                    current_block_type = None
 
                 elif event.type == "message_delta":
                     # Message-level delta (e.g., stop_reason)
@@ -362,11 +414,11 @@ class ClaudeAPIClient:
                     break
 
         except anthropic.RateLimitError as e:
-            yield f"\n\n**Rate Limit Error:** {e.message}\nPlease wait a moment and try again."
+            yield {"type": "error", "text": f"\n\n**Rate Limit Error:** {e.message}\nPlease wait a moment and try again."}
         except anthropic.APIError as e:
-            yield f"\n\n**API Error:** {str(e)}"
+            yield {"type": "error", "text": f"\n\n**API Error:** {str(e)}"}
         except Exception as e:
-            yield f"\n\n**Error:** {str(e)}"
+            yield {"type": "error", "text": f"\n\n**Error:** {str(e)}"}
             logger.error(f"Streaming error: {e}", exc_info=True)
 
     def simple_message(
