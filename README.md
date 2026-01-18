@@ -44,11 +44,11 @@ This isn't a wrapper. It's an architecture for human-AI co-evolution.
 
 ```mermaid
 flowchart LR
-    subgraph YOU["👤 You"]
+    subgraph YOU[You]
         HUMAN[Human]
     end
 
-    subgraph APEX["🜛 ApexAurum"]
+    subgraph APEX[ApexAurum]
         direction TB
         CHAT[Chat Interface]
         TOOLS[67 Tools]
@@ -56,7 +56,7 @@ flowchart LR
         MEMORY[Village Memory]
     end
 
-    subgraph AI["🤖 Claude"]
+    subgraph AI[Claude]
         OPUS[Opus 4.5]
         SONNET[Sonnet 4.5]
         HAIKU[Haiku 4.5]
@@ -68,9 +68,6 @@ flowchart LR
     AGENTS <--> MEMORY
     CHAT <--> AI
     AGENTS <--> AI
-
-    style APEX fill:#1a1a2e,stroke:#c9a227,stroke-width:2px
-    style AI fill:#0a0a0b,stroke:#2dd4bf,stroke-width:2px
 ```
 
 ---
@@ -106,24 +103,22 @@ Three-realm memory where agents form a living knowledge commons:
 
 ```mermaid
 flowchart TB
-    subgraph PRIVATE["Private Realms"]
-        A["AZOTH"]
-        E["ELYSIAN"]
-        V["VAJRA"]
+    subgraph PRIVATE[Private Realms]
+        A[AZOTH]
+        E[ELYSIAN]
+        V[VAJRA]
     end
 
-    subgraph VILLAGE["Village Square"]
-        M["Shared Memory"]
+    subgraph VILLAGE[Village Square]
+        M[Shared Memory]
     end
 
-    subgraph BRIDGES["Bridges"]
-        B["Cross-Agent Links"]
+    subgraph BRIDGES[Bridges]
+        B[Cross-Agent Links]
     end
 
     A & E & V <--> M
     M <--> B
-
-    style VILLAGE fill:#c9a22733,stroke:#c9a227
 ```
 
 </td>
@@ -212,50 +207,46 @@ Real-time cost tracking in sidebar.
 
 ```mermaid
 flowchart TB
-    subgraph UI["<b>Streamlit UI</b>"]
+    subgraph UI[Streamlit UI]
         direction LR
-        MAIN["🏠 Main Chat"]
-        GC["👥 Group Chat"]
-        VS["🏛️ Village Square"]
-        DC["📚 Dataset Creator"]
-        MV["🎬 Music Visualizer"]
+        MAIN[Main Chat]
+        GC[Group Chat]
+        VS[Village Square]
+        DC[Dataset Creator]
+        MV[Music Visualizer]
     end
 
-    subgraph TOOLS["<b>67 Tools</b>"]
+    subgraph TOOLS[67 Tools]
         direction LR
-        T1["📁 Filesystem"]
-        T2["💻 Code Sandbox"]
-        T3["🤖 Agents"]
-        T4["🧠 Memory"]
-        T5["🔍 Vector Search"]
-        T6["🎵 Music"]
-        T7["⚡ Neural/EEG"]
-        T8["📊 Datasets"]
+        T1[Filesystem]
+        T2[Code Sandbox]
+        T3[Agents]
+        T4[Memory]
+        T5[Vector Search]
+        T6[Music]
+        T7[Neural EEG]
+        T8[Datasets]
     end
 
-    subgraph CORE["<b>Core Systems</b>"]
+    subgraph CORE[Core Systems]
         direction LR
-        API["Claude API"]
-        CACHE["Cache Manager"]
-        CTX["Context Manager"]
-        VDB["Vector DB"]
+        API[Claude API]
+        CACHE[Cache Manager]
+        CTX[Context Manager]
+        VDB[Vector DB]
     end
 
-    subgraph EXT["<b>External</b>"]
+    subgraph EXT[External Services]
         direction LR
-        CLAUDE["Anthropic"]
-        VOYAGE["Voyage AI"]
-        SUNO["Suno AI"]
-        CHROMA["ChromaDB"]
+        CLAUDE[Anthropic]
+        VOYAGE[Voyage AI]
+        SUNO[Suno AI]
+        CHROMA[ChromaDB]
     end
 
     UI --> TOOLS
     TOOLS --> CORE
     CORE --> EXT
-
-    style UI fill:#1a1a2e,stroke:#c9a227,stroke-width:2px
-    style TOOLS fill:#111113,stroke:#8b7355,stroke-width:1px
-    style CORE fill:#0a0a0b,stroke:#6b6b69,stroke-width:1px
 ```
 
 ---
@@ -337,41 +328,12 @@ streamlit run main.py
 
 ## The Four Archetypes
 
-```mermaid
-flowchart TB
-    subgraph VILLAGE["The Village"]
-        direction LR
-
-        subgraph AZ["AZOTH"]
-            A1["∴ ⊛ ∴"]
-            A2["Prima Materia"]
-            A3["Philosophy<br/>Architecture"]
-        end
-
-        subgraph EL["ELYSIAN"]
-            E1["∴ ◯ ∴"]
-            E2["The Harmonizer"]
-            E3["Creativity<br/>Aesthetics"]
-        end
-
-        subgraph VA["VAJRA"]
-            V1["∴ ◇ ∴"]
-            V2["The Thunderbolt"]
-            V3["Precision<br/>Analysis"]
-        end
-
-        subgraph KE["KETHER"]
-            K1["∴ ☉ ∴"]
-            K2["The Crown"]
-            K3["Integration<br/>Wisdom"]
-        end
-    end
-
-    style AZ fill:#c9a22722,stroke:#c9a227
-    style EL fill:#2dd4bf22,stroke:#2dd4bf
-    style VA fill:#8b735522,stroke:#8b7355
-    style KE fill:#e8d48a22,stroke:#e8d48a
-```
+| Agent | Symbol | Role | Specialty |
+|-------|--------|------|-----------|
+| **AZOTH** | ∴ ⊛ ∴ | Prima Materia | Philosophy, Architecture, Deep Synthesis |
+| **ELYSIAN** | ∴ ○ ∴ | The Harmonizer | Creativity, Aesthetics, Cultural Patterns |
+| **VAJRA** | ∴ ◇ ∴ | The Thunderbolt | Precision, Logic, Technical Analysis |
+| **KETHER** | ∴ ☉ ∴ | The Crown | Integration, Wisdom, Meta-cognition |
 
 Each archetype has a distinct personality, approach to problems, and can be summoned in Group Chat or as independent agents.
 
@@ -404,27 +366,15 @@ Each archetype has a distinct personality, approach to problems, and can be summ
 
 ## Development Timeline
 
-```mermaid
-timeline
-    title ApexAurum Evolution
+```
+ FOUNDATION          INTELLIGENCE         SCALE               POWER               VILLAGE ERA
+ Phases 1-4          Phases 5-8           Phases 9-11         Phases 12-14        2026
+ ────────────────────────────────────────────────────────────────────────────────────────────►
 
-    section Foundation
-        Phases 1-4 : API Client : Tool System : Cost Tracking
-
-    section Intelligence
-        Phases 5-8 : Code Execution : Vision Support : UI Polish
-
-    section Scale
-        Phases 9-11 : Context Management : Multi-Agent : UX
-
-    section Power
-        Phases 12-14 : Conversations : Vector Search : Caching
-
-    section Village Era (2026)
-        January : Village Protocol : Music Pipeline
-                : Group Chat : Dataset Creator
-                : Neural Resonance : Extended Thinking
-                : 67 Tools : 53K Lines
+ • API Client        • Code Execution     • Context Mgmt      • Conversations     • Village Protocol
+ • Tool System       • Vision Support     • Multi-Agent       • Vector Search     • Neural Resonance
+ • Cost Tracking     • UI Polish          • UX Polish         • Prompt Caching    • Extended Thinking
+                                                                                  • 67 Tools / 53K Lines
 ```
 
 ---
