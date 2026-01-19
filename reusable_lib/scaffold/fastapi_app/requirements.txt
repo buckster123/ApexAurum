@@ -1,0 +1,27 @@
+# FastAPI AI Lab - Requirements
+# ==============================
+
+# Core Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0
+
+# Templates
+jinja2>=3.1.0
+
+# HTTP Client (for LLM calls)
+requests>=2.31.0
+httpx>=0.26.0  # Async HTTP client
+
+# Optional: Production server
+gunicorn>=21.0.0
+
+# Optional: Vector DB support
+# chromadb>=0.4.0
+# sentence-transformers>=2.2.0
+
+# Optional: Better async
+# anyio>=4.0.0
+
+# Development
+# python-dotenv>=1.0.0  # For .env file support

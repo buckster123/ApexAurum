@@ -1,0 +1,5 @@
+# Ignore runtime data but keep directory structure
+*
+!.gitignore
+!benchmark_results/.gitkeep
+!benchmark_suites/.gitkeep

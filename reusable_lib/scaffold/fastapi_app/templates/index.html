@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+    <!-- HTMX for interactivity -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+
+    <!-- Google Fonts - Cinzel for alchemical headers -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Apex Aurum - Dark Gold Alchemical Theme */
+            --bg-void: #0a0a0c;
+            --bg-primary: #0d0d0f;
+            --bg-secondary: #141418;
+            --bg-card: #1a1a20;
+            --bg-elevated: #222229;
+
+            /* Gold spectrum */
+            --gold-dark: #8B7355;
+            --gold: #D4AF37;
+            --gold-bright: #FFD700;
+            --gold-light: #F4E4BA;
+            --gold-glow: rgba(212, 175, 55, 0.15);
+            --gold-glow-strong: rgba(212, 175, 55, 0.3);
+
+            /* Accent colors */
+            --mercury: #C0C0C0;
+            --copper: #B87333;
+            --success: #50C878;
+            --error: #DC3545;
+
+            /* Text */
+            --text-primary: #E8E6E3;
+            --text-secondary: #9A9A9A;
+            --text-muted: #6B6B6B;
+
+            /* Borders */
+            --border: #2a2a30;
+            --border-gold: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Sacred Geometry Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                /* Flower of Life pattern - subtle */
+                radial-gradient(circle at 50% 50%, transparent 18px, rgba(212, 175, 55, 0.03) 19px, rgba(212, 175, 55, 0.03) 20px, transparent 21px),
+                radial-gradient(circle at 30px 52px, transparent 18px, rgba(212, 175, 55, 0.02) 19px, rgba(212, 175, 55, 0.02) 20px, transparent 21px),
+                radial-gradient(circle at 60px 0px, transparent 18px, rgba(212, 175, 55, 0.02) 19px, rgba(212, 175, 55, 0.02) 20px, transparent 21px);
+            background-size: 60px 104px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Metatron's Cube - corner accent */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background:
+                conic-gradient(from 0deg at 50% 50%,
+                    transparent 0deg,
+                    rgba(212, 175, 55, 0.05) 60deg,
+                    transparent 60deg,
+                    transparent 120deg,
+                    rgba(212, 175, 55, 0.03) 180deg,
+                    transparent 180deg,
+                    transparent 240deg,
+                    rgba(212, 175, 55, 0.05) 300deg,
+                    transparent 300deg
+                );
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: slowRotate 120s linear infinite;
+        }
+
+        @keyframes slowRotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-symbol {
+            font-size: 2.5rem;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.error {
+            background: var(--error);
+            box-shadow: 0 0 8px var(--error);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Chat Layout */
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Main Chat Area */
+        .chat-main {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 75vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative corner accents */
+        .chat-main::before,
+        .chat-main::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-gold);
+            pointer-events: none;
+        }
+
+        .chat-main::before {
+            top: 8px;
+            left: 8px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .chat-main::after {
+            bottom: 8px;
+            right: 8px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Messages */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-dark) var(--bg-primary);
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 3px;
+        }
+
+        .message {
+            padding: 14px 18px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, var(--gold-dark) 0%, rgba(212, 175, 55, 0.3) 100%);
+            border: 1px solid var(--border-gold);
+            align-self: flex-end;
+            color: var(--gold-light);
+        }
+
+        .message.assistant {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            align-self: flex-start;
+        }
+
+        .message pre {
+            background: var(--bg-void);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .message code {
+            background: var(--bg-elevated);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .message strong {
+            color: var(--gold);
+        }
+
+        /* Input Area */
+        .input-area {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 16px;
+        }
+
+        input[type="text"], textarea {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%);
+            color: var(--bg-void);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%);
+            box-shadow: 0 0 20px var(--gold-glow-strong);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            position: relative;
+        }
+
+        .sidebar-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-card h3::before {
+            content: '◇';
+            font-size: 0.6rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        select option {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .tool-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tool-tag {
+            font-size: 0.7rem;
+            padding: 5px 10px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .tool-tag:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Checkbox styling */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--bg-void);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            margin-bottom: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: 500;
+        }
+
+        .sidebar-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: none;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Streaming cursor */
+        .streaming::after {
+            content: '◆';
+            color: var(--gold);
+            animation: blink 0.8s step-end infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Tool call/result styling */
+        .tool-call {
+            background: var(--gold-glow);
+            border-left: 3px solid var(--gold);
+            padding: 10px 14px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+        }
+
+        .tool-call .tool-name {
+            color: var(--gold);
+            font-weight: 600;
+            font-family: 'Cinzel', serif;
+        }
+
+        .tool-result {
+            background: rgba(80, 200, 120, 0.1);
+            border-left: 3px solid var(--success);
+            padding: 10px 14px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+        }
+
+        .tool-result.error {
+            background: rgba(220, 53, 69, 0.1);
+            border-left-color: var(--error);
+        }
+
+        .tool-result pre {
+            margin: 8px 0 0 0;
+            font-size: 0.8rem;
+        }
+
+        /* Sacred geometry decorative element */
+        .sacred-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 8px 0;
+            color: var(--gold-dark);
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+        }
+
+        .sacred-divider::before,
+        .sacred-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+        }
+
+        /* Version badge */
+        .version-badge {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            z-index: 10;
+        }
+
+        .version-badge span {
+            color: var(--gold-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-symbol">☉</div>
+                <div class="logo-text">
+                    <h1>APEX AURUM</h1>
+                    <span class="logo-subtitle">Lab Edition</span>
+                </div>
+            </div>
+            <div class="status" id="status">
+                <span class="status-dot"></span>
+                <span id="status-text">Initializing...</span>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-main">
+                <div class="messages" id="messages">
+                    <div class="message assistant">
+                        <strong>☉ OPUS MAGNUM INITIATED</strong><br><br>
+                        Welcome to <strong>Apex Aurum - Lab Edition</strong>. The vessel is prepared and running on <strong id="current-model">{{ default_model }}</strong>.
+                        <br><br>
+                        <em style="color: var(--text-secondary);">∴ As above, so below. Transmutation awaits.</em>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input
+                        type="text"
+                        id="prompt"
+                        placeholder="Speak your query unto the Athanor..."
+                        autocomplete="off"
+                    >
+                    <button id="send-btn" onclick="sendMessage()">Transmute</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Session Stats -->
+                <div class="sidebar-card" style="background: linear-gradient(135deg, var(--bg-secondary), var(--gold-glow));">
+                    <h3>Session Stats</h3>
+                    <div id="session-stats" style="font-size: 0.8rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span style="color: var(--text-secondary);">Tokens:</span>
+                            <span id="stat-tokens" style="color: var(--gold);">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span style="color: var(--text-secondary);">Cost:</span>
+                            <span id="stat-cost" style="color: var(--gold);">$0.0000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span style="color: var(--text-secondary);">Requests:</span>
+                            <span id="stat-requests" style="color: var(--text-primary);">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary);">Context:</span>
+                            <span id="stat-context" style="color: var(--text-primary);">adaptive</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div class="sidebar-card">
+                    <h3>Presets</h3>
+                    <select id="preset-select" style="margin-bottom: 8px;">
+                        <option value="">Loading...</option>
+                    </select>
+                    <button class="sidebar-btn" onclick="applyPreset()">Apply Preset</button>
+                </div>
+
+                <!-- Conversations -->
+                <div class="sidebar-card">
+                    <h3>Conversations</h3>
+                    <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                        <button class="sidebar-btn" style="flex:1; margin:0;" onclick="newConversation()">+ New</button>
+                        <button class="sidebar-btn" style="flex:1; margin:0;" onclick="saveConversation()">💾 Save</button>
+                    </div>
+                    <div id="conv-list" style="max-height: 120px; overflow-y: auto; font-size: 0.8rem;">
+                        <div style="color: var(--text-muted); padding: 8px;">No saved conversations</div>
+                    </div>
+                </div>
+
+                <!-- Agents -->
+                <div class="sidebar-card">
+                    <h3>Agents</h3>
+                    <div id="agent-list" style="max-height: 100px; overflow-y: auto; font-size: 0.8rem;">
+                        <div style="color: var(--text-muted); padding: 8px;">No active agents</div>
+                    </div>
+                    <button class="sidebar-btn" style="margin-top: 8px;" onclick="refreshAgents()">↻ Refresh</button>
+                </div>
+
+                <!-- Village Protocol -->
+                <div class="sidebar-card" style="border-color: var(--copper);">
+                    <h3 style="color: var(--copper);">Village Protocol</h3>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Current Agent</label>
+                        <select id="village-agent" style="width: 100%;">
+                            <option value="CLAUDE">CLAUDE</option>
+                            <option value="AZOTH">∴AZOTH∴</option>
+                            <option value="ELYSIAN">∴ELYSIAN∴</option>
+                            <option value="VAJRA">∴VAJRA∴</option>
+                            <option value="KETHER">∴KETHER∴</option>
+                        </select>
+                    </div>
+                    <div id="village-stats" style="font-size: 0.75rem; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                            <span>Village:</span><span id="vs-village">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                            <span>Bridges:</span><span id="vs-bridges">0</span>
+                        </div>
+                    </div>
+                    <input type="text" id="village-search" placeholder="Search the village..." style="width: 100%; margin-bottom: 8px; padding: 8px; font-size: 0.85rem;">
+                    <button class="sidebar-btn" onclick="searchVillage()">🔍 Search</button>
+                    <div id="village-results" style="max-height: 150px; overflow-y: auto; font-size: 0.75rem; margin-top: 8px; display: none;">
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Provider</h3>
+                    <select id="provider-select">
+                        <option value="ollama">Ollama (Local)</option>
+                        <option value="claude">Claude (API)</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Model</h3>
+                    <select id="model-select">
+                        <option value="{{ default_model }}">{{ default_model }}</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Tools <span id="tool-count" style="color: var(--gold);">(0)</span></h3>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="use-tools" checked>
+                        <span>Enable Instruments</span>
+                    </label>
+                    <div class="tool-list" id="tool-list" style="max-height: 100px; overflow-y: auto;">
+                        <span class="tool-tag">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Operations</h3>
+                    <button class="sidebar-btn" onclick="clearChat()">
+                        ↺ Clear Vessel
+                    </button>
+                </div>
+
+                <div class="sacred-divider">SOLVE ET COAGULA</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-badge">
+        <span>◆</span> APEX AURUM v1.0 <span>◆</span> LAB EDITION
+    </div>
+
+    <script>
+        const messagesEl = document.getElementById('messages');
+        const promptEl = document.getElementById('prompt');
+        const sendBtn = document.getElementById('send-btn');
+        const providerSelect = document.getElementById('provider-select');
+        const modelSelect = document.getElementById('model-select');
+        const useToolsCheckbox = document.getElementById('use-tools');
+
+        // Claude models
+        const claudeModels = [
+            { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5 (Latest)' },
+            { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5' },
+            { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
+            { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)' },
+        ];
+
+        const presetSelect = document.getElementById('preset-select');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkHealth();
+            await loadModels();
+            await loadTools();
+            await loadPresets();
+            await loadStats();
+            await loadConversations();
+            await refreshAgents();
+            await loadVillageStats();
+
+            // Enter key to send
+            promptEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Provider change handler
+            providerSelect.addEventListener('change', () => {
+                loadModels();
+                document.getElementById('current-model').textContent = modelSelect.value;
+            });
+
+            // Village agent change handler
+            document.getElementById('village-agent').addEventListener('change', async (e) => {
+                await setVillageAgent(e.target.value);
+            });
+
+            // Village search on Enter
+            document.getElementById('village-search').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchVillage();
+            });
+
+            // Auto-refresh agents every 10s, stats every 5s, village stats every 30s
+            setInterval(refreshAgents, 10000);
+            setInterval(loadStats, 5000);
+            setInterval(loadVillageStats, 30000);
+        });
+
+        // ========== PRESETS & STATS ==========
+        async function loadPresets() {
+            try {
+                const res = await fetch('/api/presets');
+                const data = await res.json();
+
+                presetSelect.innerHTML = data.presets.map(p => {
+                    const active = p.is_active ? ' (Active)' : '';
+                    const builtin = p.builtin ? '' : ' [Custom]';
+                    return `<option value="${p.id}" ${p.is_active ? 'selected' : ''}>${p.name}${builtin}${active}</option>`;
+                }).join('');
+            } catch (e) {
+                console.error('Failed to load presets:', e);
+                presetSelect.innerHTML = '<option value="">Error loading presets</option>';
+            }
+        }
+
+        async function applyPreset() {
+            const presetId = presetSelect.value;
+            if (!presetId) return;
+
+            try {
+                // Activate the preset
+                const res = await fetch(`/api/presets/${presetId}/activate`, { method: 'POST' });
+                const data = await res.json();
+
+                if (data.activated) {
+                    const preset = data.activated;
+                    // Update UI with preset settings
+                    providerSelect.value = preset.provider;
+                    await loadModels();
+
+                    // Set model
+                    const modelOptions = Array.from(modelSelect.options).map(o => o.value);
+                    if (modelOptions.includes(preset.model)) {
+                        modelSelect.value = preset.model;
+                    }
+
+                    // Set tools checkbox
+                    useToolsCheckbox.checked = preset.use_tools;
+
+                    // Update current model display
+                    document.getElementById('current-model').textContent = preset.model;
+                    document.getElementById('status-text').textContent = `Preset: ${preset.name}`;
+
+                    // Refresh stats
+                    await loadStats();
+                }
+            } catch (e) {
+                console.error('Failed to apply preset:', e);
+                alert('Failed to apply preset');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+
+                document.getElementById('stat-tokens').textContent = data.costs.total_tokens.toLocaleString();
+                document.getElementById('stat-cost').textContent = data.costs.cost_formatted;
+                document.getElementById('stat-requests').textContent = data.costs.requests;
+                document.getElementById('stat-context').textContent = data.context.strategy;
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const res = await fetch('/api/models/health/check');
+                const data = await res.json();
+                const statusDot = document.querySelector('.status-dot');
+                const statusText = document.getElementById('status-text');
+
+                if (data.healthy) {
+                    statusDot.classList.remove('error');
+                    statusText.textContent = `Connected: ${data.provider}`;
+                } else {
+                    statusDot.classList.add('error');
+                    statusText.textContent = 'Disconnected';
+                }
+            } catch (e) {
+                document.querySelector('.status-dot').classList.add('error');
+                document.getElementById('status-text').textContent = 'Connection Error';
+            }
+        }
+
+        async function loadModels() {
+            const provider = providerSelect.value;
+
+            if (provider === 'claude') {
+                modelSelect.innerHTML = claudeModels.map(m =>
+                    `<option value="${m.id}">${m.name}</option>`
+                ).join('');
+                document.getElementById('current-model').textContent = claudeModels[0].name;
+            } else {
+                try {
+                    const res = await fetch('/api/models');
+                    const data = await res.json();
+
+                    modelSelect.innerHTML = data.models.map(m => {
+                        const name = m.id || m.name || m;
+                        const selected = name === data.default ? 'selected' : '';
+                        return `<option value="${name}" ${selected}>${name}</option>`;
+                    }).join('');
+
+                    document.getElementById('current-model').textContent = modelSelect.value;
+                } catch (e) {
+                    console.error('Failed to load models:', e);
+                }
+            }
+        }
+
+        async function loadTools() {
+            try {
+                const res = await fetch('/api/tools');
+                const data = await res.json();
+
+                document.getElementById('tool-count').textContent = `(${data.count})`;
+                document.getElementById('tool-list').innerHTML = data.tools.map(t =>
+                    `<span class="tool-tag" title="${t.description}">${t.name}</span>`
+                ).join('');
+            } catch (e) {
+                console.error('Failed to load tools:', e);
+            }
+        }
+
+        // ========== CONVERSATIONS ==========
+        let currentConvId = null;
+        let chatMessages = [];
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/conversations?limit=10');
+                const data = await res.json();
+                const list = document.getElementById('conv-list');
+
+                if (data.conversations.length === 0) {
+                    list.innerHTML = '<div style="color: var(--text-muted); padding: 8px;">No saved conversations</div>';
+                    return;
+                }
+
+                list.innerHTML = data.conversations.map(c => `
+                    <div class="conv-item" onclick="loadConversation('${c.id}')" style="padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;">
+                        <div style="color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${c.favorite ? '⭐ ' : ''}${escapeHtml(c.title)}
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 0.7rem;">${c.message_count} msgs</div>
+                    </div>
+                `).join('');
+
+                // Add hover effect
+                list.querySelectorAll('.conv-item').forEach(el => {
+                    el.addEventListener('mouseenter', () => el.style.background = 'var(--bg-elevated)');
+                    el.addEventListener('mouseleave', () => el.style.background = 'transparent');
+                });
+            } catch (e) {
+                console.error('Failed to load conversations:', e);
+            }
+        }
+
+        async function loadConversation(convId) {
+            try {
+                const res = await fetch(`/api/conversations/${convId}`);
+                const conv = await res.json();
+
+                currentConvId = convId;
+                chatMessages = conv.messages;
+
+                // Render messages
+                messagesEl.innerHTML = '';
+                for (const msg of conv.messages) {
+                    addMessage(formatContent(msg.content), msg.role);
+                }
+
+                // Update title hint
+                document.getElementById('status-text').textContent = `Loaded: ${conv.title.substring(0, 20)}...`;
+            } catch (e) {
+                console.error('Failed to load conversation:', e);
+            }
+        }
+
+        async function saveConversation() {
+            if (chatMessages.length === 0) {
+                alert('Nothing to save!');
+                return;
+            }
+
+            try {
+                if (currentConvId) {
+                    // Update existing
+                    await fetch(`/api/conversations/${currentConvId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: chatMessages })
+                    });
+                } else {
+                    // Create new
+                    const res = await fetch('/api/conversations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: chatMessages })
+                    });
+                    const conv = await res.json();
+                    currentConvId = conv.id;
+                }
+
+                loadConversations();
+                document.getElementById('status-text').textContent = 'Conversation saved ☉';
+            } catch (e) {
+                console.error('Failed to save:', e);
+            }
+        }
+
+        function newConversation() {
+            currentConvId = null;
+            chatMessages = [];
+            clearChat();
+            document.getElementById('status-text').textContent = 'New conversation';
+        }
+
+        // ========== AGENTS ==========
+        async function refreshAgents() {
+            try {
+                const res = await fetch('/api/tools/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool: 'agent_list', arguments: { limit: 10 } })
+                });
+                const data = await res.json();
+                const list = document.getElementById('agent-list');
+
+                if (!data.result.agents || data.result.agents.length === 0) {
+                    list.innerHTML = '<div style="color: var(--text-muted); padding: 8px;">No agents</div>';
+                    return;
+                }
+
+                list.innerHTML = data.result.agents.map(a => {
+                    const statusColor = a.status === 'completed' ? 'var(--success)' :
+                                       a.status === 'running' ? 'var(--gold)' :
+                                       a.status === 'failed' ? 'var(--error)' : 'var(--text-muted)';
+                    const icon = a.status === 'completed' ? '✓' :
+                                a.status === 'running' ? '◐' :
+                                a.status === 'failed' ? '✗' : '○';
+                    return `
+                        <div style="padding: 8px; border-bottom: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: ${statusColor};">${icon} ${a.agent_type}</span>
+                                <span style="font-size: 0.65rem; color: var(--text-muted);">${a.agent_id.slice(-6)}</span>
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${escapeHtml(a.task.substring(0, 40))}...
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Failed to load agents:', e);
+            }
+        }
+
+        // ========== VILLAGE PROTOCOL ==========
+        async function loadVillageStats() {
+            try {
+                const res = await fetch('/api/village/stats');
+                const data = await res.json();
+
+                document.getElementById('vs-village').textContent = data.village_count || 0;
+                document.getElementById('vs-bridges').textContent = data.bridges_count || 0;
+            } catch (e) {
+                console.error('Failed to load village stats:', e);
+            }
+        }
+
+        async function setVillageAgent(agentId) {
+            try {
+                await fetch('/api/village/agent/set', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_id: agentId })
+                });
+                document.getElementById('status-text').textContent = `Agent: ${agentId}`;
+            } catch (e) {
+                console.error('Failed to set village agent:', e);
+            }
+        }
+
+        async function searchVillage() {
+            const query = document.getElementById('village-search').value.trim();
+            if (!query) return;
+
+            const resultsEl = document.getElementById('village-results');
+            resultsEl.style.display = 'block';
+            resultsEl.innerHTML = '<div style="color: var(--text-muted); padding: 8px;">Searching...</div>';
+
+            try {
+                const res = await fetch('/api/village/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        n_results: 5,
+                        include_bridges: true
+                    })
+                });
+                const data = await res.json();
+
+                if (!data.results || data.results.length === 0) {
+                    resultsEl.innerHTML = '<div style="color: var(--text-muted); padding: 8px;">No results found</div>';
+                    return;
+                }
+
+                resultsEl.innerHTML = data.results.map(r => {
+                    const agentColor = getAgentColor(r.metadata?.agent_id || 'unknown');
+                    const content = r.content?.substring(0, 100) || 'No content';
+                    return `
+                        <div style="padding: 8px; border-bottom: 1px solid var(--border); border-left: 3px solid ${agentColor};">
+                            <div style="color: ${agentColor}; font-weight: 600; font-size: 0.7rem;">
+                                ${r.metadata?.agent_id || 'Unknown'} · ${(r.score * 100).toFixed(0)}%
+                            </div>
+                            <div style="color: var(--text-primary); margin-top: 4px;">
+                                ${escapeHtml(content)}${content.length >= 100 ? '...' : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Village search failed:', e);
+                resultsEl.innerHTML = '<div style="color: var(--error); padding: 8px;">Search failed</div>';
+            }
+        }
+
+        function getAgentColor(agentId) {
+            const colors = {
+                'AZOTH': '#D4AF37',
+                'ELYSIAN': '#6B8E23',
+                'VAJRA': '#4169E1',
+                'KETHER': '#9370DB',
+                'CLAUDE': '#C0C0C0'
+            };
+            return colors[agentId] || '#888888';
+        }
+
+        function addMessage(content, role) {
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+            msg.innerHTML = content;
+            messagesEl.appendChild(msg);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            return msg;
+        }
+
+        async function sendMessage() {
+            const prompt = promptEl.value.trim();
+            if (!prompt) return;
+
+            // Track message
+            chatMessages.push({ role: 'user', content: prompt });
+            addMessage(prompt, 'user');
+            promptEl.value = '';
+            sendBtn.disabled = true;
+
+            const assistantMsg = addMessage('<span class="streaming"></span>', 'assistant');
+
+            try {
+                const response = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: prompt }],
+                        model: modelSelect.value,
+                        provider: providerSelect.value,
+                        stream: true,
+                        use_tools: useToolsCheckbox.checked
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let content = '';
+                let toolHtml = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.tool_call) {
+                                    const tc = data.tool_call;
+                                    toolHtml += `<div class="tool-call">☿ Invoking <span class="tool-name">${tc.tool}</span>(${JSON.stringify(tc.arguments)})</div>`;
+                                    assistantMsg.innerHTML = formatContent(content) + toolHtml + '<span class="streaming"></span>';
+                                    messagesEl.scrollTop = messagesEl.scrollHeight;
+                                }
+
+                                if (data.tool_result) {
+                                    const tr = data.tool_result;
+                                    if (tr.success) {
+                                        const resultStr = typeof tr.result === 'object' ? JSON.stringify(tr.result, null, 2) : tr.result;
+                                        toolHtml += `<div class="tool-result">☉ Transmutation complete:<pre>${escapeHtml(resultStr)}</pre></div>`;
+                                    } else {
+                                        toolHtml += `<div class="tool-result error">☽ Error: ${escapeHtml(tr.error)}</div>`;
+                                    }
+                                    assistantMsg.innerHTML = formatContent(content) + toolHtml + '<span class="streaming"></span>';
+                                    messagesEl.scrollTop = messagesEl.scrollHeight;
+                                }
+
+                                if (data.content) {
+                                    content += data.content;
+                                    assistantMsg.innerHTML = formatContent(content) + toolHtml + '<span class="streaming"></span>';
+                                    messagesEl.scrollTop = messagesEl.scrollHeight;
+                                }
+
+                                if (data.done) {
+                                    assistantMsg.innerHTML = toolHtml + formatContent(content);
+                                    // Update stats after response
+                                    if (data.cost) {
+                                        document.getElementById('stat-tokens').textContent =
+                                            (parseInt(document.getElementById('stat-tokens').textContent.replace(/,/g, '')) +
+                                             data.cost.input_tokens + data.cost.output_tokens).toLocaleString();
+                                        document.getElementById('stat-cost').textContent = `$${data.cost.session_total.toFixed(4)}`;
+                                        document.getElementById('stat-requests').textContent =
+                                            parseInt(document.getElementById('stat-requests').textContent) + 1;
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                assistantMsg.innerHTML = toolHtml + formatContent(content);
+
+                // Track assistant response
+                if (content) {
+                    chatMessages.push({ role: 'assistant', content: content });
+                }
+
+            } catch (e) {
+                assistantMsg.innerHTML = `<span style="color: var(--error);">☽ Error: ${e.message}</span>`;
+            }
+
+            sendBtn.disabled = false;
+            promptEl.focus();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatContent(content) {
+            return content
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function clearChat() {
+            messagesEl.innerHTML = `
+                <div class="message assistant">
+                    <strong>☉ VESSEL PURIFIED</strong><br><br>
+                    The crucible has been cleansed. Ready for new operations.
+                </div>
+            `;
+        }
+
+        async function testStream() {
+            const msg = addMessage('<span class="streaming">Testing stream...</span>', 'assistant');
+
+            try {
+                const response = await fetch('/api/chat/stream/test');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let content = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.content) {
+                                    content += data.content;
+                                    msg.innerHTML = content + '<span class="streaming"></span>';
+                                }
+                                if (data.done) {
+                                    msg.innerHTML = content + ' <span style="color: var(--gold);">☉</span>';
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+            } catch (e) {
+                msg.innerHTML = `<span style="color: var(--error);">Error: ${e.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
