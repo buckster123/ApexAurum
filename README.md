@@ -8,7 +8,6 @@
 
 <br/>
 
-[![Status](https://img.shields.io/badge/status-production%20ready-gold?style=for-the-badge)]()
 [![Tools](https://img.shields.io/badge/tools-67-blueviolet?style=for-the-badge)]()
 [![Code](https://img.shields.io/badge/lines-53k+-blue?style=for-the-badge)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green?style=for-the-badge)]()
