@@ -1161,7 +1161,7 @@ def init_session_state():
         st.session_state.loop = ToolCallLoop(
             st.session_state.client,
             st.session_state.executor,
-            max_iterations=10
+            max_iterations=25
         )
 
     if "app_state" not in st.session_state:

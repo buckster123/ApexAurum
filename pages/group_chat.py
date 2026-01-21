@@ -600,6 +600,15 @@ def run_agent_turn_sync(
     Run a single agent's turn synchronously.
     Returns result dict with content, usage, tool_results.
     """
+    # Set thread-local agent context so tools know who's calling
+    from tools.agents import set_current_agent_context
+    set_current_agent_context({
+        'agent_id': agent.id,
+        'agent_type': 'group_chat',
+        'display_name': agent.display_name,
+        'model': agent.model
+    })
+
     api_client = get_api_client()
     tool_executor = create_tool_executor()
 
@@ -635,7 +644,7 @@ def run_agent_turn_sync(
     total_input = 0
     total_output = 0
 
-    max_iterations = 5
+    max_iterations = 25
     current_messages = messages.copy()
 
     for iteration in range(max_iterations):
@@ -705,6 +714,9 @@ def run_agent_turn_sync(
             logger.error(f"Agent {agent.id} error: {e}")
             full_response = f"[Error: {str(e)}]"
             break
+
+    # Clear thread-local agent context
+    set_current_agent_context(None)
 
     return {
         "agent_id": agent.id,
@@ -1392,12 +1404,12 @@ if st.session_state.gc_view_mode == "chat":
                 status_containers = {}
                 response_containers = {}
 
-                # Create columns for parallel display
+                # Create columns for parallel display (4 fits native agents)
                 num_agents = len(st.session_state.gc_agents)
-                if num_agents <= 2:
+                if num_agents <= 4:
                     cols = st.columns(num_agents)
                 else:
-                    cols = st.columns(min(num_agents, 3))
+                    cols = st.columns(4)  # Wrap after 4
 
                 for i, agent in enumerate(st.session_state.gc_agents):
                     col_idx = i % len(cols)
@@ -1488,10 +1500,10 @@ if st.session_state.gc_view_mode == "chat":
             num_agents = len(st.session_state.gc_agents)
             if num_agents == 1:
                 cols = [st.container()]
-            elif num_agents <= 2:
+            elif num_agents <= 4:
                 cols = st.columns(num_agents)
             else:
-                cols = st.columns(min(num_agents, 3))
+                cols = st.columns(4)  # Wrap after 4
 
             for i, agent in enumerate(st.session_state.gc_agents):
                 col_idx = i % len(cols)
@@ -1575,8 +1587,8 @@ if st.session_state.gc_view_mode == "chat":
             with st.expander(f"Round {round_num}", expanded=(round_num == st.session_state.gc_round)):
                 entries = rounds[round_num]
 
-                # Display in columns if multiple agents
-                if len(entries) <= 3:
+                # Display in columns if multiple agents (4 fits native agents)
+                if len(entries) <= 4:
                     cols = st.columns(len(entries))
                     for i, entry in enumerate(entries):
                         with cols[i]:
@@ -1647,10 +1659,10 @@ if st.session_state.gc_view_mode == "chat":
             num_agents = len(st.session_state.gc_agents)
             if num_agents == 1:
                 cols = [st.container()]
-            elif num_agents <= 2:
+            elif num_agents <= 4:
                 cols = st.columns(num_agents)
             else:
-                cols = st.columns(min(num_agents, 3))
+                cols = st.columns(4)  # Wrap after 4
 
             for i, agent in enumerate(st.session_state.gc_agents):
                 col_idx = i % len(cols)

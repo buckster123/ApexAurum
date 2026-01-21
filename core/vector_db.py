@@ -74,7 +74,13 @@ class EmbeddingGenerator:
             from sentence_transformers import SentenceTransformer
 
             logger.info(f"Loading embedding model: {self.model_name}")
-            self._model = SentenceTransformer(self.model_name)
+            # Explicitly set device='cpu' to avoid accelerate meta tensor issues
+            # and set trust_remote_code=False for safety
+            self._model = SentenceTransformer(
+                self.model_name,
+                device='cpu',
+                trust_remote_code=False
+            )
             self._model_loaded = True
             logger.info(f"Model loaded successfully: {self.model_name}")
 

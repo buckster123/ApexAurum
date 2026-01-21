@@ -313,7 +313,7 @@ class ToolCallLoop:
         self,
         api_client: Any,
         tool_executor: ToolExecutor,
-        max_iterations: int = 10
+        max_iterations: int = 25
     ):
         """
         Initialize tool call loop.

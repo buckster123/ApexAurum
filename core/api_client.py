@@ -41,7 +41,7 @@ class ClaudeAPIClient:
     - Token management
     """
 
-    def __init__(self, api_key: Optional[str] = None, timeout: float = 1200.0):
+    def __init__(self, api_key: Optional[str] = None, timeout: float = 3600.0):
         """
         Initialize Claude API client
 
@@ -474,7 +474,7 @@ class ClaudeAPIClientWithRetry(ClaudeAPIClient):
     def __init__(
         self,
         api_key: Optional[str] = None,
-        timeout: float = 600.0,
+        timeout: float = 3600.0,
         max_retries: int = 3,
         initial_backoff: float = 1.0,
     ):

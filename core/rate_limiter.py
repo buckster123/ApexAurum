@@ -35,10 +35,10 @@ class RateLimiter:
 
     def __init__(
         self,
-        max_requests_per_min: int = 200,
-        max_input_tokens_per_min: int = 64000,
-        max_output_tokens_per_min: int = 64000,
-        safety_margin: float = 0.9  # Use 90% of limits to be safe
+        max_requests_per_min: int = 2000,
+        max_input_tokens_per_min: int = 800000,
+        max_output_tokens_per_min: int = 160000,
+        safety_margin: float = 0.95  # Use 95% of limits
     ):
         """
         Initialize rate limiter.
@@ -65,7 +65,7 @@ class RateLimiter:
 
     def _clean_old_records(self):
         """Remove records older than 60 seconds"""
-        cutoff_time = time.time() - 300.0
+        cutoff_time = time.time() - 60.0
         self.request_history = [
             record for record in self.request_history
             if record.timestamp > cutoff_time

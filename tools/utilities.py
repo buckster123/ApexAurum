@@ -201,19 +201,28 @@ def session_info() -> dict:
         "agents": {}
     }
 
-    # Try to get Streamlit session state (may not be available in agent threads)
+    # Try to get context from multiple sources:
+    # 1. Thread-local agent context (for spawned agents)
+    # 2. Streamlit session state (for main chat)
     try:
-        import streamlit as st
-        if hasattr(st, 'session_state'):
-            # Agent ID
-            result["agent_id"] = st.session_state.get("current_agent_id")
+        # First check thread-local context (spawned agents)
+        from tools.agents import get_current_agent_context
+        agent_context = get_current_agent_context()
+        if agent_context and 'agent_id' in agent_context:
+            result["agent_id"] = agent_context['agent_id']
+        else:
+            # Fallback to Streamlit session state
+            import streamlit as st
+            if hasattr(st, 'session_state'):
+                # Agent ID
+                result["agent_id"] = st.session_state.get("current_agent_id")
 
-            # Active preset
-            result["preset"] = st.session_state.get("active_preset", "Custom")
+                # Active preset
+                result["preset"] = st.session_state.get("active_preset", "Custom")
 
-            # Conversation length
-            messages = st.session_state.get("messages", [])
-            result["conversation_length"] = len(messages)
+                # Conversation length
+                messages = st.session_state.get("messages", [])
+                result["conversation_length"] = len(messages)
     except:
         pass
 

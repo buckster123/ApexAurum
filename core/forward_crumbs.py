@@ -58,14 +58,21 @@ def get_forward_crumbs(
     try:
         from tools.vector_search import vector_search_knowledge
 
-        # Auto-detect agent_id from session state if available
+        # Auto-detect agent_id from thread-local or session state
         if agent_id is None:
             try:
-                import streamlit as st
-                if hasattr(st, 'session_state') and 'current_agent' in st.session_state:
-                    agent_id = st.session_state.current_agent.get('agent_id', 'unknown')
+                # First check thread-local context (spawned agents)
+                from tools.agents import get_current_agent_context
+                agent_context = get_current_agent_context()
+                if agent_context and 'agent_id' in agent_context:
+                    agent_id = agent_context['agent_id']
                 else:
-                    agent_id = "unknown"
+                    # Fallback to Streamlit session state
+                    import streamlit as st
+                    if hasattr(st, 'session_state') and 'current_agent' in st.session_state:
+                        agent_id = st.session_state.current_agent.get('agent_id', 'unknown')
+                    else:
+                        agent_id = "unknown"
             except (ImportError, AttributeError):
                 agent_id = "unknown"
 
@@ -255,14 +262,21 @@ def leave_forward_crumb(
     try:
         from tools.vector_search import vector_add_knowledge
 
-        # Auto-detect agent_id
+        # Auto-detect agent_id from thread-local or session state
         if agent_id is None:
             try:
-                import streamlit as st
-                if hasattr(st, 'session_state') and 'current_agent' in st.session_state:
-                    agent_id = st.session_state.current_agent.get('agent_id', 'unknown')
+                # First check thread-local context (spawned agents)
+                from tools.agents import get_current_agent_context
+                agent_context = get_current_agent_context()
+                if agent_context and 'agent_id' in agent_context:
+                    agent_id = agent_context['agent_id']
                 else:
-                    agent_id = "unknown"
+                    # Fallback to Streamlit session state
+                    import streamlit as st
+                    if hasattr(st, 'session_state') and 'current_agent' in st.session_state:
+                        agent_id = st.session_state.current_agent.get('agent_id', 'unknown')
+                    else:
+                        agent_id = "unknown"
             except (ImportError, AttributeError):
                 agent_id = "unknown"
 

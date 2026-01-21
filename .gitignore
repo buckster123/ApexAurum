@@ -108,6 +108,7 @@ api/
 
 # Landing page / website (separate project)
 sandbox/apex-website/
+website/
 
 # Archived prompts (experimental/deprecated)
 prompts/archive/

@@ -25,6 +25,30 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+# Thread-local storage for agent context
+# This allows tools to know which agent is calling them
+_agent_context = threading.local()
+
+
+def get_current_agent_context() -> Optional[Dict[str, Any]]:
+    """
+    Get the current agent context from thread-local storage.
+
+    Returns:
+        Dict with agent_id, agent_type, etc. or None if not in agent thread
+    """
+    return getattr(_agent_context, 'current', None)
+
+
+def set_current_agent_context(context: Optional[Dict[str, Any]]):
+    """
+    Set the current agent context in thread-local storage.
+
+    Args:
+        context: Dict with agent_id, agent_type, etc. or None to clear
+    """
+    _agent_context.current = context
+
 
 class AgentStatus(Enum):
     """Agent execution status"""
@@ -178,6 +202,13 @@ class AgentManager:
         agent.status = AgentStatus.RUNNING
         agent.started_at = datetime.now()
 
+        # Set thread-local agent context so tools know who's calling
+        set_current_agent_context({
+            'agent_id': agent_id,
+            'agent_type': agent.agent_type,
+            'model': agent.model
+        })
+
         try:
             # Import here to avoid circular dependency
             from core import ClaudeAPIClient, ToolRegistry, ToolExecutor, ToolCallLoop
@@ -192,7 +223,7 @@ class AgentManager:
                 registry = ToolRegistry()
                 register_all_tools(registry)
                 executor = ToolExecutor(registry)
-                loop = ToolCallLoop(client, executor, max_iterations=10)
+                loop = ToolCallLoop(client, executor, max_iterations=25)
                 tools = list(ALL_TOOL_SCHEMAS.values())
             else:
                 # No tools, just direct API call
@@ -264,6 +295,10 @@ class AgentManager:
                 "error": str(e),
                 "status": agent.status.value
             }
+
+        finally:
+            # Clear thread-local agent context
+            set_current_agent_context(None)
 
 
 # Global agent manager
