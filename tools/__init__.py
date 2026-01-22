@@ -119,6 +119,41 @@ DATASET_TOOL_SCHEMAS = {
     "dataset_query": DATASET_QUERY_SCHEMA,
 }
 
+# Suno Prompt Compiler
+from .suno_compiler import (
+    suno_prompt_build,
+    suno_prompt_preset_save,
+    suno_prompt_preset_load,
+    suno_prompt_preset_list,
+    SUNO_PROMPT_BUILD_SCHEMA,
+    SUNO_PROMPT_PRESET_SAVE_SCHEMA,
+    SUNO_PROMPT_PRESET_LOAD_SCHEMA,
+    SUNO_PROMPT_PRESET_LIST_SCHEMA,
+)
+
+# Suno Compiler tool schemas
+SUNO_COMPILER_TOOL_SCHEMAS = {
+    "suno_prompt_build": SUNO_PROMPT_BUILD_SCHEMA,
+    "suno_prompt_preset_save": SUNO_PROMPT_PRESET_SAVE_SCHEMA,
+    "suno_prompt_preset_load": SUNO_PROMPT_PRESET_LOAD_SCHEMA,
+    "suno_prompt_preset_list": SUNO_PROMPT_PRESET_LIST_SCHEMA,
+}
+
+# Audio Editor Tools
+from .audio_editor import (
+    audio_info,
+    audio_trim,
+    audio_fade,
+    audio_normalize,
+    audio_loop,
+    audio_concat,
+    audio_speed,
+    audio_reverse,
+    audio_list_files,
+    audio_get_waveform,
+    AUDIO_EDITOR_TOOL_SCHEMAS,
+)
+
 # EEG Tools (Neural Resonance)
 from .eeg import (
     eeg_connect,
@@ -162,6 +197,8 @@ ALL_TOOL_SCHEMAS = {
     **MUSIC_TOOL_SCHEMAS,
     **DATASET_TOOL_SCHEMAS,
     **EEG_TOOL_SCHEMAS,
+    **SUNO_COMPILER_TOOL_SCHEMAS,
+    **AUDIO_EDITOR_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -247,6 +284,22 @@ ALL_TOOLS = {
     "eeg_calibrate_baseline": eeg_calibrate_baseline,
     "eeg_realtime_emotion": eeg_realtime_emotion,
     "eeg_list_sessions": eeg_list_sessions,
+    # Suno Prompt Compiler
+    "suno_prompt_build": suno_prompt_build,
+    "suno_prompt_preset_save": suno_prompt_preset_save,
+    "suno_prompt_preset_load": suno_prompt_preset_load,
+    "suno_prompt_preset_list": suno_prompt_preset_list,
+    # Audio Editor Tools
+    "audio_info": audio_info,
+    "audio_trim": audio_trim,
+    "audio_fade": audio_fade,
+    "audio_normalize": audio_normalize,
+    "audio_loop": audio_loop,
+    "audio_concat": audio_concat,
+    "audio_speed": audio_speed,
+    "audio_reverse": audio_reverse,
+    "audio_list_files": audio_list_files,
+    "audio_get_waveform": audio_get_waveform,
 }
 
 __all__ = [
@@ -332,6 +385,22 @@ __all__ = [
     "eeg_calibrate_baseline",
     "eeg_realtime_emotion",
     "eeg_list_sessions",
+    # Suno Prompt Compiler
+    "suno_prompt_build",
+    "suno_prompt_preset_save",
+    "suno_prompt_preset_load",
+    "suno_prompt_preset_list",
+    # Audio Editor Tools
+    "audio_info",
+    "audio_trim",
+    "audio_fade",
+    "audio_normalize",
+    "audio_loop",
+    "audio_concat",
+    "audio_speed",
+    "audio_reverse",
+    "audio_list_files",
+    "audio_get_waveform",
     # Schemas
     "UTILITY_TOOL_SCHEMAS",
     "FILESYSTEM_TOOL_SCHEMAS",
@@ -342,6 +411,8 @@ __all__ = [
     "MUSIC_TOOL_SCHEMAS",
     "DATASET_TOOL_SCHEMAS",
     "EEG_TOOL_SCHEMAS",
+    "SUNO_COMPILER_TOOL_SCHEMAS",
+    "AUDIO_EDITOR_TOOL_SCHEMAS",
     "ALL_TOOL_SCHEMAS",
     "ALL_TOOLS",
 ]
