@@ -106,6 +106,7 @@ from reusable_lib.tools import (
 )
 
 from services.llm_service import get_llm_client
+from services.event_service import get_event_broadcaster
 from app_config import settings
 
 logger = logging.getLogger(__name__)
@@ -331,9 +332,11 @@ class ToolService:
             "registered": True
         }
 
-    def execute(self, name: str, arguments: Dict[str, Any]) -> Any:
+    def execute_without_broadcast(self, name: str, arguments: Dict[str, Any]) -> Any:
         """
-        Execute a tool.
+        Execute a tool without event broadcasting.
+
+        Use this when broadcasting is handled at a higher level (e.g., async routes).
 
         Args:
             name: Tool name
@@ -357,6 +360,47 @@ class ToolService:
             return result
         except Exception as e:
             logger.error(f"Tool {name} failed: {e}")
+            raise
+
+    def execute(self, name: str, arguments: Dict[str, Any], agent_id: Optional[str] = None) -> Any:
+        """
+        Execute a tool with event broadcasting for Village GUI.
+
+        Args:
+            name: Tool name
+            arguments: Arguments to pass
+            agent_id: Optional agent ID for event attribution
+
+        Returns:
+            Tool result
+
+        Raises:
+            ValueError: If tool not found
+        """
+        if name not in self.tools:
+            raise ValueError(f"Tool not found: {name}")
+
+        func = self.tools[name]
+        logger.info(f"Executing tool: {name} with args: {arguments}")
+
+        # Broadcast start event for Village GUI
+        broadcaster = get_event_broadcaster()
+        broadcaster.tool_start_sync(name, arguments, agent_id=agent_id)
+
+        try:
+            result = func(**arguments)
+            logger.info(f"Tool {name} completed successfully")
+
+            # Broadcast complete event
+            broadcaster.tool_complete_sync(name, result, success=True, agent_id=agent_id)
+
+            return result
+        except Exception as e:
+            logger.error(f"Tool {name} failed: {e}")
+
+            # Broadcast error event
+            broadcaster.tool_complete_sync(name, str(e), success=False, agent_id=agent_id)
+
             raise
 
     def get_openai_schemas(self) -> List[Dict]:

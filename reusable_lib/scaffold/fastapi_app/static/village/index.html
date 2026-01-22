@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village GUI - Apex Aurum</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="/" class="back-link">< Back to Chat</a>
+
+    <div class="container">
+        <header>
+            <h1>VILLAGE GUI</h1>
+            <span class="subtitle">Agent Activity Visualization</span>
+        </header>
+
+        <main>
+            <canvas id="village-canvas"></canvas>
+        </main>
+
+        <footer>
+            <div id="event-log">Connecting...</div>
+        </footer>
+    </div>
+
+    <!-- Quick test button -->
+    <div style="position: fixed; bottom: 10px; right: 10px; display: flex; gap: 10px;">
+        <button onclick="testTool('memory_list')" style="padding: 8px 16px; background: #00b894; border: none; color: white; cursor: pointer; border-radius: 4px;">
+            Test Memory
+        </button>
+        <button onclick="testTool('fs_list_files')" style="padding: 8px 16px; background: #fdcb6e; border: none; color: black; cursor: pointer; border-radius: 4px;">
+            Test Files
+        </button>
+        <button onclick="testTool('get_current_time')" style="padding: 8px 16px; background: #6c5ce7; border: none; color: white; cursor: pointer; border-radius: 4px;">
+            Test Time
+        </button>
+    </div>
+
+    <script>
+        async function testTool(tool) {
+            const args = tool === 'fs_list_files' ? {path: '.'} : (tool === 'get_current_time' ? {format: 'human'} : {});
+            try {
+                const res = await fetch('/api/tools/execute', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({tool, arguments: args})
+                });
+                const data = await res.json();
+                console.log('Tool result:', data);
+            } catch(e) {
+                console.error('Tool error:', e);
+            }
+        }
+    </script>
+    <script type="module" src="village.js"></script>
+</body>
+</html>

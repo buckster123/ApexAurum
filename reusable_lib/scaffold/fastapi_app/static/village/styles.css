@@ -1,0 +1,209 @@
+/**
+ * Village GUI Styles - Alchemical Dark Theme
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --gold: #D4AF37;
+    --gold-dim: #9a7b1a;
+    --void-black: #0a0a0c;
+    --deep-blue: #12121f;
+    --text-primary: #ffffff;
+    --text-muted: #888888;
+    --success: #00ff88;
+    --error: #ff4444;
+}
+
+body {
+    background: var(--void-black);
+    color: var(--text-primary);
+    font-family: 'Courier New', 'Monaco', monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+}
+
+header {
+    text-align: center;
+}
+
+header h1 {
+    font-size: 28px;
+    color: var(--gold);
+    margin-bottom: 5px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+header .subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+main {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+        0 0 30px rgba(212, 175, 55, 0.2),
+        inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Corner accents */
+main::before,
+main::after {
+    content: '◈';
+    position: absolute;
+    color: var(--gold);
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+main::before {
+    top: 8px;
+    left: 10px;
+}
+
+main::after {
+    bottom: 8px;
+    right: 10px;
+}
+
+#village-canvas {
+    display: block;
+}
+
+footer {
+    width: 800px;
+    max-height: 100px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+#event-log {
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    line-height: 1.5;
+}
+
+/* Event log entry styling */
+#event-log .entry-time {
+    color: var(--gold-dim);
+}
+
+#event-log .entry-tool-start {
+    color: #00aaff;
+}
+
+#event-log .entry-tool-complete {
+    color: var(--success);
+}
+
+/* Scrollbar styling */
+footer::-webkit-scrollbar {
+    width: 6px;
+}
+
+footer::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+footer::-webkit-scrollbar-thumb {
+    background: var(--gold-dim);
+    border-radius: 3px;
+}
+
+footer::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* Back link */
+.back-link {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 13px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.back-link:hover {
+    opacity: 1;
+    border-color: var(--gold-dim);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Status indicators */
+.status-connected {
+    color: var(--success);
+}
+
+.status-disconnected {
+    color: var(--error);
+}
+
+/* Responsive adjustments */
+@media (max-width: 850px) {
+    .container {
+        padding: 10px;
+    }
+
+    footer {
+        width: calc(100vw - 20px);
+        max-width: 800px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+}
+
+/* Animation for new events */
+@keyframes flash {
+    0% { background: rgba(212, 175, 55, 0.3); }
+    100% { background: transparent; }
+}
+
+.event-new {
+    animation: flash 0.5s ease-out;
+}

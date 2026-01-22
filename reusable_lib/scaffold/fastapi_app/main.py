@@ -23,6 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app_config import settings
 from routes import chat, tools, models, memory, benchmark, conversations, stats, presets, village, prompts
+from routes import websocket as ws_routes
 
 # Configure logging
 logging.basicConfig(
@@ -79,6 +80,12 @@ app.include_router(stats.router, prefix="/api/stats", tags=["Statistics"])
 app.include_router(presets.router, prefix="/api/presets", tags=["Presets"])
 app.include_router(village.router, tags=["Village Protocol"])
 app.include_router(prompts.router, prefix="/api/prompts", tags=["Prompts"])
+app.include_router(ws_routes.router, prefix="/ws", tags=["WebSocket"])
+
+# Mount Village GUI static files
+village_static = Path(__file__).parent / "static" / "village"
+village_static.mkdir(parents=True, exist_ok=True)
+app.mount("/village", StaticFiles(directory=village_static, html=True), name="village")
 
 
 @app.get("/")
@@ -103,7 +110,7 @@ async def api_info():
     return {
         "name": "Apex Aurum - Lab Edition API",
         "version": "1.0.0",
-        "phase": "8 - Village Protocol",
+        "phase": "9 - Village GUI",
         "endpoints": {
             "chat": "/api/chat",
             "stream": "/api/chat/stream",
@@ -114,7 +121,9 @@ async def api_info():
             "conversations": "/api/conversations",
             "stats": "/api/stats",
             "presets": "/api/presets",
-            "village": "/api/village"
+            "village": "/api/village",
+            "websocket": "/ws/village",
+            "village_gui": "/village/"
         }
     }
 

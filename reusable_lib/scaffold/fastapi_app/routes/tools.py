@@ -11,12 +11,14 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 
 from services.tool_service import ToolService
+from services.event_service import get_event_broadcaster
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Initialize tool service
 tool_service = ToolService()
+broadcaster = get_event_broadcaster()
 
 
 class ToolCallRequest(BaseModel):
@@ -66,23 +68,33 @@ async def get_tool(tool_name: str):
 @router.post("/execute", response_model=ToolCallResponse)
 async def execute_tool(request: ToolCallRequest):
     """
-    Execute a tool directly.
+    Execute a tool directly with Village GUI event broadcasting.
 
     Example:
         POST /api/tools/execute
         {"tool": "calculator", "arguments": {"operation": "add", "a": 5, "b": 3}}
     """
+    # Broadcast tool start event (async - works with WebSocket)
+    await broadcaster.broadcast_tool_start(request.tool, request.arguments)
+
     try:
-        result = tool_service.execute(request.tool, request.arguments)
+        # Execute tool (sync - the actual tool functions are sync)
+        result = tool_service.execute_without_broadcast(request.tool, request.arguments)
+
+        # Broadcast completion event
+        await broadcaster.broadcast_tool_complete(request.tool, result, success=True)
+
         return ToolCallResponse(
             tool=request.tool,
             result=result,
             success=True
         )
     except ValueError as e:
+        await broadcaster.broadcast_tool_error(request.tool, str(e))
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Tool execution error: {e}")
+        await broadcaster.broadcast_tool_complete(request.tool, str(e), success=False)
         return ToolCallResponse(
             tool=request.tool,
             result=None,
