@@ -230,6 +230,60 @@ body {
     border: none;
 }
 
+/* Mood controls (Phase 4.4) */
+.mood-controls {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.mood-btn {
+    flex: 1;
+    padding: 6px 2px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: var(--deep-blue);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mood-btn:hover {
+    border-color: var(--gold);
+    transform: scale(1.1);
+}
+
+.mood-btn.happy { border-bottom: 2px solid #44ff88; }
+.mood-btn.stressed { border-bottom: 2px solid #ff6666; }
+.mood-btn.thinking { border-bottom: 2px solid #6699ff; }
+.mood-btn.energized { border-bottom: 2px solid #ffdd00; }
+.mood-btn.idle { border-bottom: 2px solid #888888; }
+
+.mood-sim {
+    display: flex;
+    gap: 6px;
+}
+
+.sim-btn {
+    flex: 1;
+    padding: 5px 8px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: var(--deep-blue);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sim-btn:hover {
+    border-color: var(--gold);
+}
+
+.sim-btn.success { border-left: 3px solid #44ff88; }
+.sim-btn.fail { border-left: 3px solid #ff6666; }
+
 /* Stats panel */
 #stats-panel {
     font-size: 11px;

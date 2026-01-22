@@ -72,6 +72,21 @@
             </div>
 
             <div class="panel-section">
+                <h3>😊 Mood</h3>
+                <div class="mood-controls">
+                    <button onclick="setMood('happy')" class="mood-btn happy">😊</button>
+                    <button onclick="setMood('stressed')" class="mood-btn stressed">😰</button>
+                    <button onclick="setMood('thinking')" class="mood-btn thinking">💭</button>
+                    <button onclick="setMood('energized')" class="mood-btn energized">⚡</button>
+                    <button onclick="setMood('idle')" class="mood-btn idle">😴</button>
+                </div>
+                <div class="mood-sim">
+                    <button onclick="simulateResult(true)" class="sim-btn success">✓ Success</button>
+                    <button onclick="simulateResult(false)" class="sim-btn fail">✗ Fail</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
                 <h3>📊 Stats</h3>
                 <div id="stats-panel">
                     <div class="stat-row">
@@ -170,6 +185,22 @@
             weatherIntensity = value / 100;
             if (window.villageApp) {
                 window.villageApp.setWeather(currentWeather, weatherIntensity);
+            }
+        }
+
+        // Mood control functions
+        function setMood(mood) {
+            if (window.villageApp) {
+                window.villageApp.setMood(mood);
+                const icons = {happy: '😊', stressed: '😰', thinking: '💭', energized: '⚡', idle: '😴'};
+                addLogEntry('system', 'SYSTEM', 'mood', `${icons[mood]} ${mood}`);
+            }
+        }
+
+        function simulateResult(success) {
+            if (window.villageApp) {
+                window.villageApp.simulateResult(success);
+                addLogEntry('system', 'SYSTEM', 'test', success ? '✓ Success recorded' : '✗ Failure recorded');
             }
         }
 

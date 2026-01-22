@@ -198,7 +198,7 @@ class VillageApp {
         const zone = event.zone || getZoneForTool(event.tool);
 
         if (agent) {
-            agent.finishTool();
+            agent.finishTool(event.result_preview, event.success !== false);
         }
 
         // Track in zone history
@@ -395,6 +395,26 @@ class VillageApp {
      */
     setWeather(type, intensity = 0.5) {
         this.renderer.setWeather(type, intensity);
+    }
+
+    /**
+     * Set mood for current agent
+     */
+    setMood(mood, intensity = 0.7) {
+        const agent = this.agents.get(this.currentAgentId);
+        if (agent) {
+            agent.setMood(mood, intensity);
+        }
+    }
+
+    /**
+     * Simulate success/failure for testing moods
+     */
+    simulateResult(success) {
+        const agent = this.agents.get(this.currentAgentId);
+        if (agent) {
+            agent.recordResult(success);
+        }
     }
 }
 

@@ -98,6 +98,102 @@ export class Agent {
         // Trail effect
         this.trail = [];
         this.maxTrailLength = 15;
+
+        // Emotional state (Phase 4.4)
+        this.mood = 'idle';  // idle, happy, stressed, thinking, energized
+        this.moodIntensity = 0.5;  // 0-1
+        this.successHistory = [];  // Recent success/failure records
+        this.maxHistoryLength = 10;
+        this.thoughtBubble = null;  // Current thought (emoji or text)
+        this.thoughtTimer = 0;
+        this.lastMoodChange = 0;
+    }
+
+    /**
+     * Record a task result for mood calculation
+     */
+    recordResult(success) {
+        this.successHistory.push(success);
+        if (this.successHistory.length > this.maxHistoryLength) {
+            this.successHistory.shift();
+        }
+        this.updateMood();
+    }
+
+    /**
+     * Update mood based on recent activity
+     */
+    updateMood() {
+        const now = Date.now();
+
+        // Calculate success rate
+        if (this.successHistory.length === 0) {
+            this.mood = 'idle';
+            this.moodIntensity = 0.3;
+            return;
+        }
+
+        const successCount = this.successHistory.filter(s => s).length;
+        const successRate = successCount / this.successHistory.length;
+        const activityLevel = this.successHistory.length / this.maxHistoryLength;
+
+        // Determine mood
+        if (this.state === 'working') {
+            this.mood = 'thinking';
+            this.moodIntensity = 0.7;
+            this.thoughtBubble = '💭';
+        } else if (successRate >= 0.8 && activityLevel > 0.5) {
+            this.mood = 'energized';
+            this.moodIntensity = 0.9;
+            this.thoughtBubble = '⚡';
+        } else if (successRate >= 0.6) {
+            this.mood = 'happy';
+            this.moodIntensity = 0.6 + successRate * 0.3;
+            this.thoughtBubble = '😊';
+        } else if (successRate < 0.4 && this.successHistory.length >= 3) {
+            this.mood = 'stressed';
+            this.moodIntensity = 0.8;
+            this.thoughtBubble = '😰';
+        } else {
+            this.mood = 'idle';
+            this.moodIntensity = 0.4;
+            this.thoughtBubble = null;
+        }
+
+        this.lastMoodChange = now;
+        this.thoughtTimer = 120;  // Show thought for 2 seconds
+    }
+
+    /**
+     * Set mood directly (for external control)
+     */
+    setMood(mood, intensity = 0.7) {
+        this.mood = mood;
+        this.moodIntensity = intensity;
+
+        const moodEmojis = {
+            happy: '😊',
+            stressed: '😰',
+            thinking: '💭',
+            idle: '😴',
+            energized: '⚡'
+        };
+        this.thoughtBubble = moodEmojis[mood] || null;
+        this.thoughtTimer = 120;
+    }
+
+    /**
+     * Get mood color overlay
+     */
+    getMoodColor() {
+        const moodColors = {
+            happy: '#44ff88',      // Bright green
+            stressed: '#ff6666',   // Red tint
+            thinking: '#6699ff',   // Blue
+            idle: '#888888',       // Gray
+            energized: '#ffdd00'   // Bright yellow
+        };
+        return moodColors[this.mood] || this.color;
     }
 
     /**
@@ -143,12 +239,22 @@ export class Agent {
     /**
      * Finish working
      */
-    finishTool(result = null) {
+    finishTool(result = null, success = true) {
         this.lastResult = result;
         this.currentTool = null;
 
-        // Emit celebration particles
-        this.emitParticleBurst(30);
+        // Record result for mood tracking
+        this.recordResult(success);
+
+        // Emit particles - different colors based on success
+        if (success) {
+            this.emitParticleBurst(30);
+        } else {
+            // Red particles for errors
+            for (let i = 0; i < 20; i++) {
+                this.particles.push(new Particle(this.x, this.y, '#ff4444'));
+            }
+        }
 
         // Return to village square
         this.startX = this.x;
@@ -228,6 +334,16 @@ export class Agent {
         // Fade trail
         this.trail.forEach(t => t.alpha *= 0.92);
         this.trail = this.trail.filter(t => t.alpha > 0.05);
+
+        // Update thought bubble timer
+        if (this.thoughtTimer > 0) {
+            this.thoughtTimer--;
+        }
+
+        // Update mood when working
+        if (this.state === 'working' && this.mood !== 'thinking') {
+            this.setMood('thinking');
+        }
     }
 
     /**
@@ -250,25 +366,44 @@ export class Agent {
         // Breathing effect
         const breathScale = 1 + Math.sin(this.breathPhase) * 0.03;
 
-        // Pulse effect when working
+        // Pulse effect based on mood
         let radius = this.radius * breathScale;
         let glowIntensity = 0;
+        let glowColor = this.color;
+
+        // Mood-based effects
+        const moodColor = this.getMoodColor();
 
         if (this.state === 'working') {
             radius += Math.sin(this.pulsePhase) * 4;
             glowIntensity = 0.5 + Math.sin(this.pulsePhase) * 0.3;
+            glowColor = '#6699ff';  // Blue thinking glow
         } else if (this.state === 'moving' || this.state === 'returning') {
             glowIntensity = 0.3;
+        } else {
+            // Mood-based glow when idle
+            glowIntensity = this.moodIntensity * 0.4;
+            glowColor = moodColor;
+
+            // Stressed agents pulse faster
+            if (this.mood === 'stressed') {
+                radius += Math.sin(this.pulsePhase * 2) * 3;
+                glowIntensity = 0.4 + Math.sin(this.pulsePhase * 2) * 0.3;
+            }
+            // Energized agents have brighter glow
+            if (this.mood === 'energized') {
+                glowIntensity = 0.6 + Math.sin(this.pulsePhase) * 0.2;
+            }
         }
 
-        // Outer glow
+        // Outer glow (mood-colored)
         if (glowIntensity > 0) {
             const gradient = ctx.createRadialGradient(
                 this.x, this.y, radius,
                 this.x, this.y, radius + 25
             );
-            gradient.addColorStop(0, this.color + Math.floor(glowIntensity * 99).toString(16).padStart(2, '0'));
-            gradient.addColorStop(1, this.color + '00');
+            gradient.addColorStop(0, glowColor + Math.floor(glowIntensity * 99).toString(16).padStart(2, '0'));
+            gradient.addColorStop(1, glowColor + '00');
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(this.x, this.y, radius + 25, 0, Math.PI * 2);
@@ -340,6 +475,57 @@ export class Agent {
             // Tool label text
             ctx.fillStyle = '#D4AF37';
             ctx.fillText(this.currentTool, this.x, this.y - radius - 9);
+        }
+
+        // Thought bubble (mood indicator)
+        if (this.thoughtBubble && this.thoughtTimer > 0) {
+            const bubbleAlpha = Math.min(1, this.thoughtTimer / 30);  // Fade out
+            const bobOffset = Math.sin(this.breathPhase * 2) * 3;
+
+            // Bubble background
+            ctx.save();
+            ctx.globalAlpha = bubbleAlpha;
+
+            const bubbleX = this.x + radius + 10;
+            const bubbleY = this.y - radius - 10 + bobOffset;
+
+            // Draw bubble shape
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(bubbleX, bubbleY, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Small circles leading to agent
+            ctx.beginPath();
+            ctx.arc(bubbleX - 12, bubbleY + 8, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(bubbleX - 16, bubbleY + 14, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Emoji
+            ctx.font = '14px serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#000000';
+            ctx.fillText(this.thoughtBubble, bubbleX, bubbleY + 5);
+
+            ctx.restore();
+        }
+
+        // Mood indicator bar (small bar under name)
+        if (this.mood !== 'idle' || this.moodIntensity > 0.5) {
+            const barWidth = 30;
+            const barHeight = 3;
+            const barX = this.x - barWidth / 2;
+            const barY = this.y + radius + 24;
+
+            // Background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+
+            // Mood fill
+            ctx.fillStyle = this.getMoodColor();
+            ctx.fillRect(barX, barY, barWidth * this.moodIntensity, barHeight);
         }
 
         ctx.restore();
