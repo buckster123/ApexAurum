@@ -103,7 +103,7 @@ class WaveformRequest(BaseModel):
 
 @router.get("/list")
 async def list_audio_files(
-    directory: Optional[str] = None,
+    folder: Optional[str] = None,
     pattern: str = "*.mp3"
 ):
     """
@@ -112,7 +112,7 @@ async def list_audio_files(
     Defaults to the sandbox/music directory.
     """
     try:
-        result = audio_list_files(directory=directory, pattern=pattern)
+        result = audio_list_files(folder=folder)
         return result
     except Exception as e:
         logger.error(f"List files error: {e}")
