@@ -56,6 +56,22 @@
             </div>
 
             <div class="panel-section">
+                <h3>🌤️ Weather</h3>
+                <div class="weather-controls">
+                    <button onclick="setWeather('clear')" class="weather-btn clear">☀️</button>
+                    <button onclick="setWeather('rain')" class="weather-btn rain">🌧️</button>
+                    <button onclick="setWeather('storm')" class="weather-btn storm">⛈️</button>
+                    <button onclick="setWeather('snow')" class="weather-btn snow">❄️</button>
+                    <button onclick="setWeather('fog')" class="weather-btn fog">🌫️</button>
+                </div>
+                <div class="intensity-control">
+                    <label>Intensity:</label>
+                    <input type="range" id="weather-intensity" min="0" max="100" value="50"
+                           onchange="updateWeatherIntensity(this.value)">
+                </div>
+            </div>
+
+            <div class="panel-section">
                 <h3>📊 Stats</h3>
                 <div id="stats-panel">
                     <div class="stat-row">
@@ -134,6 +150,26 @@
             if (window.villageApp && window.villageApp.renderer) {
                 window.villageApp.renderer.useRealTimeMode();
                 addLogEntry('system', 'SYSTEM', 'time', 'Using real time');
+            }
+        }
+
+        // Weather control functions
+        let currentWeather = 'clear';
+        let weatherIntensity = 0.5;
+
+        function setWeather(type) {
+            currentWeather = type;
+            if (window.villageApp) {
+                window.villageApp.setWeather(type, weatherIntensity);
+                const icons = {clear: '☀️', rain: '🌧️', storm: '⛈️', snow: '❄️', fog: '🌫️'};
+                addLogEntry('system', 'SYSTEM', 'weather', `${icons[type]} ${type}`);
+            }
+        }
+
+        function updateWeatherIntensity(value) {
+            weatherIntensity = value / 100;
+            if (window.villageApp) {
+                window.villageApp.setWeather(currentWeather, weatherIntensity);
             }
         }
 

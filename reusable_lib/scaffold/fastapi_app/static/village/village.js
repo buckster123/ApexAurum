@@ -369,6 +369,9 @@ class VillageApp {
             agent.draw(this.renderer.ctx);
         }
 
+        // Draw weather overlay (fog, lightning flash)
+        this.renderer.drawWeatherOverlay();
+
         // Continue loop
         requestAnimationFrame(() => this.animate());
     }
@@ -385,6 +388,13 @@ class VillageApp {
      */
     advanceTime(hours = 1) {
         this.renderer.advanceTime(hours);
+    }
+
+    /**
+     * Set weather (clear, rain, storm, snow, fog)
+     */
+    setWeather(type, intensity = 0.5) {
+        this.renderer.setWeather(type, intensity);
     }
 }
 

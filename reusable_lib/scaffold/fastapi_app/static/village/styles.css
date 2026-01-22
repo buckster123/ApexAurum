@@ -161,6 +161,75 @@ body {
 .time-btn.night { border-bottom: 2px solid #4a3f6b; }
 .time-btn.real { border-bottom: 2px solid #00aaff; }
 
+/* Weather controls (Phase 4.2) */
+.weather-controls {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.weather-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: var(--deep-blue);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.weather-btn:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+    transform: scale(1.1);
+}
+
+.weather-btn:active {
+    transform: scale(0.95);
+}
+
+.weather-btn.clear { border-bottom: 2px solid #ffdd66; }
+.weather-btn.rain { border-bottom: 2px solid #6eb5ff; }
+.weather-btn.storm { border-bottom: 2px solid #9370db; }
+.weather-btn.snow { border-bottom: 2px solid #e0e0ff; }
+.weather-btn.fog { border-bottom: 2px solid #a0a0a0; }
+
+.intensity-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.intensity-control input[type="range"] {
+    flex: 1;
+    height: 4px;
+    background: var(--deep-blue);
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.intensity-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.intensity-control input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
 /* Stats panel */
 #stats-panel {
     font-size: 11px;

@@ -70,6 +70,41 @@ export class Renderer {
         this.useRealTime = true;
         this.manualHour = 12;  // For manual override
         this.timeSpeed = 1;    // 1 = real time, 60 = 1 hour per minute
+
+        // Weather system (Phase 4.2)
+        this.weather = 'clear';  // clear, rain, storm, snow, fog
+        this.weatherIntensity = 0.5;  // 0-1
+        this.weatherParticles = [];
+        this.lightningFlash = 0;  // Flash intensity (decays)
+        this.lastLightning = 0;
+        this.initWeatherParticles();
+    }
+
+    /**
+     * Initialize weather particle pool
+     */
+    initWeatherParticles() {
+        this.weatherParticles = [];
+        for (let i = 0; i < 200; i++) {
+            this.weatherParticles.push({
+                x: Math.random() * CANVAS_WIDTH,
+                y: Math.random() * CANVAS_HEIGHT,
+                speed: Math.random() * 2 + 1,
+                size: Math.random() * 2 + 1,
+                wobble: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    /**
+     * Set weather state
+     */
+    setWeather(type, intensity = 0.5) {
+        this.weather = type;
+        this.weatherIntensity = Math.max(0, Math.min(1, intensity));
+        if (type === 'storm') {
+            this.lastLightning = this.time;
+        }
     }
 
     /**
@@ -202,6 +237,25 @@ export class Renderer {
 
         // Store current brightness for zone rendering
         this.currentBrightness = this.getBrightness(hour);
+
+        // Draw weather effects (rain, snow fall behind zones)
+        if (this.weather === 'rain' || this.weather === 'storm' || this.weather === 'snow') {
+            this.drawWeather();
+        }
+    }
+
+    /**
+     * Draw weather overlay (fog, lightning flash - drawn after zones)
+     */
+    drawWeatherOverlay() {
+        if (this.weather === 'fog') {
+            this.drawFog(this.ctx, this.weatherIntensity);
+        }
+        if (this.weather === 'storm' && this.lightningFlash > 0) {
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${this.lightningFlash * 0.3})`;
+            this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            this.lightningFlash -= 0.05;
+        }
     }
 
     /**
@@ -294,6 +348,192 @@ export class Renderer {
         if (hour >= 19 && hour < 21) return 0.5;       // Evening
         if (hour >= 5 && hour < 7) return 0.4;         // Dawn
         return 0.3;                                     // Night
+    }
+
+    /**
+     * Draw weather effects
+     */
+    drawWeather() {
+        if (this.weather === 'clear') return;
+
+        const ctx = this.ctx;
+        const intensity = this.weatherIntensity;
+        const particleCount = Math.floor(this.weatherParticles.length * intensity);
+
+        ctx.save();
+
+        switch (this.weather) {
+            case 'rain':
+                this.drawRain(ctx, particleCount);
+                break;
+            case 'storm':
+                this.drawRain(ctx, particleCount);
+                this.drawLightning(ctx);
+                break;
+            case 'snow':
+                this.drawSnow(ctx, particleCount);
+                break;
+            case 'fog':
+                this.drawFog(ctx, intensity);
+                break;
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * Draw rain particles
+     */
+    drawRain(ctx, count) {
+        ctx.strokeStyle = 'rgba(150, 180, 255, 0.6)';
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i < count; i++) {
+            const p = this.weatherParticles[i];
+
+            // Update position
+            p.y += p.speed * 8;
+            p.x += 2;  // Wind
+
+            // Reset if off screen
+            if (p.y > CANVAS_HEIGHT) {
+                p.y = -10;
+                p.x = Math.random() * (CANVAS_WIDTH + 100) - 50;
+            }
+            if (p.x > CANVAS_WIDTH + 50) {
+                p.x = -50;
+            }
+
+            // Draw raindrop as a short line
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x + 3, p.y + 10 + p.speed * 3);
+            ctx.stroke();
+        }
+    }
+
+    /**
+     * Draw lightning flash
+     */
+    drawLightning(ctx) {
+        // Random lightning strikes
+        if (Math.random() < 0.005 * this.weatherIntensity) {
+            this.lightningFlash = 1;
+            this.lastLightning = this.time;
+        }
+
+        // Decay flash
+        if (this.lightningFlash > 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.lightningFlash * 0.7})`;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Draw lightning bolt occasionally
+            if (this.lightningFlash > 0.8) {
+                this.drawLightningBolt(ctx);
+            }
+
+            this.lightningFlash -= 0.08;
+        }
+    }
+
+    /**
+     * Draw a lightning bolt
+     */
+    drawLightningBolt(ctx) {
+        const startX = Math.random() * CANVAS_WIDTH * 0.6 + CANVAS_WIDTH * 0.2;
+        let x = startX;
+        let y = 0;
+
+        ctx.strokeStyle = 'rgba(255, 255, 200, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+
+        // Jagged path down
+        while (y < CANVAS_HEIGHT * 0.7) {
+            x += (Math.random() - 0.5) * 60;
+            y += Math.random() * 40 + 20;
+            ctx.lineTo(x, y);
+
+            // Branch occasionally
+            if (Math.random() < 0.3) {
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                const branchX = x + (Math.random() - 0.5) * 80;
+                const branchY = y + Math.random() * 50 + 20;
+                ctx.lineTo(branchX, branchY);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    /**
+     * Draw snow particles
+     */
+    drawSnow(ctx, count) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+
+        for (let i = 0; i < count; i++) {
+            const p = this.weatherParticles[i];
+
+            // Update position - snow drifts and falls slowly
+            p.y += p.speed * 1.5;
+            p.x += Math.sin(this.time * 2 + p.wobble) * 0.5;
+
+            // Reset if off screen
+            if (p.y > CANVAS_HEIGHT) {
+                p.y = -5;
+                p.x = Math.random() * CANVAS_WIDTH;
+            }
+
+            // Draw snowflake
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    /**
+     * Draw fog overlay
+     */
+    drawFog(ctx, intensity) {
+        // Multiple fog layers for depth
+        const layers = [
+            { y: CANVAS_HEIGHT * 0.3, alpha: 0.15 * intensity },
+            { y: CANVAS_HEIGHT * 0.5, alpha: 0.25 * intensity },
+            { y: CANVAS_HEIGHT * 0.7, alpha: 0.35 * intensity },
+        ];
+
+        for (const layer of layers) {
+            const gradient = ctx.createLinearGradient(0, layer.y - 100, 0, layer.y + 100);
+            gradient.addColorStop(0, `rgba(180, 180, 200, 0)`);
+            gradient.addColorStop(0.5, `rgba(180, 180, 200, ${layer.alpha})`);
+            gradient.addColorStop(1, `rgba(180, 180, 200, 0)`);
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, layer.y - 100, CANVAS_WIDTH, 200);
+        }
+
+        // Drifting fog wisps
+        const wispCount = Math.floor(5 * intensity);
+        ctx.fillStyle = `rgba(200, 200, 220, ${0.1 * intensity})`;
+
+        for (let i = 0; i < wispCount; i++) {
+            const x = (this.time * 20 + i * 200) % (CANVAS_WIDTH + 200) - 100;
+            const y = CANVAS_HEIGHT * 0.4 + Math.sin(this.time + i) * 50 + i * 40;
+
+            ctx.beginPath();
+            ctx.ellipse(x, y, 100 + i * 20, 30 + i * 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     /**
@@ -554,7 +794,7 @@ export class Renderer {
     }
 
     /**
-     * Draw time indicator (clock and time-of-day icon)
+     * Draw time and weather indicator
      */
     drawTimeIndicator() {
         const ctx = this.ctx;
@@ -566,24 +806,24 @@ export class Renderer {
         const x = CANVAS_WIDTH - 75;
         const y = 15;
 
-        // Background panel
+        // Background panel (taller to fit weather)
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.beginPath();
-        ctx.roundRect(x - 5, y - 5, 70, 25, 5);
+        ctx.roundRect(x - 5, y - 5, 70, this.weather !== 'clear' ? 45 : 25, 5);
         ctx.fill();
 
         // Time icon based on period
-        let icon;
-        if (hour >= 21 || hour < 5) icon = '🌙';
-        else if (hour >= 5 && hour < 7) icon = '🌅';
-        else if (hour >= 7 && hour < 10) icon = '🌤️';
-        else if (hour >= 10 && hour < 17) icon = '☀️';
-        else if (hour >= 17 && hour < 19) icon = '🌇';
-        else icon = '🌆';
+        let timeIcon;
+        if (hour >= 21 || hour < 5) timeIcon = '🌙';
+        else if (hour >= 5 && hour < 7) timeIcon = '🌅';
+        else if (hour >= 7 && hour < 10) timeIcon = '🌤️';
+        else if (hour >= 10 && hour < 17) timeIcon = '☀️';
+        else if (hour >= 17 && hour < 19) timeIcon = '🌇';
+        else timeIcon = '🌆';
 
         ctx.font = '14px serif';
         ctx.textAlign = 'left';
-        ctx.fillText(icon, x, y + 12);
+        ctx.fillText(timeIcon, x, y + 12);
 
         // Time text
         const hours = Math.floor(hour);
@@ -593,6 +833,22 @@ export class Renderer {
         ctx.fillStyle = '#cccccc';
         ctx.font = '12px monospace';
         ctx.fillText(timeStr, x + 22, y + 12);
+
+        // Weather indicator (if not clear)
+        if (this.weather !== 'clear') {
+            const weatherIcons = {
+                rain: '🌧️',
+                storm: '⛈️',
+                snow: '❄️',
+                fog: '🌫️'
+            };
+            ctx.font = '12px serif';
+            ctx.fillText(weatherIcons[this.weather] || '☁️', x, y + 32);
+
+            ctx.fillStyle = '#888888';
+            ctx.font = '10px monospace';
+            ctx.fillText(this.weather.toUpperCase(), x + 18, y + 32);
+        }
 
         ctx.restore();
     }
