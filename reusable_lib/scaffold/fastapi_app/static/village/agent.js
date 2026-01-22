@@ -107,6 +107,61 @@ export class Agent {
         this.thoughtBubble = null;  // Current thought (emoji or text)
         this.thoughtTimer = 0;
         this.lastMoodChange = 0;
+
+        // DJ Mode (Phase 6.4)
+        this.djMode = false;
+        this.djRecordAngle = 0;
+        this.djRecordSpeed = 0;
+        this.danceMode = false;
+        this.danceTimer = 0;
+        this.dancePhase = 0;
+        this.musicalNotes = [];  // Floating music note particles
+    }
+
+    /**
+     * Check if current tool is a DJ booth tool
+     */
+    isDJTool(toolName) {
+        const djTools = [
+            'music_generate', 'music_compose', 'midi_create', 'music_play',
+            'suno_prompt_build', 'suno_prompt_preset_load',
+            'audio_trim', 'audio_fade', 'audio_normalize', 'audio_loop'
+        ];
+        return djTools.includes(toolName);
+    }
+
+    /**
+     * Start dance mode (called when music completes successfully)
+     */
+    startDancing(duration = 180) {
+        this.danceMode = true;
+        this.danceTimer = duration;
+        this.dancePhase = 0;
+        this.setMood('energized', 0.9);
+        this.thoughtBubble = '🎵';
+        this.thoughtTimer = duration;
+        // Burst of musical notes
+        this.emitMusicalNotes(15);
+    }
+
+    /**
+     * Emit floating musical note particles
+     */
+    emitMusicalNotes(count) {
+        const notes = ['🎵', '🎶', '♪', '♫', '🎼'];
+        for (let i = 0; i < count; i++) {
+            this.musicalNotes.push({
+                x: this.x + (Math.random() - 0.5) * 40,
+                y: this.y - 10,
+                vx: (Math.random() - 0.5) * 2,
+                vy: -1 - Math.random() * 2,
+                note: notes[Math.floor(Math.random() * notes.length)],
+                life: 1.0,
+                decay: 0.01 + Math.random() * 0.01,
+                size: 12 + Math.random() * 8,
+                rotation: Math.random() * 0.5 - 0.25
+            });
+        }
     }
 
     /**
@@ -232,6 +287,16 @@ export class Agent {
     startTool(toolName) {
         this.currentTool = toolName;
         this.state = 'working';
+
+        // Check if DJ tool
+        if (this.isDJTool(toolName)) {
+            this.djMode = true;
+            this.djRecordSpeed = 0.05;  // Start spinning
+            this.emitMusicalNotes(5);
+        } else {
+            this.djMode = false;
+        }
+
         // Burst of particles when starting work
         this.emitParticleBurst(20);
     }
@@ -240,11 +305,25 @@ export class Agent {
      * Finish working
      */
     finishTool(result = null, success = true) {
+        const wasDJ = this.djMode;
+        const wasMusicGenerate = this.currentTool === 'music_generate' || this.currentTool === 'music_compose';
+
         this.lastResult = result;
         this.currentTool = null;
 
         // Record result for mood tracking
         this.recordResult(success);
+
+        // DJ mode: dance on success, stop record on failure
+        if (wasDJ) {
+            if (success && wasMusicGenerate) {
+                this.startDancing(180);  // Dance for 3 seconds
+                this.djRecordSpeed = 0.1;  // Speed up record
+            } else {
+                this.djRecordSpeed = 0;  // Stop record
+                this.djMode = false;
+            }
+        }
 
         // Emit particles - different colors based on success
         if (success) {
@@ -344,6 +423,40 @@ export class Agent {
         if (this.state === 'working' && this.mood !== 'thinking') {
             this.setMood('thinking');
         }
+
+        // DJ Mode updates
+        if (this.djMode) {
+            this.djRecordAngle += this.djRecordSpeed;
+            // Emit musical notes periodically while DJing
+            if (this.state === 'working' && Math.random() < 0.02) {
+                this.emitMusicalNotes(1);
+            }
+        }
+
+        // Dance mode updates
+        if (this.danceMode) {
+            this.dancePhase += 0.15;
+            this.danceTimer--;
+            if (this.danceTimer <= 0) {
+                this.danceMode = false;
+                this.djMode = false;
+                this.djRecordSpeed = 0;
+            }
+            // Emit notes while dancing
+            if (Math.random() < 0.05) {
+                this.emitMusicalNotes(1);
+            }
+        }
+
+        // Update musical notes
+        this.musicalNotes.forEach(note => {
+            note.x += note.vx;
+            note.y += note.vy;
+            note.vy += 0.02;  // Slight gravity
+            note.life -= note.decay;
+            note.vx *= 0.99;
+        });
+        this.musicalNotes = this.musicalNotes.filter(n => n.life > 0);
     }
 
     /**
@@ -362,6 +475,68 @@ export class Agent {
 
         // Draw particles
         this.particles.forEach(p => p.draw(ctx));
+
+        // Draw musical notes
+        this.musicalNotes.forEach(note => {
+            ctx.save();
+            ctx.globalAlpha = note.life;
+            ctx.font = `${note.size}px serif`;
+            ctx.textAlign = 'center';
+            ctx.translate(note.x, note.y);
+            ctx.rotate(note.rotation);
+            ctx.fillText(note.note, 0, 0);
+            ctx.restore();
+        });
+
+        // DJ Mode: Draw vinyl record behind agent
+        if (this.djMode) {
+            ctx.save();
+            ctx.translate(drawX, drawY);
+            ctx.rotate(this.djRecordAngle);
+
+            // Vinyl record
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius + 15, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+
+            // Record grooves (concentric circles)
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 1;
+            for (let r = 8; r < this.radius + 12; r += 4) {
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Center label
+            ctx.beginPath();
+            ctx.arc(0, 0, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#cc66ff';  // Purple label
+            ctx.fill();
+
+            // Label detail
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Dance mode: Apply body bounce and sway
+        let danceOffsetY = 0;
+        let danceOffsetX = 0;
+        if (this.danceMode) {
+            // Bounce up and down
+            danceOffsetY = Math.sin(this.dancePhase) * 6;
+            // Slight horizontal sway
+            danceOffsetX = Math.sin(this.dancePhase * 0.5) * 4;
+        }
+
+        // Calculate final draw position
+        const drawX = this.x + danceOffsetX;
+        const drawY = this.y + danceOffsetY;
 
         // Breathing effect
         const breathScale = 1 + Math.sin(this.breathPhase) * 0.03;
@@ -399,21 +574,21 @@ export class Agent {
         // Outer glow (mood-colored)
         if (glowIntensity > 0) {
             const gradient = ctx.createRadialGradient(
-                this.x, this.y, radius,
-                this.x, this.y, radius + 25
+                drawX, drawY, radius,
+                drawX, drawY, radius + 25
             );
             gradient.addColorStop(0, glowColor + Math.floor(glowIntensity * 99).toString(16).padStart(2, '0'));
             gradient.addColorStop(1, glowColor + '00');
             ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, radius + 25, 0, Math.PI * 2);
+            ctx.arc(drawX, drawY, radius + 25, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        // Rotating ring when working
-        if (this.state === 'working') {
+        // Rotating ring when working (or DJ record spinning effect)
+        if (this.state === 'working' && !this.djMode) {
             ctx.save();
-            ctx.translate(this.x, this.y);
+            ctx.translate(drawX, drawY);
             ctx.rotate(this.rotationPhase);
             ctx.strokeStyle = this.color + '66';
             ctx.lineWidth = 2;
@@ -427,26 +602,34 @@ export class Agent {
 
         // Main circle with gradient
         const mainGradient = ctx.createRadialGradient(
-            this.x - radius * 0.3, this.y - radius * 0.3, 0,
-            this.x, this.y, radius
+            drawX - radius * 0.3, drawY - radius * 0.3, 0,
+            drawX, drawY, radius
         );
         mainGradient.addColorStop(0, this.lightenColor(this.color, 40));
         mainGradient.addColorStop(0.7, this.color);
         mainGradient.addColorStop(1, this.darkenColor(this.color, 30));
 
         ctx.beginPath();
-        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+        ctx.arc(drawX, drawY, radius, 0, Math.PI * 2);
         ctx.fillStyle = mainGradient;
         ctx.fill();
 
-        // Border
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
+        // Border - extra glow when dancing
+        if (this.danceMode) {
+            ctx.strokeStyle = '#ffff00';  // Yellow glow
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 10;
+        } else {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+        }
         ctx.stroke();
+        ctx.shadowBlur = 0;
 
         // Inner highlight
         ctx.beginPath();
-        ctx.arc(this.x - radius * 0.25, this.y - radius * 0.25, radius * 0.3, 0, Math.PI * 2);
+        ctx.arc(drawX - radius * 0.25, drawY - radius * 0.25, radius * 0.3, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.fill();
 
@@ -457,11 +640,11 @@ export class Agent {
 
         // Label background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.fillRect(this.x - textWidth/2 - 4, this.y + radius + 6, textWidth + 8, 16);
+        ctx.fillRect(drawX - textWidth/2 - 4, drawY + radius + 6, textWidth + 8, 16);
 
         // Label text
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(this.name, this.x, this.y + radius + 18);
+        ctx.fillText(this.name, drawX, drawY + radius + 18);
 
         // Tool label when working
         if (this.currentTool) {
@@ -470,11 +653,11 @@ export class Agent {
 
             // Tool label background
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(this.x - toolWidth/2 - 4, this.y - radius - 20, toolWidth + 8, 14);
+            ctx.fillRect(drawX - toolWidth/2 - 4, drawY - radius - 20, toolWidth + 8, 14);
 
             // Tool label text
             ctx.fillStyle = '#D4AF37';
-            ctx.fillText(this.currentTool, this.x, this.y - radius - 9);
+            ctx.fillText(this.currentTool, drawX, drawY - radius - 9);
         }
 
         // Thought bubble (mood indicator)
@@ -486,8 +669,8 @@ export class Agent {
             ctx.save();
             ctx.globalAlpha = bubbleAlpha;
 
-            const bubbleX = this.x + radius + 10;
-            const bubbleY = this.y - radius - 10 + bobOffset;
+            const bubbleX = drawX + radius + 10;
+            const bubbleY = drawY - radius - 10 + bobOffset;
 
             // Draw bubble shape
             ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -516,8 +699,8 @@ export class Agent {
         if (this.mood !== 'idle' || this.moodIntensity > 0.5) {
             const barWidth = 30;
             const barHeight = 3;
-            const barX = this.x - barWidth / 2;
-            const barY = this.y + radius + 24;
+            const barX = drawX - barWidth / 2;
+            const barY = drawY + radius + 24;
 
             // Background
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
