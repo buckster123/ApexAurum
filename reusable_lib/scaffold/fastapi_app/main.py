@@ -23,6 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app_config import settings
 from routes import chat, tools, models, memory, benchmark, conversations, stats, presets, village, prompts
+from routes import suno, audio
 from routes import websocket as ws_routes
 
 # Configure logging
@@ -80,6 +81,8 @@ app.include_router(stats.router, prefix="/api/stats", tags=["Statistics"])
 app.include_router(presets.router, prefix="/api/presets", tags=["Presets"])
 app.include_router(village.router, tags=["Village Protocol"])
 app.include_router(prompts.router, prefix="/api/prompts", tags=["Prompts"])
+app.include_router(suno.router, prefix="/api/suno", tags=["Suno Compiler"])
+app.include_router(audio.router, prefix="/api/audio", tags=["Audio Editor"])
 app.include_router(ws_routes.router, prefix="/ws", tags=["WebSocket"])
 
 # Mount Village GUI static files
@@ -110,7 +113,7 @@ async def api_info():
     return {
         "name": "Apex Aurum - Lab Edition API",
         "version": "1.0.0",
-        "phase": "9 - Village GUI",
+        "phase": "10 - DJ Booth",
         "endpoints": {
             "chat": "/api/chat",
             "stream": "/api/chat/stream",
@@ -122,6 +125,8 @@ async def api_info():
             "stats": "/api/stats",
             "presets": "/api/presets",
             "village": "/api/village",
+            "suno": "/api/suno",
+            "audio": "/api/audio",
             "websocket": "/ws/village",
             "village_gui": "/village/"
         }

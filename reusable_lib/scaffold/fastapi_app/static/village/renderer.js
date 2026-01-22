@@ -119,6 +119,18 @@ export class Renderer {
     }
 
     /**
+     * Get time of day category for sound system
+     * @returns {'night'|'dawn'|'day'|'dusk'}
+     */
+    getTimeOfDay() {
+        const hour = this.getCurrentHour();
+        if (hour >= 21 || hour < 5) return 'night';
+        if (hour >= 5 && hour < 7) return 'dawn';
+        if (hour >= 19 && hour < 21) return 'dusk';
+        return 'day';
+    }
+
+    /**
      * Get sky palette for current time
      */
     getSkyPalette(hour) {

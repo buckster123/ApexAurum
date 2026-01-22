@@ -13,9 +13,15 @@ from typing import Dict, Any, List, Optional, Callable
 import sys
 from pathlib import Path
 
+# Path to reusable_lib directory
 lib_path = Path(__file__).parent.parent.parent.parent
 if str(lib_path) not in sys.path:
     sys.path.insert(0, str(lib_path))
+
+# Path to project root (for tools/ directory)
+project_root = lib_path.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from reusable_lib.tools import (
     get_current_time,
@@ -103,6 +109,47 @@ from reusable_lib.tools import (
     dataset_list,
     dataset_query,
     DATASET_TOOL_SCHEMAS,
+)
+
+# Import from parent project tools (Suno Compiler and Audio Editor)
+from tools.suno_compiler import (
+    suno_prompt_build,
+    suno_prompt_preset_save,
+    suno_prompt_preset_load,
+    suno_prompt_preset_list,
+    SUNO_PROMPT_BUILD_SCHEMA,
+    SUNO_PROMPT_PRESET_SAVE_SCHEMA,
+    SUNO_PROMPT_PRESET_LOAD_SCHEMA,
+    SUNO_PROMPT_PRESET_LIST_SCHEMA,
+)
+
+from tools.audio_editor import (
+    audio_info,
+    audio_trim,
+    audio_fade,
+    audio_normalize,
+    audio_loop,
+    audio_concat,
+    audio_speed,
+    audio_reverse,
+    audio_list_files,
+    audio_get_waveform,
+    AUDIO_EDITOR_TOOL_SCHEMAS,
+)
+
+# Music tools from parent project
+from tools.music import (
+    music_generate,
+    music_status,
+    music_result,
+    music_list,
+    music_favorite,
+    music_library,
+    music_search,
+    music_play,
+    midi_create,
+    music_compose,
+    MUSIC_TOOL_SCHEMAS,
 )
 
 from services.llm_service import get_llm_client
@@ -253,6 +300,36 @@ class ToolService:
 
         self.register("dataset_list", dataset_list, DATASET_TOOL_SCHEMAS.get("dataset_list"))
         self.register("dataset_query", dataset_query, DATASET_TOOL_SCHEMAS.get("dataset_query"))
+
+        # Suno Prompt Compiler tools
+        self.register("suno_prompt_build", suno_prompt_build, SUNO_PROMPT_BUILD_SCHEMA)
+        self.register("suno_prompt_preset_save", suno_prompt_preset_save, SUNO_PROMPT_PRESET_SAVE_SCHEMA)
+        self.register("suno_prompt_preset_load", suno_prompt_preset_load, SUNO_PROMPT_PRESET_LOAD_SCHEMA)
+        self.register("suno_prompt_preset_list", suno_prompt_preset_list, SUNO_PROMPT_PRESET_LIST_SCHEMA)
+
+        # Audio Editor tools
+        self.register("audio_info", audio_info, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_info"))
+        self.register("audio_trim", audio_trim, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_trim"))
+        self.register("audio_fade", audio_fade, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_fade"))
+        self.register("audio_normalize", audio_normalize, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_normalize"))
+        self.register("audio_loop", audio_loop, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_loop"))
+        self.register("audio_concat", audio_concat, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_concat"))
+        self.register("audio_speed", audio_speed, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_speed"))
+        self.register("audio_reverse", audio_reverse, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_reverse"))
+        self.register("audio_list_files", audio_list_files, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_list_files"))
+        self.register("audio_get_waveform", audio_get_waveform, AUDIO_EDITOR_TOOL_SCHEMAS.get("audio_get_waveform"))
+
+        # Music Generation tools
+        self.register("music_generate", music_generate, MUSIC_TOOL_SCHEMAS.get("music_generate"))
+        self.register("music_status", music_status, MUSIC_TOOL_SCHEMAS.get("music_status"))
+        self.register("music_result", music_result, MUSIC_TOOL_SCHEMAS.get("music_result"))
+        self.register("music_list", music_list, MUSIC_TOOL_SCHEMAS.get("music_list"))
+        self.register("music_favorite", music_favorite, MUSIC_TOOL_SCHEMAS.get("music_favorite"))
+        self.register("music_library", music_library, MUSIC_TOOL_SCHEMAS.get("music_library"))
+        self.register("music_search", music_search, MUSIC_TOOL_SCHEMAS.get("music_search"))
+        self.register("music_play", music_play, MUSIC_TOOL_SCHEMAS.get("music_play"))
+        self.register("midi_create", midi_create, MUSIC_TOOL_SCHEMAS.get("midi_create"))
+        self.register("music_compose", music_compose, MUSIC_TOOL_SCHEMAS.get("music_compose"))
 
         # Update session_info with actual tool count
         set_session_info_config(tool_count=len(self.tools))

@@ -40,6 +40,24 @@ TOOL_ZONE_MAP = {
     "midi_create": "dj_booth",
     "music_compose": "dj_booth",
 
+    # DJ Booth - Suno Prompt Compiler
+    "suno_prompt_build": "dj_booth",
+    "suno_prompt_preset_save": "dj_booth",
+    "suno_prompt_preset_load": "dj_booth",
+    "suno_prompt_preset_list": "dj_booth",
+
+    # DJ Booth - Audio Editor
+    "audio_info": "dj_booth",
+    "audio_trim": "dj_booth",
+    "audio_fade": "dj_booth",
+    "audio_normalize": "dj_booth",
+    "audio_loop": "dj_booth",
+    "audio_concat": "dj_booth",
+    "audio_speed": "dj_booth",
+    "audio_reverse": "dj_booth",
+    "audio_list_files": "dj_booth",
+    "audio_get_waveform": "dj_booth",
+
     # Memory Garden - Vector and memory tools
     "vector_add": "memory_garden",
     "vector_search": "memory_garden",

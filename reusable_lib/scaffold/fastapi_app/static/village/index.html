@@ -103,6 +103,87 @@
                     </div>
                 </div>
             </div>
+
+            <div class="panel-section dj-booth-section">
+                <h3>🎵 DJ Booth</h3>
+                <div class="dj-controls">
+                    <div class="dj-preset-row">
+                        <select id="dj-preset-select">
+                            <option value="">Select Preset...</option>
+                        </select>
+                        <button onclick="loadDJPresets()" class="dj-btn refresh" title="Refresh presets">↻</button>
+                    </div>
+                    <div class="dj-intent-row">
+                        <input type="text" id="dj-intent" placeholder="Describe the sound..." />
+                    </div>
+                    <div class="dj-options-row">
+                        <select id="dj-mood">
+                            <option value="mystical">Mystical</option>
+                            <option value="ethereal">Ethereal</option>
+                            <option value="dark">Dark</option>
+                            <option value="triumphant">Triumphant</option>
+                            <option value="playful">Playful</option>
+                            <option value="melancholic">Melancholic</option>
+                            <option value="error">Error/Glitch</option>
+                        </select>
+                        <select id="dj-purpose">
+                            <option value="sfx">SFX (5-30s)</option>
+                            <option value="ambient">Ambient (1-4m)</option>
+                            <option value="loop">Loop (15-60s)</option>
+                            <option value="jingle">Jingle (15-45s)</option>
+                            <option value="song">Full Song</option>
+                        </select>
+                    </div>
+                    <div class="dj-sliders-row">
+                        <div class="dj-slider">
+                            <label>Weird</label>
+                            <input type="range" id="dj-weirdness" min="0" max="100" value="30">
+                        </div>
+                        <div class="dj-slider">
+                            <label>Style</label>
+                            <input type="range" id="dj-style" min="0" max="100" value="70">
+                        </div>
+                    </div>
+                    <div class="dj-buttons-row">
+                        <button onclick="compilePrompt()" class="dj-btn compile">🔮 Compile</button>
+                        <button onclick="generateMusic()" class="dj-btn generate" id="dj-generate-btn">🎹 Generate</button>
+                    </div>
+                    <div class="dj-status" id="dj-status">Ready</div>
+                    <div class="dj-preview" id="dj-preview" style="display: none;">
+                        <div class="dj-preview-text" id="dj-preview-text"></div>
+                    </div>
+                </div>
+                <div class="dj-audio" id="dj-audio-container" style="display: none;">
+                    <audio id="dj-audio-player" controls></audio>
+                    <div class="dj-audio-controls">
+                        <button onclick="editAudio('trim')" class="dj-btn mini">✂️ Trim</button>
+                        <button onclick="editAudio('fade')" class="dj-btn mini">📉 Fade</button>
+                        <button onclick="editAudio('normalize')" class="dj-btn mini">📊 Norm</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>🔊 Sound</h3>
+                <div class="sound-controls">
+                    <div class="sound-row">
+                        <label>Master</label>
+                        <input type="range" id="sound-master" min="0" max="100" value="70"
+                               onchange="updateVolume('master', this.value)">
+                        <button onclick="toggleMute()" id="mute-btn" class="sound-btn">🔊</button>
+                    </div>
+                    <div class="sound-row">
+                        <label>UI</label>
+                        <input type="range" id="sound-ui" min="0" max="100" value="100"
+                               onchange="updateVolume('ui', this.value)">
+                    </div>
+                    <div class="sound-row">
+                        <label>Ambient</label>
+                        <input type="range" id="sound-ambient" min="0" max="100" value="50"
+                               onchange="updateVolume('ambient', this.value)">
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- Center: Canvas -->
@@ -267,6 +348,241 @@
         if (savedAgent) {
             document.getElementById('agent-select').value = savedAgent;
         }
+
+        // =================================================================
+        // DJ Booth Functions
+        // =================================================================
+
+        let currentCompiledPrompt = null;
+        let currentAudioFile = null;
+
+        // Load presets on page load
+        async function loadDJPresets() {
+            try {
+                const res = await fetch('/api/suno/presets');
+                const data = await res.json();
+                const select = document.getElementById('dj-preset-select');
+                select.innerHTML = '<option value="">Select Preset...</option>';
+                (data.presets || []).forEach(name => {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name.replace(/_/g, ' ');
+                    select.appendChild(opt);
+                });
+            } catch(e) {
+                console.error('Failed to load presets:', e);
+            }
+        }
+
+        // Preset selection handler
+        document.getElementById('dj-preset-select').addEventListener('change', async function() {
+            if (!this.value) return;
+            try {
+                const res = await fetch(`/api/suno/presets/${this.value}`);
+                const data = await res.json();
+                if (data.config) {
+                    document.getElementById('dj-intent').value = data.config.intent || '';
+                    document.getElementById('dj-mood').value = data.config.mood || 'mystical';
+                    document.getElementById('dj-purpose').value = data.config.purpose || 'sfx';
+                    document.getElementById('dj-weirdness').value = data.config.weirdness || 50;
+                    document.getElementById('dj-style').value = data.config.style_balance || 50;
+                    updateDJStatus('Preset loaded: ' + this.value);
+                }
+            } catch(e) {
+                updateDJStatus('Failed to load preset');
+            }
+        });
+
+        // Compile prompt
+        async function compilePrompt() {
+            const intent = document.getElementById('dj-intent').value;
+            if (!intent) {
+                updateDJStatus('Enter a sound description first');
+                return;
+            }
+
+            updateDJStatus('Compiling...');
+            try {
+                const res = await fetch('/api/suno/compile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        intent: intent,
+                        mood: document.getElementById('dj-mood').value,
+                        purpose: document.getElementById('dj-purpose').value,
+                        weirdness: parseInt(document.getElementById('dj-weirdness').value),
+                        style_balance: parseInt(document.getElementById('dj-style').value),
+                        instrumental: true
+                    })
+                });
+                const data = await res.json();
+                currentCompiledPrompt = data;
+
+                // Show preview
+                const preview = document.getElementById('dj-preview');
+                const previewText = document.getElementById('dj-preview-text');
+                preview.style.display = 'block';
+                previewText.textContent = data.display || data.prompt?.substring(0, 200) + '...';
+
+                updateDJStatus('Prompt compiled! Ready to generate.');
+                addLogEntry('complete', 'DJ', 'suno_compile', intent.substring(0, 30) + '...');
+
+            } catch(e) {
+                console.error('Compile error:', e);
+                updateDJStatus('Compile failed: ' + e.message);
+            }
+        }
+
+        // Generate music
+        async function generateMusic() {
+            if (!currentCompiledPrompt || !currentCompiledPrompt.music_generate_args) {
+                updateDJStatus('Compile a prompt first');
+                return;
+            }
+
+            const btn = document.getElementById('dj-generate-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            updateDJStatus('Generating music... (2-4 min)');
+
+            try {
+                // Call music_generate tool via API
+                const args = currentCompiledPrompt.music_generate_args;
+                const res = await fetch('/api/tools/execute', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tool: 'music_generate',
+                        arguments: {
+                            prompt: args.prompt,
+                            style: args.style,
+                            title: args.title,
+                            model: args.model || 'V5',
+                            is_instrumental: args.is_instrumental !== false,
+                            blocking: true
+                        }
+                    })
+                });
+                const data = await res.json();
+
+                if (data.result && data.result.status === 'complete') {
+                    const files = data.result.files || [];
+                    if (files.length > 0) {
+                        currentAudioFile = files[0];
+                        showAudioPlayer(currentAudioFile);
+                        updateDJStatus('Generated! ' + files.length + ' track(s)');
+                        addLogEntry('complete', 'DJ', 'music_generate', args.title);
+                    }
+                } else {
+                    updateDJStatus('Generation failed: ' + (data.result?.error || 'Unknown error'));
+                }
+
+            } catch(e) {
+                console.error('Generate error:', e);
+                updateDJStatus('Generate failed: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎹 Generate';
+            }
+        }
+
+        // Show audio player
+        function showAudioPlayer(filePath) {
+            const container = document.getElementById('dj-audio-container');
+            const player = document.getElementById('dj-audio-player');
+
+            // Convert file path to static URL
+            const fileName = filePath.split('/').pop();
+            player.src = `/static/music/${fileName}`;
+            container.style.display = 'block';
+        }
+
+        // Audio editing shortcuts
+        async function editAudio(action) {
+            if (!currentAudioFile) {
+                updateDJStatus('No audio to edit');
+                return;
+            }
+
+            updateDJStatus(`Applying ${action}...`);
+            try {
+                let endpoint, body;
+                switch(action) {
+                    case 'trim':
+                        endpoint = '/api/audio/sfx-pipeline';
+                        body = { file_path: currentAudioFile, duration: 5.0 };
+                        break;
+                    case 'fade':
+                        endpoint = '/api/audio/fade';
+                        body = { file_path: currentAudioFile, fade_in_ms: 100, fade_out_ms: 500 };
+                        break;
+                    case 'normalize':
+                        endpoint = '/api/audio/normalize';
+                        body = { file_path: currentAudioFile, target_dbfs: -14.0 };
+                        break;
+                }
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                if (data.output_file) {
+                    currentAudioFile = data.output_file;
+                    showAudioPlayer(currentAudioFile);
+                    updateDJStatus(`${action} applied!`);
+                    addLogEntry('complete', 'DJ', `audio_${action}`, 'OK');
+                } else {
+                    updateDJStatus(`${action} failed`);
+                }
+            } catch(e) {
+                updateDJStatus(`${action} error: ` + e.message);
+            }
+        }
+
+        // Update DJ status display
+        function updateDJStatus(msg) {
+            document.getElementById('dj-status').textContent = msg;
+        }
+
+        // =================================================================
+        // Sound Control Functions
+        // =================================================================
+
+        function updateVolume(category, value) {
+            if (!window.soundManager) return;
+            const vol = value / 100;
+            if (category === 'master') {
+                window.soundManager.setMasterVolume(vol);
+            } else {
+                window.soundManager.setCategoryVolume(category, vol);
+            }
+        }
+
+        function toggleMute() {
+            if (!window.soundManager) return;
+            const muted = window.soundManager.toggleMute();
+            document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+        }
+
+        // Initialize sound controls from saved settings
+        function initSoundControls() {
+            if (!window.soundManager) return;
+            const status = window.soundManager.getStatus();
+            document.getElementById('sound-master').value = status.masterVolume * 100;
+            document.getElementById('sound-ui').value = (status.categoryVolumes.ui || 1) * 100;
+            document.getElementById('sound-ambient').value = (status.categoryVolumes.ambient || 0.5) * 100;
+            document.getElementById('mute-btn').textContent = status.muted ? '🔇' : '🔊';
+        }
+
+        // Load presets on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDJPresets();
+            // Init sound controls after a short delay (wait for soundManager)
+            setTimeout(initSoundControls, 1000);
+        });
     </script>
     <script type="module" src="village.js"></script>
     <script>

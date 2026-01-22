@@ -3,11 +3,13 @@
  *
  * Coordinates WebSocket events, agents, and rendering.
  * Phase 3: Integrated with HTML UI panels
+ * Phase 5: Sound system integration
  */
 
 import { ZONES, ZONE_TOOLS, getZoneForTool, getZoneAtPoint } from './zones.js';
 import { Agent, AGENT_COLORS } from './agent.js';
 import { Renderer } from './renderer.js';
+import { soundManager } from './sound.js';
 
 class VillageApp {
     constructor() {
@@ -53,6 +55,14 @@ class VillageApp {
         this.maxReconnectAttempts = 10;
         this.connectWebSocket();
 
+        // Sound system - initialize on first click
+        this.soundInitialized = false;
+        this.initSoundOnInteraction();
+
+        // Track time/weather for sound updates
+        this.lastTimeOfDay = null;
+        this.lastWeather = null;
+
         // Start render loop
         this.animate();
 
@@ -60,6 +70,58 @@ class VillageApp {
         window.villageApp = this;
 
         console.log('Village GUI initialized');
+    }
+
+    /**
+     * Initialize sound system on first user interaction
+     * (Required by browser autoplay policies)
+     */
+    initSoundOnInteraction() {
+        const initSound = async () => {
+            if (this.soundInitialized) return;
+
+            const success = await soundManager.init();
+            if (success) {
+                this.soundInitialized = true;
+                console.log('[Village] Sound system initialized');
+
+                // Start ambient based on current time
+                this.updateAmbientSound();
+
+                // Remove listeners
+                document.removeEventListener('click', initSound);
+                document.removeEventListener('keydown', initSound);
+            }
+        };
+
+        document.addEventListener('click', initSound);
+        document.addEventListener('keydown', initSound);
+    }
+
+    /**
+     * Update ambient sound based on time of day
+     */
+    updateAmbientSound() {
+        if (!this.soundInitialized) return;
+
+        const timeOfDay = this.renderer.getTimeOfDay();
+        if (timeOfDay !== this.lastTimeOfDay) {
+            this.lastTimeOfDay = timeOfDay;
+            soundManager.setAmbient(timeOfDay);
+        }
+    }
+
+    /**
+     * Update weather sound
+     */
+    updateWeatherSound() {
+        if (!this.soundInitialized) return;
+
+        const weather = this.renderer.weather?.type;
+        if (weather !== this.lastWeather) {
+            this.lastWeather = weather;
+            soundManager.setWeather(weather);
+        }
     }
 
     /**
@@ -183,6 +245,12 @@ class VillageApp {
         this.activeZone = zone;
         this.status.lastTool = event.tool;
 
+        // Play sound
+        if (this.soundInitialized) {
+            soundManager.playToolSound(event.tool, 'tool_start', zone);
+            soundManager.startThinking();
+        }
+
         // Update activity log
         if (window.addLogEntry) {
             addLogEntry('start', agentId, event.tool, null, zone);
@@ -199,6 +267,13 @@ class VillageApp {
 
         if (agent) {
             agent.finishTool(event.result_preview, event.success !== false);
+        }
+
+        // Play sound
+        if (this.soundInitialized) {
+            soundManager.stopThinking();
+            const eventType = event.success !== false ? 'tool_complete' : 'tool_error';
+            soundManager.playToolSound(event.tool, eventType, zone);
         }
 
         // Track in zone history
@@ -372,6 +447,11 @@ class VillageApp {
         // Draw weather overlay (fog, lightning flash)
         this.renderer.drawWeatherOverlay();
 
+        // Update ambient sound based on time (check every ~60 frames)
+        if (this.soundInitialized && Math.random() < 0.016) {
+            this.updateAmbientSound();
+        }
+
         // Continue loop
         requestAnimationFrame(() => this.animate());
     }
@@ -395,6 +475,29 @@ class VillageApp {
      */
     setWeather(type, intensity = 0.5) {
         this.renderer.setWeather(type, intensity);
+        this.updateWeatherSound();
+
+        // Play thunder for storms
+        if (type === 'storm' && this.soundInitialized) {
+            // Random thunder during storms
+            this.scheduleThunder();
+        }
+    }
+
+    /**
+     * Schedule random thunder sounds during storms
+     */
+    scheduleThunder() {
+        if (this.renderer.weather?.type !== 'storm') return;
+
+        // Random delay 5-20 seconds
+        const delay = 5000 + Math.random() * 15000;
+        setTimeout(() => {
+            if (this.renderer.weather?.type === 'storm' && this.soundInitialized) {
+                soundManager.playThunder();
+                this.scheduleThunder(); // Schedule next
+            }
+        }, delay);
     }
 
     /**
@@ -423,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Village GUI: DOM ready, creating app...');
     try {
         window.villageApp = new VillageApp();
+        window.soundManager = soundManager; // Export for UI control
         console.log('Village GUI: App created successfully');
     } catch (e) {
         console.error('Village GUI: Failed to create app:', e);
