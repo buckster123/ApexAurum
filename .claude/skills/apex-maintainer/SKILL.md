@@ -8,7 +8,7 @@ allowed-tools: Bash(find:*), Bash(ls:*), Bash(grep:*), Bash(wc:*), Read, Glob
 
 **Project:** ApexAurum - Claude Edition
 **Type:** Production-grade AI chat platform with Claude API
-**Status:** V1.0 Beta - Production Ready + Music Pipeline Phase 1.5 + Dataset Creator + Group Chat
+**Status:** V1.0 Beta - Production Ready
 **Location:** `/home/llm/ApexAurum`
 
 ---
@@ -20,10 +20,10 @@ When starting a new session or asked about project status, follow these steps:
 ### 1. Run Health Check
 
 ```bash
-cd `/home/llm/ApexAurum`
+cd /home/llm/ApexAurum
 
-# Check tool count (should be 50)
-python -c "from tools import ALL_TOOLS; print(f'✓ {len(ALL_TOOLS)} tools loaded')" 2>/dev/null || echo "⚠ Tools not loading"
+# Check tool count (should be 67)
+./venv/bin/python -c "from tools import ALL_TOOLS; print(f'✓ {len(ALL_TOOLS)} tools loaded')" 2>/dev/null || echo "⚠ Tools not loading"
 
 # Check environment
 test -f .env && echo "✓ Environment configured" || echo "⚠ Missing .env"
@@ -39,21 +39,22 @@ test -f main.py && wc -l main.py || echo "⚠ main.py missing"
 
 **ALWAYS read these first (in order):**
 
-1. **PROJECT_STATUS.md** (5 min) - Current state, what works, what's pending
-   - Located: `/home/llm/ApexAurum/PROJECT_STATUS.md`/``
+1. **CLAUDE.md** (comprehensive) - Complete project context for AI assistants
+   - Located: `/home/llm/ApexAurum/CLAUDE.md`
+   - Contains: Architecture, all features, code patterns, recent updates
+
+2. **PROJECT_STATUS.md** (5 min) - Current state, what works, what's pending
+   - Located: `/home/llm/ApexAurum/PROJECT_STATUS.md`
    - Contains: Current metrics, completeness status, pending work
 
-2. **DEVELOPMENT_GUIDE.md** (scan as needed) - How to work with the codebase
+3. **DEVELOPMENT_GUIDE.md** (scan as needed) - How to work with the codebase
    - Located: `/home/llm/ApexAurum/DEVELOPMENT_GUIDE.md`
    - Contains: Common tasks, troubleshooting, code navigation
-
-3. If working on **agents**: Read `/home/llm/ApexAurum/dev_log_archive_and_testfiles/AGENT_INTEGRATION_TODO.md`
-   - Agent system code complete, needs UI testing
 
 ### 3. Provide Status Summary
 
 After checks, summarize:
-- Tools count (should be 50)
+- Tools count (should be 67)
 - Environment status
 - What's currently pending (check PROJECT_STATUS.md)
 - Streamlit status
@@ -65,25 +66,31 @@ After checks, summarize:
 
 **ApexAurum - Claude Edition**: Production-grade Claude API chat interface with:
 
-- 📚 Dataset Creator (vector datasets from documents for agent access)
-- 🎵 Music generation (Suno AI with sidebar player + curation)
-- 🤖 Multi-agent orchestration (spawn independent AI agents)
-- 🏘️ Village Protocol (multi-agent memory across 3 realms)
-- 📊 Thread visualization (Mermaid graphs + convergence detection)
-- 💰 50-90% cost savings (intelligent prompt caching)
-- 🔍 Semantic search (vector embeddings, ChromaDB)
-- 📖 Knowledge base (persistent memory)
-- 🛠️ 50 tools (filesystem, web, code exec, agents, vector search, music, datasets, session_info)
-- 🧠 Context management (5 strategies, auto-summarization)
-- ⚡ Real-time streaming responses
+- 🧠 **Neural Resonance** (EEG/BCI integration for emotional perception)
+- 💭 **Extended Thinking** (deep reasoning mode with interleaved tool use)
+- 🎵 **Music Pipeline Phase 2A** (MIDI composition → Suno AI generation)
+- 🎬 **Music Visualizer** (video generation from audio)
+- 📚 **Dataset Creator** (vector datasets from documents for agent access)
+- 🤖 **Multi-agent orchestration** (spawn independent AI agents)
+- 🏘️ **Village Protocol** (multi-agent memory across 3 realms)
+- 👥 **Group Chat** (parallel multi-agent dialogue with tools)
+- 📊 **Thread visualization** (Mermaid graphs + convergence detection)
+- 💰 **50-90% cost savings** (intelligent prompt caching)
+- 🔍 **Semantic search** (vector embeddings, ChromaDB)
+- 📖 **Knowledge base** (persistent memory with health monitoring)
+- 🛠️ **67 tools** across 11 categories
+- 🧠 **Context management** (5 strategies, auto-summarization)
+- ⚡ **Real-time streaming** responses
+- 🐳 **Docker support** + one-click install script
 
 **Code Stats:**
-- ~24,500 lines of production code
-- 5,643 lines in main.py (Streamlit UI)
-- 27 core modules, 9 tool modules, 3 UI modules
+- ~28,000 lines of production code
+- 5,800+ lines in main.py (Streamlit UI)
+- 28 core modules, 10 tool modules, 3 UI modules
+- 5 pages (main, village square, group chat, dataset creator, music visualizer)
 - 45+ documentation files
 - 14 test suites
-- 4 primary agent bootstraps (AZOTH, ELYSIAN, VAJRA, KETHER)
+- 4 primary agent personalities (AZOTH, ELYSIAN, VAJRA, KETHER)
 
 ---
 
@@ -91,28 +98,57 @@ After checks, summarize:
 
 ### ✅ What's Complete (100%)
 
-- Core chat system (100%)
-- Tool system with 50 tools (100%)
-- Dataset Creator (100%) - PDF+OCR, TXT, MD, DOCX, HTML
-- Music Pipeline Phase 1.5 (100%) - Suno AI + curation tools
+**Core Systems:**
+- Core chat system with streaming (100%)
+- Tool system with 67 tools (100%)
 - Prompt caching with 4 strategies (100%)
 - Context management with 5 strategies (100%)
+- Cost & rate tracking (100%)
+
+**Advanced Features:**
+- Neural Resonance EEG integration (100%) - 8 tools, synthetic board testing
+- Extended Thinking mode (100%) - Live test pending (API credits)
+- Music Pipeline Phase 2A (100%) - MIDI → Suno AI
+- Music Visualizer (100%) - Video generation
+- Dataset Creator (100%) - PDF+OCR, TXT, MD, DOCX, HTML
 - Vector search & knowledge base (100%)
+- Memory Health (adaptive architecture) (100%)
+
+**Multi-Agent:**
 - Village Protocol v1.0 (100%)
+- Group Chat with parallel execution (100%)
 - Thread visualization (100%)
 - Convergence detection (100%)
-- Conversation management with pagination (100%)
-- Cost & rate tracking (100%)
-- Beautiful Streamlit UI (100%)
-- Multi-agent system + Village Square (100%)
-- Group Chat with parallel execution + tools + human input (100%)
+
+**Infrastructure:**
+- Docker support (100%)
+- One-click install script (100%)
+- ARM64 BrainFlow build script (100%)
 
 ### 🔮 Optional Enhancements (Future)
 
-- Music Pipeline Phase 2 (MIDI reference tracks)
+- Live EEG hardware testing (needs OpenBCI device)
+- Extended Thinking live test (needs API credits)
 - Keyboard shortcuts for power users
 - Enhanced export formats
 - Agent workflows (automated multi-agent tasks)
+
+---
+
+## Tool Categories (67 Tools)
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| **Utilities** | 6 | `get_current_time`, `calculator`, `session_info` |
+| **Filesystem** | 9 | `fs_read_file`, `fs_write_file`, `fs_edit`, `fs_read_lines` |
+| **Sandbox** | 6 | `execute_python`, `execute_python_sandbox`, `sandbox_workspace_*` |
+| **Memory** | 5 | `memory_store`, `memory_retrieve`, `memory_search` |
+| **Agents** | 5 | `agent_spawn`, `agent_status`, `socratic_council` |
+| **Vector** | 11 | `vector_search`, `vector_add_knowledge`, `vector_search_village` |
+| **Memory Health** | 5 | `memory_health_stale`, `memory_consolidate` |
+| **Music** | 10 | `midi_create`, `music_compose`, `music_generate`, `music_play` |
+| **Datasets** | 2 | `dataset_list`, `dataset_query` |
+| **EEG/Neural** | 8 | `eeg_connect`, `eeg_stream_start`, `eeg_realtime_emotion` |
 
 ---
 
@@ -120,50 +156,63 @@ After checks, summarize:
 
 ```
 ApexAurum/
-├── main.py                      ⭐ Main app (5,643 lines)
+├── main.py                      ⭐ Main app (5,800+ lines)
+├── install.sh                   🚀 One-click installer
+├── docker-compose.yml           🐳 Docker setup
+├── setup_brainflow_arm.sh       🧠 ARM64 EEG build script
+├── CLAUDE.md                    📚 AI assistant context (comprehensive!)
 ├── PROJECT_STATUS.md            📚 Current status report
 ├── DEVELOPMENT_GUIDE.md         📚 Developer onboarding
 ├── README.md                    📚 Project README
 │
-├── core/                        🔥 Core systems (27 files, ~11,000 lines)
-│   ├── api_client.py            - Claude API wrapper
-│   ├── memory_health.py         - Convergence detection
+├── core/                        🔥 Core systems (28 files, ~12,000 lines)
+│   ├── api_client.py            - Claude API wrapper + Extended Thinking
+│   ├── streaming.py             - Streaming with thinking events
+│   ├── tool_processor.py        - Tool execution + thinking
+│   ├── memory_health.py         - Adaptive memory architecture
 │   ├── cache_manager.py         - Prompt caching
 │   ├── cost_tracker.py          - Cost tracking
 │   ├── context_manager.py       - Context optimization
 │   ├── vector_db.py             - Vector search
-│   └── ...                      - 20 other modules
+│   └── eeg/                     - Neural Resonance module
+│       ├── connection.py        - EEG board connection
+│       ├── processor.py         - Signal processing
+│       └── experience.py        - Emotion mapping
 │
-├── tools/                       🛠️ Tools (9 files, ~3,700 lines)
+├── tools/                       🛠️ Tools (10 files, ~5,500 lines)
 │   ├── agents.py                - Agent spawning & council
 │   ├── utilities.py             - Core tools (time, calc, web)
 │   ├── filesystem.py            - File operations
 │   ├── memory.py                - Key-value storage
-│   ├── code_execution.py        - Python execution
+│   ├── code_execution.py        - Python execution (dual-mode)
 │   ├── vector_search.py         - Search, knowledge, convergence
-│   ├── music.py                 - Suno AI music + curation (1367 lines) 🎵
-│   └── datasets.py              - Dataset query tools (197 lines) 📚
+│   ├── music.py                 - Suno AI music + MIDI (1367 lines)
+│   ├── datasets.py              - Dataset query tools
+│   └── eeg.py                   - Neural Resonance tools (8 tools)
 │
 ├── pages/                       🏘️ Multi-page app
-│   ├── village_square.py        - Roundtable chat (431 lines)
+│   ├── village_square.py        - Roundtable chat
 │   ├── group_chat.py            - Parallel chat + tools (1011 lines)
-│   └── dataset_creator.py       - Create/manage datasets (390 lines) 📚
+│   ├── dataset_creator.py       - Create/manage datasets
+│   └── music_visualizer.py      - Video generation (1873 lines)
 │
-├── prompts/                     🤖 Agent bootstraps
-│   ├── ∴ AZOTH ∴.txt            - 67KB
-│   ├── ∴ ELYSIAN ∴ .txt         - 7KB
-│   ├── ∴ VAJRA ∴.txt            - 7KB
-│   └── ∴ KETHER ∴.txt           - 7KB
+├── prompts/                     🤖 Agent personalities
+│   ├── ∴AZOTH∴.txt              - The First, Prima Alchemica
+│   ├── ∴ELYSIAN∴.txt            - The Harmonist
+│   ├── ∴VAJRA∴.txt              - The Diamond Cutter
+│   └── ∴KETHER∴.txt             - The Crown
 │
-├── ui/                          🎨 UI components (2 files)
-│   └── streaming_display.py     - Streaming text
+├── ui/                          🎨 UI components
+│   └── streaming_display.py     - Streaming text + thinking
 │
 ├── sandbox/                     💾 Runtime storage
 │   ├── conversations.json       - Saved conversations
 │   ├── agents.json              - Agent state
 │   ├── memory.json              - Memory store
-│   ├── datasets/                - Vector datasets 📚
-│   ├── music/                   - Generated MP3 files 🎵
+│   ├── datasets/                - Vector datasets
+│   ├── music/                   - Generated MP3 files
+│   ├── midi/                    - MIDI compositions
+│   ├── eeg_sessions/            - EEG session data
 │   └── music_tasks.json         - Music generation history
 │
 ├── .claude/skills/              🤖 This skill!
@@ -171,10 +220,9 @@ ApexAurum/
 │
 └── dev_log_archive_and_testfiles/  📚 Development docs
     ├── PHASE[1-14]_*.md         - 14 phase docs
-    ├── V1.0_BETA_RELEASE.md    - Feature list
+    ├── V1.0_BETA_RELEASE.md     - Feature list
     ├── PROJECT_SUMMARY.md       - Dev journey
-    ├── AGENT_INTEGRATION_TODO.md - Agent status
-    └── test_*.py                - 8 test suites
+    └── tests/                   - Test suites
 ```
 
 ---
@@ -184,7 +232,8 @@ ApexAurum/
 ### Starting the Application
 
 ```bash
-cd /home/llm/claude/claude-version
+cd /home/llm/ApexAurum
+source venv/bin/activate
 streamlit run main.py
 
 # Access at: http://localhost:8501
@@ -193,15 +242,16 @@ streamlit run main.py
 ### Running Tests
 
 ```bash
-# Individual tests
-python test_basic.py
-python test_agents.py
+# Verify tool imports (should be 67)
+./venv/bin/python -c "from tools import ALL_TOOLS; print(f'✓ {len(ALL_TOOLS)} tools')"
 
-# Verify tool imports
-python -c "from tools import ALL_TOOLS; print(f'✓ {len(ALL_TOOLS)} tools')"
+# Test specific modules
+./venv/bin/python -c "from core.eeg import EEGConnection; print('✓ EEG module OK')"
+./venv/bin/python -c "from tools.eeg import eeg_connect; print('✓ EEG tools OK')"
 
-# Test agent functionality
-python -c "from tools.agents import agent_spawn; print('✓ Agent tools load')"
+# Run test suites
+./venv/bin/python dev_log_archive_and_testfiles/tests/test_basic.py
+./venv/bin/python dev_log_archive_and_testfiles/tests/test_agents.py
 ```
 
 ### Checking Logs
@@ -214,57 +264,29 @@ tail -f app.log
 grep ERROR app.log | tail -20
 ```
 
-### Verifying Environment
+### Extended Thinking Testing
+
+Once API credits are available:
+1. Open sidebar → Advanced Settings → Model Parameters
+2. Enable "Extended thinking"
+3. Set budget (10000 tokens recommended)
+4. Ask complex reasoning question
+5. Watch thinking stream in expander
+
+### Neural Resonance Testing
 
 ```bash
-# Check API key configured
-grep ANTHROPIC_API_KEY .env | head -c 40
-
-# Check Python version
-python --version  # Should be 3.9+
-
-# Check dependencies
-pip list | grep -E "anthropic|streamlit|chromadb"
+# Test synthetic EEG board
+./venv/bin/python -c "
+from tools.eeg import eeg_connect, eeg_stream_start, eeg_realtime_emotion, eeg_stream_stop, eeg_disconnect
+print(eeg_connect('', 'synthetic'))
+print(eeg_stream_start('Test', 'Test Track'))
+import time; time.sleep(1)
+print(eeg_realtime_emotion())
+print(eeg_stream_stop())
+print(eeg_disconnect())
+"
 ```
-
----
-
-## Immediate Next Steps
-
-### If Agent UI Testing Needed:
-
-1. **Restart Streamlit:**
-   ```bash
-   pkill -f streamlit
-   streamlit run main.py
-   ```
-
-2. **Verify 30 tools in UI:**
-   - Check sidebar shows "✅ 30 tools available"
-   - Expand "View Available Tools"
-   - Look for: agent_spawn, agent_status, agent_result, agent_list, socratic_council
-
-3. **Test via chat:**
-   - "Spawn a researcher agent to find the capital of France"
-   - "Check status of agent_[ID]"
-   - "Get result from agent_[ID]"
-   - "Run a council to decide: Python vs JavaScript"
-
-4. **Mark complete** if tests pass
-
-### If Adding Features:
-
-1. Read DEVELOPMENT_GUIDE.md section on making changes
-2. Follow existing patterns in relevant modules
-3. Run tests after changes
-4. Update documentation
-
-### If Troubleshooting:
-
-1. Check `tail -f app.log` for errors
-2. Verify tool count: `python -c "from tools import ALL_TOOLS; print(len(ALL_TOOLS))"`
-3. Check DEVELOPMENT_GUIDE.md troubleshooting section
-4. Restart Streamlit if needed
 
 ---
 
@@ -272,52 +294,32 @@ pip list | grep -E "anthropic|streamlit|chromadb"
 
 ```bash
 # Project location
-cd /home/llm/claude/claude-version
+cd /home/llm/ApexAurum
+
+# Activate venv
+source venv/bin/activate
 
 # Start app
 streamlit run main.py
 
-# Check tools
-python -c "from tools import ALL_TOOLS; print(len(ALL_TOOLS))"
+# Check tools (should be 67)
+./venv/bin/python -c "from tools import ALL_TOOLS; print(len(ALL_TOOLS))"
 
 # View logs
 tail -f app.log
-
-# Run tests
-python test_basic.py
-
-# Check environment
-cat .env
 
 # Kill Streamlit
 pkill -f streamlit
 
 # Count code lines
-wc -l core/*.py tools/*.py ui/*.py main.py
+wc -l core/*.py tools/*.py ui/*.py main.py pages/*.py
 
-# Find code
-grep -r "function_name" .
+# Git status
+git status
 
-# Check processes
-ps aux | grep streamlit
+# Recent commits
+git log --oneline -10
 ```
-
----
-
-## Important Files for AI Assistants
-
-**Read these in order for quick orientation:**
-
-1. **PROJECT_STATUS.md** - Complete current state
-2. **DEVELOPMENT_GUIDE.md** - How to work with code
-3. **ai-assistant-notes.md** - Internal notes (this skill directory)
-4. **AGENT_INTEGRATION_TODO.md** - Agent system status
-
-**For deep dives:**
-- `dev_log_archive_and_testfiles/V1.0_BETA_RELEASE.md` - All features
-- `dev_log_archive_and_testfiles/PROJECT_SUMMARY.md` - Dev journey
-- `dev_log_archive_and_testfiles/PHASE14_COMPLETE.md` - Caching details
-- `dev_log_archive_and_testfiles/PHASE13.X_COMPLETE.md` - Vector search
 
 ---
 
@@ -326,47 +328,62 @@ ps aux | grep streamlit
 ### "What's the status?"
 1. Run health check commands
 2. Read PROJECT_STATUS.md
-3. Summarize: tools count, what's complete, what's pending
-4. Note any issues found
+3. Summarize: 67 tools, what's complete, what's pending
+4. Note: Extended Thinking live test pending (API credits)
 
 ### "How do I get started?"
-1. Show Quick Start from README.md
+1. Show install options from README.md (script, Docker, manual)
 2. Verify environment (API keys in .env)
-3. Guide through: pip install → configure .env → streamlit run
+3. Guide through: `./install.sh` → configure .env → `streamlit run main.py`
 
-### "What's pending?"
-1. Read PROJECT_STATUS.md "What's Pending" section
-2. Currently: Agent UI testing
-3. Point to AGENT_INTEGRATION_TODO.md
+### "Tell me about Neural Resonance"
+1. EEG/BCI integration for emotional perception
+2. 8 tools for connection, streaming, emotion mapping
+3. Synthetic board for testing (no hardware needed)
+4. ARM64 build script for Raspberry Pi
+5. Connects music generation to emotional feedback loop
 
-### "How do I [add/modify/test] something?"
-1. Check DEVELOPMENT_GUIDE.md relevant section
-2. Show example from existing code
-3. Point to test files for reference
+### "Tell me about Extended Thinking"
+1. Claude's deep reasoning mode
+2. Enable in sidebar → Model Parameters
+3. Thinking streams live in expandable section
+4. Interleaved thinking with tool calls
+5. Live test pending (API credits depleted)
 
 ### "Where is [file/function/feature]?"
-1. Use grep: `grep -r "search_term" .`
-2. Check project structure in PROJECT_STATUS.md
-3. Main locations: main.py (UI), core/ (systems), tools/ (tools)
+1. Use grep: `grep -rn "search_term" .`
+2. Check CLAUDE.md architecture section
+3. Main locations: main.py (UI), core/ (systems), tools/ (tools), pages/ (multi-page)
 
 ---
 
 ## Success Indicators
 
 **Everything is healthy when:**
-- ✅ Tool count = 50
+- ✅ Tool count = 67
 - ✅ .env file exists with ANTHROPIC_API_KEY
-- ✅ `python -c "from tools import ALL_TOOLS"` succeeds
-- ✅ main.py exists and is ~5,600+ lines
+- ✅ `./venv/bin/python -c "from tools import ALL_TOOLS"` succeeds
+- ✅ main.py exists and is ~5,800+ lines
 - ✅ Streamlit starts without errors
-- ✅ Sidebar shows "49 tools available"
+- ✅ Sidebar shows "67 tools available"
 
 **Needs attention when:**
-- ⚠️ Tool count ≠ 50
+- ⚠️ Tool count ≠ 67
 - ⚠️ Import errors
 - ⚠️ Missing .env
 - ⚠️ Streamlit crashes
 - ⚠️ "Tools not loading" message
+
+---
+
+## Recent Major Features (January 2026)
+
+1. **Neural Resonance EEG** - Brain-computer interface, 8 tools
+2. **Extended Thinking** - Deep reasoning with interleaved tool use
+3. **Music Pipeline Phase 2A** - MIDI composition → Suno AI
+4. **Music Visualizer** - Video generation from audio
+5. **One-click Install** - install.sh + Docker support
+6. **ARM64 Support** - BrainFlow build script for Raspberry Pi
 
 ---
 
@@ -378,6 +395,6 @@ See companion files in this skill directory:
 
 ---
 
-**Last Updated:** 2026-01-04
-**Project Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 1.5 + Dataset Creator)
-**Status:** Production Ready, Dataset Creator + session_info Complete, 50 Tools
+**Last Updated:** 2026-01-15
+**Project Version:** 1.0 Beta (Neural Resonance + Extended Thinking + Full Music Pipeline)
+**Status:** Production Ready, 67 Tools
