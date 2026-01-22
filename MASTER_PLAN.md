@@ -11,9 +11,9 @@
 | Aspect | Streamlit (ApexAurum) | FastAPI (Village GUI) |
 |--------|----------------------|----------------------|
 | **Purpose** | Full chat interface with all tools | Embodied agent visualization |
-| **Tools** | 81 tools | 55 tools (needs sync) |
-| **Lines** | ~32,000+ total | ~6,500+ total |
-| **Status** | Production Ready | Phase 4 Complete |
+| **Tools** | 81 tools | 79 tools (EEG excluded) |
+| **Lines** | ~32,000+ total | ~8,500+ total |
+| **Status** | Production Ready | Phase 7 Complete |
 
 ---
 
@@ -105,10 +105,11 @@
   - Generate button + compile button
   - Edit buttons (trim/fade/normalize)
   - Sound volume controls
-- [ ] **6.4: Agent DJ Animation** - Visual feedback (FUTURE)
+- [x] **6.4: Agent DJ Animation** - Visual feedback ✅ COMPLETE
   - Walk to booth when music tools called
-  - Spinning record animation during generation
-  - Dance animation on completion
+  - Spinning vinyl record animation during generation
+  - Dance animation on completion (bounce + sway)
+  - Musical note particles floating up
 
 #### Phase 7: Tool Sync 🔧 ✅ COMPLETE
 - [x] **7.1: Sync to 79 Tools** - Match Streamlit toolset (EEG excluded)
@@ -132,18 +133,18 @@
 
 ### Village Sound Presets (10 created)
 
-| Preset | Purpose | Generated? |
-|--------|---------|------------|
-| `village_tool_chime` | Success feedback | ✅ |
-| `village_tool_error` | Error feedback | ✅ |
-| `village_night_ambient` | Night background | ✅ |
-| `village_dawn` | Morning transition | ✅ |
-| `village_ambient_rain` | Rain ambience | ✅ |
-| `village_thinking` | Processing indicator | ✅ |
-| `village_thunder` | Storm accent | ⏳ |
-| `village_wind_snow` | Winter ambience | ⏳ |
-| `village_footsteps` | Agent movement | ⏳ |
-| `village_success_fanfare` | Major achievement | ⏳ |
+| Preset | Purpose | Generated? | Deployed? |
+|--------|---------|------------|-----------|
+| `village_tool_chime` | Success feedback | ✅ | ✅ |
+| `village_tool_error` | Error feedback | ✅ | ✅ |
+| `village_night_ambient` | Night background | ✅ | - |
+| `village_dawn` | Morning transition | ✅ | ✅ |
+| `village_ambient_rain` | Rain ambience | ✅ | ✅ |
+| `village_thinking` | Processing indicator | ✅ | ✅ |
+| `village_thunder` | Storm accent | ✅ | ✅ |
+| `village_wind_snow` | Winter ambience | ✅ | ✅ |
+| `village_footsteps` | Agent movement | ✅ | ✅ |
+| `village_success_fanfare` | Major achievement | ✅ | ✅ |
 
 ### Audio Files Generated: 42 total
 - Located in `sandbox/music/`
@@ -252,9 +253,9 @@ reusable_lib/
 - Cache TTL is Anthropic limitation (5 min)
 
 ### FastAPI Village
-- Tool count behind Streamlit (55 vs 81)
-- No sound system yet
-- Single agent focus (multi-agent needs work)
+- Tool count 79 vs 81 (EEG tools excluded intentionally)
+- Sound system complete (9 sounds deployed)
+- Single agent focus (multi-agent needs work for Phase 8)
 
 ### Both
 - No authentication (localhost only)
@@ -316,9 +317,10 @@ print(r['output_file'])
 
 ---
 
-**Last Updated:** 2026-01-22
-**Next Session:** Start with Phase 5 (Sound System) or generate remaining sounds
-**Local Commits:** 9 ready to push (holding for grand unveiling)
+**Last Updated:** 2026-01-22 (Session 2)
+**Next Session:** Phase 8 Polish (multi-agent, interactions) or THE GRAND PUSH
+**Local Commits:** 13 ready to push (holding for grand unveiling)
+**Tests:** 20/21 passing
 
 ---
 
