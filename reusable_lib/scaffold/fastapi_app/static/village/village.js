@@ -91,8 +91,18 @@ class VillageApp {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/village`;
 
-        console.log(`Connecting to ${wsUrl}`);
-        this.ws = new WebSocket(wsUrl);
+        console.log(`Village GUI: Connecting to ${wsUrl}`);
+        console.log(`Village GUI: location.host = ${window.location.host}`);
+        console.log(`Village GUI: location.protocol = ${window.location.protocol}`);
+
+        try {
+            this.ws = new WebSocket(wsUrl);
+        } catch (e) {
+            console.error('Village GUI: WebSocket creation failed:', e);
+            this.status.connection = 'error';
+            this.updateUI();
+            return;
+        }
 
         this.ws.onopen = () => {
             console.log('WebSocket connected');
@@ -365,5 +375,19 @@ class VillageApp {
 
 // Start app when DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.villageApp = new VillageApp();
+    console.log('Village GUI: DOM ready, creating app...');
+    try {
+        window.villageApp = new VillageApp();
+        console.log('Village GUI: App created successfully');
+    } catch (e) {
+        console.error('Village GUI: Failed to create app:', e);
+        const statusEl = document.getElementById('stat-connection');
+        if (statusEl) {
+            statusEl.textContent = 'INIT ERROR: ' + e.message;
+            statusEl.className = 'stat-value disconnected';
+        }
+    }
 });
+
+// Mark module as loaded
+console.log('Village GUI: Module loaded');

@@ -176,5 +176,14 @@
         }
     </script>
     <script type="module" src="village.js"></script>
+    <script>
+        // Debug: Check if JS modules load correctly
+        window.addEventListener('error', function(e) {
+            console.error('JS Error:', e.message, e.filename, e.lineno);
+            document.getElementById('stat-connection').textContent = 'JS ERROR: ' + e.message;
+        });
+        // Mark that inline script ran
+        console.log('Village GUI: Inline scripts loaded');
+    </script>
 </body>
 </html>
