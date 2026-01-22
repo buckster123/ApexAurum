@@ -249,9 +249,11 @@ async def chat_stream(request: ChatRequest):
 
     # Build system prompt
     system_prompt = request.system
+    if system_prompt:
+        logger.info(f"Custom system prompt: {system_prompt[:100]}{'...' if len(system_prompt) > 100 else ''}")
     if request.use_tools:
         system_prompt = tool_service.build_system_prompt(request.system)
-        logger.info(f"Tools enabled, system prompt length: {len(system_prompt)}")
+        logger.info(f"Tools enabled, final system prompt: {len(system_prompt)} chars")
 
     # Convert messages
     messages = [{"role": m.role, "content": m.content} for m in request.messages]

@@ -86,9 +86,11 @@ fastapi_app/
 │
 ├── routes/              # API endpoints
 │   ├── chat.py          # /api/chat - Chat completions
-│   ├── tools.py         # /api/tools - Tool execution
+│   ├── tools.py         # /api/tools - Tool execution (55 tools)
 │   ├── models.py        # /api/models - Model management
 │   ├── memory.py        # /api/memory - Storage
+│   ├── prompts.py       # /api/prompts - System prompt files
+│   ├── village.py       # /api/village - Village Protocol
 │   └── benchmark.py     # /api/benchmark - Evaluations
 │
 ├── services/            # Business logic

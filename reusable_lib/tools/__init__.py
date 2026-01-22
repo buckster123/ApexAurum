@@ -9,6 +9,8 @@ from .utilities import (
     count_words,
     random_number,
     random_choice,
+    set_session_info_config,
+    session_info,
     UTILITY_TOOL_SCHEMAS
 )
 from .memory import (
@@ -90,6 +92,22 @@ from .village import (
     village_get_stats,
     VILLAGE_TOOL_SCHEMAS
 )
+from .memory_health import (
+    set_memory_health_db,
+    memory_health_stale,
+    memory_health_low_access,
+    memory_health_duplicates,
+    memory_consolidate,
+    memory_health_summary,
+    MEMORY_HEALTH_TOOL_SCHEMAS
+)
+from .datasets import (
+    set_datasets_path,
+    get_datasets_path,
+    dataset_list,
+    dataset_query,
+    DATASET_TOOL_SCHEMAS
+)
 
 __all__ = [
     # Utilities
@@ -99,6 +117,8 @@ __all__ = [
     'count_words',
     'random_number',
     'random_choice',
+    'set_session_info_config',
+    'session_info',
     'UTILITY_TOOL_SCHEMAS',
     # Memory
     'SimpleMemory',
@@ -171,4 +191,18 @@ __all__ = [
     'village_detect_convergence',
     'village_get_stats',
     'VILLAGE_TOOL_SCHEMAS',
+    # Memory Health
+    'set_memory_health_db',
+    'memory_health_stale',
+    'memory_health_low_access',
+    'memory_health_duplicates',
+    'memory_consolidate',
+    'memory_health_summary',
+    'MEMORY_HEALTH_TOOL_SCHEMAS',
+    # Datasets
+    'set_datasets_path',
+    'get_datasets_path',
+    'dataset_list',
+    'dataset_query',
+    'DATASET_TOOL_SCHEMAS',
 ]

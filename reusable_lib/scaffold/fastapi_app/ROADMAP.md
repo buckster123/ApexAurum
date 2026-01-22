@@ -5,8 +5,8 @@
 >
 > **Rebranded 2026-01-18:** Now "Apex Aurum - Lab Edition" with dark gold alchemical UI.
 
-**Last Updated:** 2026-01-19
-**Current Status:** Phase 8 Complete - Village Protocol (47 tools)
+**Last Updated:** 2026-01-22
+**Current Status:** Phase 8+ Complete - Memory Health + Datasets (55 tools)
 
 ---
 
@@ -24,12 +24,12 @@
 
 ## Current State
 
-### What's Working (Phase 8)
+### What's Working (Phase 8+)
 
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Basic chat with Ollama | ✅ | Streaming SSE |
-| Tool calling (47 tools) | ✅ | Via system prompt injection |
+| Tool calling (55 tools) | ✅ | Via system prompt injection |
 | Claude API support | ✅ | Needs API key to test |
 | Provider switcher UI | ✅ | Ollama / Claude dropdown |
 | Tool result display | ✅ | Visual feedback in chat |
@@ -49,6 +49,9 @@
 | Session stats UI | ✅ | Tokens, cost, requests in sidebar |
 | Village Protocol | ✅ | 8 tools, 3 realms, agent identity |
 | Village UI | ✅ | Agent selector, search, stats |
+| Memory Health tools | ✅ | 5 tools for memory maintenance |
+| Dataset tools | ✅ | 2 tools for agent dataset access |
+| Session info | ✅ | Operational context for agents |
 
 ### Infrastructure
 
@@ -225,12 +228,12 @@ A lightweight, API-first AI application that provides:
 - [x] `vector_search_knowledge`
 - [ ] `vector_search_village` (Village Protocol - Phase 8)
 
-#### Memory Health Tools (0/5)
-- [ ] `memory_health_stale`
-- [ ] `memory_health_low_access`
-- [ ] `memory_health_duplicates`
-- [ ] `memory_consolidate`
-- [ ] `memory_migration_run`
+#### Memory Health Tools (5/5) ✅
+- [x] `memory_health_stale`
+- [x] `memory_health_low_access`
+- [x] `memory_health_duplicates`
+- [x] `memory_consolidate`
+- [x] `memory_health_summary` (replaces migration_run)
 
 #### Agent Tools (0/5)
 - [ ] `agent_spawn`
@@ -239,9 +242,9 @@ A lightweight, API-first AI application that provides:
 - [ ] `agent_list`
 - [ ] `socratic_council`
 
-#### Dataset Tools (0/2)
-- [ ] `dataset_list`
-- [ ] `dataset_query`
+#### Dataset Tools (2/2) ✅
+- [x] `dataset_list`
+- [x] `dataset_query`
 
 #### Music Tools (0/8) - May skip for this project
 - [ ] `music_generate`
@@ -257,8 +260,8 @@ A lightweight, API-first AI application that provides:
 - [ ] `midi_create`
 - [ ] `music_compose`
 
-#### Session Tools (0/1)
-- [ ] `session_info`
+#### Session Tools (1/1) ✅
+- [x] `session_info`
 
 ---
 

@@ -733,6 +733,18 @@
                 </div>
 
                 <div class="sidebar-card">
+                    <h3>System Prompt</h3>
+                    <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                        <select id="prompt-select" style="flex: 1; font-size: 0.8rem;">
+                            <option value="">-- Load from file --</option>
+                        </select>
+                        <button class="sidebar-btn" style="margin: 0; padding: 6px 10px;" onclick="loadPrompt()">📄</button>
+                    </div>
+                    <textarea id="system-prompt" placeholder="Custom instructions for the AI..." style="width: 100%; min-height: 80px; resize: vertical; font-size: 0.8rem; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--gold-dim); color: var(--text-primary); border-radius: 4px;">You are a helpful AI assistant with access to tools. Use them when needed to help the user.</textarea>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">Drop .md/.txt files in data/prompts/</div>
+                </div>
+
+                <div class="sidebar-card">
                     <h3>Tools <span id="tool-count" style="color: var(--gold);">(0)</span></h3>
                     <label class="checkbox-wrapper">
                         <input type="checkbox" id="use-tools" checked>
@@ -766,6 +778,8 @@
         const providerSelect = document.getElementById('provider-select');
         const modelSelect = document.getElementById('model-select');
         const useToolsCheckbox = document.getElementById('use-tools');
+        const systemPromptEl = document.getElementById('system-prompt');
+        const promptSelect = document.getElementById('prompt-select');
 
         // Claude models
         const claudeModels = [
@@ -782,6 +796,7 @@
             await checkHealth();
             await loadModels();
             await loadTools();
+            await loadPromptList();
             await loadPresets();
             await loadStats();
             await loadConversations();
@@ -943,6 +958,40 @@
                 ).join('');
             } catch (e) {
                 console.error('Failed to load tools:', e);
+            }
+        }
+
+        // ========== PROMPTS ==========
+        async function loadPromptList() {
+            try {
+                const res = await fetch('/api/prompts');
+                const data = await res.json();
+
+                promptSelect.innerHTML = '<option value="">-- Load from file --</option>';
+                data.prompts.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.filename;
+                    opt.textContent = p.name;
+                    promptSelect.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Failed to load prompts:', e);
+            }
+        }
+
+        async function loadPrompt() {
+            const filename = promptSelect.value;
+            if (!filename) return;
+
+            try {
+                const res = await fetch(`/api/prompts/${encodeURIComponent(filename)}`);
+                if (!res.ok) throw new Error('Failed to load prompt');
+
+                const data = await res.json();
+                systemPromptEl.value = data.content;
+            } catch (e) {
+                console.error('Failed to load prompt:', e);
+                alert('Failed to load prompt file');
             }
         }
 
@@ -1184,6 +1233,7 @@
             const assistantMsg = addMessage('<span class="streaming"></span>', 'assistant');
 
             try {
+                const systemPrompt = systemPromptEl.value.trim() || null;
                 const response = await fetch('/api/chat/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1192,7 +1242,8 @@
                         model: modelSelect.value,
                         provider: providerSelect.value,
                         stream: true,
-                        use_tools: useToolsCheckbox.checked
+                        use_tools: useToolsCheckbox.checked,
+                        system: systemPrompt
                     })
                 });
 

@@ -22,6 +22,8 @@ from reusable_lib.tools import (
     calculator,
     count_words,
     random_number,
+    set_session_info_config,
+    session_info,
     UTILITY_TOOL_SCHEMAS,
     memory_store,
     memory_retrieve,
@@ -87,7 +89,20 @@ from reusable_lib.tools import (
     introduction_ritual,
     village_detect_convergence,
     village_get_stats,
-    VILLAGE_TOOL_SCHEMAS
+    VILLAGE_TOOL_SCHEMAS,
+    # Memory Health tools
+    set_memory_health_db,
+    memory_health_stale,
+    memory_health_low_access,
+    memory_health_duplicates,
+    memory_consolidate,
+    memory_health_summary,
+    MEMORY_HEALTH_TOOL_SCHEMAS,
+    # Dataset tools
+    set_datasets_path,
+    dataset_list,
+    dataset_query,
+    DATASET_TOOL_SCHEMAS,
 )
 
 from services.llm_service import get_llm_client
@@ -116,6 +131,13 @@ class ToolService:
         self.register("calculator", calculator, UTILITY_TOOL_SCHEMAS.get("calculator"))
         self.register("count_words", count_words, UTILITY_TOOL_SCHEMAS.get("count_words"))
         self.register("random_number", random_number, UTILITY_TOOL_SCHEMAS.get("random_number"))
+
+        # Session info tool - configure with data dir and register
+        set_session_info_config(
+            data_dir=str(settings.DATA_DIR),
+            tool_count=0  # Will be updated after all tools registered
+        )
+        self.register("session_info", session_info, UTILITY_TOOL_SCHEMAS.get("session_info"))
 
         # Memory tools
         self.register("memory_store", memory_store, MEMORY_TOOL_SCHEMAS.get("memory_store"))
@@ -210,6 +232,29 @@ class ToolService:
         self.register("introduction_ritual", introduction_ritual, VILLAGE_TOOL_SCHEMAS.get("introduction_ritual"))
         self.register("village_detect_convergence", village_detect_convergence, VILLAGE_TOOL_SCHEMAS.get("village_detect_convergence"))
         self.register("village_get_stats", village_get_stats, VILLAGE_TOOL_SCHEMAS.get("village_get_stats"))
+
+        # Memory Health tools - uses same vector DB
+        from reusable_lib.vector import VectorDB
+        vector_path = settings.DATA_DIR / "vectors"
+        memory_health_db = VectorDB(persist_directory=str(vector_path))
+        set_memory_health_db(memory_health_db)
+
+        self.register("memory_health_stale", memory_health_stale, MEMORY_HEALTH_TOOL_SCHEMAS.get("memory_health_stale"))
+        self.register("memory_health_low_access", memory_health_low_access, MEMORY_HEALTH_TOOL_SCHEMAS.get("memory_health_low_access"))
+        self.register("memory_health_duplicates", memory_health_duplicates, MEMORY_HEALTH_TOOL_SCHEMAS.get("memory_health_duplicates"))
+        self.register("memory_consolidate", memory_consolidate, MEMORY_HEALTH_TOOL_SCHEMAS.get("memory_consolidate"))
+        self.register("memory_health_summary", memory_health_summary, MEMORY_HEALTH_TOOL_SCHEMAS.get("memory_health_summary"))
+
+        # Dataset tools
+        datasets_path = settings.DATA_DIR / "datasets"
+        datasets_path.mkdir(parents=True, exist_ok=True)
+        set_datasets_path(str(datasets_path))
+
+        self.register("dataset_list", dataset_list, DATASET_TOOL_SCHEMAS.get("dataset_list"))
+        self.register("dataset_query", dataset_query, DATASET_TOOL_SCHEMAS.get("dataset_query"))
+
+        # Update session_info with actual tool count
+        set_session_info_config(tool_count=len(self.tools))
 
         logger.info(f"Registered {len(self.tools)} built-in tools")
 

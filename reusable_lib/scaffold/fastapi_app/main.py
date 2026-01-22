@@ -22,7 +22,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 from app_config import settings
-from routes import chat, tools, models, memory, benchmark, conversations, stats, presets, village
+from routes import chat, tools, models, memory, benchmark, conversations, stats, presets, village, prompts
 
 # Configure logging
 logging.basicConfig(
@@ -78,6 +78,7 @@ app.include_router(conversations.router, prefix="/api/conversations", tags=["Con
 app.include_router(stats.router, prefix="/api/stats", tags=["Statistics"])
 app.include_router(presets.router, prefix="/api/presets", tags=["Presets"])
 app.include_router(village.router, tags=["Village Protocol"])
+app.include_router(prompts.router, prefix="/api/prompts", tags=["Prompts"])
 
 
 @app.get("/")

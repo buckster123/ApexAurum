@@ -185,6 +185,123 @@ def random_choice(choices: List[Any]) -> Union[Any, str]:
     return random.choice(choices)
 
 
+# Module-level configuration for session_info
+_session_info_config = {
+    "data_dir": None,
+    "agent_id": None,
+    "tool_count": 0,
+}
+
+
+def set_session_info_config(data_dir: str = None, agent_id: str = None, tool_count: int = 0):
+    """Configure session_info tool with runtime information."""
+    global _session_info_config
+    if data_dir is not None:
+        _session_info_config["data_dir"] = data_dir
+    if agent_id is not None:
+        _session_info_config["agent_id"] = agent_id
+    if tool_count > 0:
+        _session_info_config["tool_count"] = tool_count
+
+
+def session_info() -> Dict[str, Any]:
+    """
+    Get operational context about the current session and system state.
+
+    Helps agents understand their environment and available resources.
+
+    Returns:
+        Dictionary with session context:
+        - timestamp: Current ISO timestamp
+        - agent_id: Current agent ID if running as agent (or None)
+        - tools_available: Total number of tools available
+        - datasets: List of available dataset names
+        - village_stats: Village memory statistics
+        - agents: Recent agent activity summary
+    """
+    import json
+    from pathlib import Path
+
+    result = {
+        "timestamp": datetime.now().isoformat(),
+        "agent_id": _session_info_config.get("agent_id"),
+        "tools_available": _session_info_config.get("tool_count", 0),
+        "datasets": [],
+        "village_stats": {},
+        "agents": {}
+    }
+
+    data_dir = _session_info_config.get("data_dir")
+    if not data_dir:
+        return result
+
+    data_path = Path(data_dir)
+
+    # Available datasets
+    try:
+        datasets_path = data_path / "datasets"
+        if datasets_path.exists():
+            datasets = []
+            for item in datasets_path.iterdir():
+                if item.is_dir():
+                    meta_path = item / "dataset_meta.json"
+                    if meta_path.exists():
+                        try:
+                            meta = json.loads(meta_path.read_text())
+                            datasets.append({
+                                "name": item.name,
+                                "description": meta.get("description", ""),
+                                "chunks": meta.get("chunk_count", 0)
+                            })
+                        except:
+                            datasets.append({"name": item.name, "description": "", "chunks": 0})
+            result["datasets"] = datasets
+    except Exception:
+        pass
+
+    # Village stats
+    try:
+        import chromadb
+        village_path = data_path / "village"
+        if village_path.exists():
+            client = chromadb.PersistentClient(path=str(village_path))
+            village_stats = {}
+
+            for collection_name in ["knowledge_village", "knowledge_private", "knowledge_bridges"]:
+                try:
+                    col = client.get_collection(collection_name)
+                    village_stats[collection_name] = col.count()
+                except:
+                    pass
+
+            result["village_stats"] = village_stats
+    except:
+        pass
+
+    # Agent activity
+    try:
+        agents_path = data_path / "agents.json"
+        if agents_path.exists():
+            agents_data = json.loads(agents_path.read_text())
+
+            # Summarize agent activity
+            total = len(agents_data)
+            running = sum(1 for a in agents_data.values() if a.get("status") == "running")
+            completed = sum(1 for a in agents_data.values() if a.get("status") == "completed")
+            failed = sum(1 for a in agents_data.values() if a.get("status") == "failed")
+
+            result["agents"] = {
+                "total": total,
+                "running": running,
+                "completed": completed,
+                "failed": failed
+            }
+    except:
+        result["agents"] = {"total": 0, "running": 0, "completed": 0, "failed": 0}
+
+    return result
+
+
 # Tool schemas for AI API registration
 UTILITY_TOOL_SCHEMAS = {
     "get_current_time": {
@@ -295,6 +412,25 @@ UTILITY_TOOL_SCHEMAS = {
                 }
             },
             "required": ["choices"]
+        }
+    },
+    "session_info": {
+        "name": "session_info",
+        "description": """Get operational context about the current session and system state.
+
+Returns information about:
+- timestamp: Current ISO timestamp
+- agent_id: Current agent ID if running as agent
+- tools_available: Total number of tools available
+- datasets: List of available dataset names with descriptions
+- village_stats: Village memory statistics (message counts per realm)
+- agents: Summary of agent activity (total, running, completed, failed)
+
+Use this to understand your environment and available resources.""",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
         }
     }
 }
