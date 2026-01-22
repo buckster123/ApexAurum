@@ -5,7 +5,7 @@
  * Phase 3: Integrated with HTML UI panels
  */
 
-import { ZONES, getZoneForTool } from './zones.js';
+import { ZONES, ZONE_TOOLS, getZoneForTool, getZoneAtPoint } from './zones.js';
 import { Agent, AGENT_COLORS } from './agent.js';
 import { Renderer } from './renderer.js';
 
@@ -29,6 +29,23 @@ class VillageApp {
 
         // Active zone (for highlighting)
         this.activeZone = null;
+
+        // Zone history - tracks recent tool executions per zone
+        this.zoneHistory = {};
+        for (const zoneName of Object.keys(ZONES)) {
+            this.zoneHistory[zoneName] = [];
+        }
+
+        // Selected zone (for detail panel)
+        this.selectedZone = null;
+
+        // Hovered zone (for visual feedback)
+        this.hoveredZone = null;
+
+        // Set up canvas click handler
+        this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
+        this.canvas.addEventListener('mouseleave', () => { this.hoveredZone = null; });
 
         // WebSocket
         this.ws = null;
@@ -174,6 +191,15 @@ class VillageApp {
             agent.finishTool();
         }
 
+        // Track in zone history
+        this.addToZoneHistory(zone, {
+            tool: event.tool,
+            agent: agentId,
+            success: event.success,
+            result_preview: event.result_preview,
+            timestamp: Date.now()
+        });
+
         // Update activity log
         const type = event.success ? 'complete' : 'error';
         if (window.addLogEntry) {
@@ -184,6 +210,124 @@ class VillageApp {
         setTimeout(() => {
             this.activeZone = null;
         }, 500);
+
+        // Update zone detail if this zone is selected
+        if (this.selectedZone === zone) {
+            this.showZoneDetail(zone);
+        }
+    }
+
+    /**
+     * Add entry to zone history (keep last 20 per zone)
+     */
+    addToZoneHistory(zoneName, entry) {
+        if (!this.zoneHistory[zoneName]) {
+            this.zoneHistory[zoneName] = [];
+        }
+        this.zoneHistory[zoneName].unshift(entry);
+        if (this.zoneHistory[zoneName].length > 20) {
+            this.zoneHistory[zoneName].pop();
+        }
+    }
+
+    /**
+     * Handle canvas click - detect zone
+     */
+    handleCanvasClick(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+
+        const zoneName = getZoneAtPoint(x, y);
+        if (zoneName) {
+            this.selectedZone = zoneName;
+            this.showZoneDetail(zoneName);
+        } else {
+            this.hideZoneDetail();
+        }
+    }
+
+    /**
+     * Handle canvas hover - change cursor and highlight zone
+     */
+    handleCanvasHover(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+
+        const zoneName = getZoneAtPoint(x, y);
+        this.hoveredZone = zoneName;
+        this.canvas.style.cursor = zoneName ? 'pointer' : 'default';
+    }
+
+    /**
+     * Show zone detail panel
+     */
+    showZoneDetail(zoneName) {
+        const zone = ZONES[zoneName];
+        const tools = ZONE_TOOLS[zoneName] || [];
+        const history = this.zoneHistory[zoneName] || [];
+
+        const panel = document.getElementById('zone-detail-panel');
+        if (!panel) return;
+
+        // Build HTML
+        let html = `
+            <div class="zone-detail-header" style="border-left-color: ${zone.color}">
+                <span class="zone-icon">${zone.icon}</span>
+                <h4>${zone.label}</h4>
+                <button onclick="window.villageApp.hideZoneDetail()" class="close-btn">&times;</button>
+            </div>
+            <p class="zone-description">${zone.description}</p>
+            <div class="zone-section">
+                <h5>Available Tools (${tools.length})</h5>
+                <div class="zone-tools">
+                    ${tools.slice(0, 8).map(t => `<span class="tool-tag">${t}</span>`).join('')}
+                    ${tools.length > 8 ? `<span class="tool-more">+${tools.length - 8} more</span>` : ''}
+                </div>
+            </div>
+            <div class="zone-section">
+                <h5>Recent Activity</h5>
+                <div class="zone-history">
+        `;
+
+        if (history.length === 0) {
+            html += '<div class="no-history">No activity yet</div>';
+        } else {
+            history.slice(0, 5).forEach(entry => {
+                const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {hour12: false});
+                const icon = entry.success ? '✓' : '✗';
+                const statusClass = entry.success ? 'success' : 'error';
+                html += `
+                    <div class="history-entry ${statusClass}">
+                        <span class="history-icon">${icon}</span>
+                        <span class="history-tool">${entry.tool}</span>
+                        <span class="history-agent">${entry.agent}</span>
+                        <span class="history-time">${time}</span>
+                    </div>
+                `;
+            });
+        }
+
+        html += '</div></div>';
+
+        panel.innerHTML = html;
+        panel.classList.add('visible');
+    }
+
+    /**
+     * Hide zone detail panel
+     */
+    hideZoneDetail() {
+        this.selectedZone = null;
+        const panel = document.getElementById('zone-detail-panel');
+        if (panel) {
+            panel.classList.remove('visible');
+        }
     }
 
     /**
@@ -207,7 +351,7 @@ class VillageApp {
         // Render
         this.renderer.clear();
         this.renderer.drawConnections();
-        this.renderer.drawZones(this.activeZone);
+        this.renderer.drawZones(this.activeZone, this.hoveredZone, this.selectedZone);
 
         // Draw all agents
         for (const agent of this.agents.values()) {

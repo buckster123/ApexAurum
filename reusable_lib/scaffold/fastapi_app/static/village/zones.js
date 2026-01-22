@@ -6,6 +6,8 @@
  * - size (width, height)
  * - color - fill color
  * - label - display name
+ * - description - what happens here
+ * - icon - emoji for the zone
  */
 
 export const CANVAS_WIDTH = 800;
@@ -16,38 +18,62 @@ export const ZONES = {
         x: 400, y: 300,
         width: 120, height: 120,
         color: '#2d3436',
-        label: 'Village Square'
+        label: 'Village Square',
+        icon: '🏠',
+        description: 'The central gathering place. Agents idle here between tasks and return here after completing work.'
     },
     dj_booth: {
         x: 100, y: 300,
         width: 100, height: 80,
         color: '#6c5ce7',
-        label: 'DJ Booth'
+        label: 'DJ Booth',
+        icon: '🎵',
+        description: 'Music generation station. Create AI-generated music, manage playlists, and compose MIDI.'
     },
     memory_garden: {
         x: 400, y: 80,
         width: 140, height: 80,
         color: '#00b894',
-        label: 'Memory Garden'
+        label: 'Memory Garden',
+        icon: '🌿',
+        description: 'The knowledge repository. Store, search, and retrieve memories and vector embeddings.'
     },
     file_shed: {
         x: 700, y: 300,
         width: 100, height: 80,
         color: '#fdcb6e',
-        label: 'File Shed'
+        label: 'File Shed',
+        icon: '📁',
+        description: 'File system workshop. Read, write, and manage files in the sandbox.'
     },
     workshop: {
         x: 400, y: 520,
         width: 120, height: 80,
         color: '#e17055',
-        label: 'Workshop'
+        label: 'Workshop',
+        icon: '⚙️',
+        description: 'Code execution forge. Run Python code in a sandboxed environment.'
     },
     bridge_portal: {
         x: 700, y: 80,
         width: 100, height: 80,
         color: '#a29bfe',
-        label: 'Bridge Portal'
+        label: 'Bridge Portal',
+        icon: '🌉',
+        description: 'Agent coordination hub. Spawn agents, check status, and manage the village protocol.'
     }
+};
+
+/**
+ * Tools available in each zone (for display)
+ */
+export const ZONE_TOOLS = {
+    village_square: ['get_current_time', 'calculate', 'web_search', 'web_fetch'],
+    dj_booth: ['music_generate', 'music_status', 'music_result', 'music_list', 'music_favorite', 'music_library', 'music_search', 'music_play', 'midi_create', 'music_compose'],
+    memory_garden: ['vector_add', 'vector_search', 'vector_delete', 'vector_list_collections', 'vector_get_stats', 'vector_add_knowledge', 'vector_search_knowledge', 'memory_store', 'memory_retrieve', 'memory_search', 'memory_delete', 'memory_list', 'memory_health_stale', 'memory_health_low_access', 'memory_health_duplicates', 'memory_consolidate', 'dataset_list', 'dataset_query'],
+    file_shed: ['fs_read_file', 'fs_write_file', 'fs_list_files', 'fs_mkdir', 'fs_delete', 'fs_exists', 'fs_get_info', 'fs_read_lines', 'fs_edit'],
+    workshop: ['execute_python'],
+    bridge_portal: ['agent_spawn', 'agent_status', 'agent_result', 'agent_list', 'socratic_council', 'village_post', 'village_search', 'village_get_thread', 'village_list_agents', 'summon_ancestor', 'introduction_ritual', 'village_detect_convergence', 'village_get_stats']
 };
 
 /**
@@ -92,4 +118,19 @@ export function getZoneForTool(toolName) {
     };
 
     return TOOL_ZONES[toolName] || 'village_square';
+}
+
+/**
+ * Hit test: check if a point is within a zone
+ */
+export function getZoneAtPoint(x, y) {
+    for (const [name, zone] of Object.entries(ZONES)) {
+        const halfW = zone.width / 2;
+        const halfH = zone.height / 2;
+        if (x >= zone.x - halfW && x <= zone.x + halfW &&
+            y >= zone.y - halfH && y <= zone.y + halfH) {
+            return name;
+        }
+    }
+    return null;
 }

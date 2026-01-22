@@ -64,21 +64,27 @@ export class Renderer {
     /**
      * Draw all zones
      */
-    drawZones(activeZone = null) {
+    drawZones(activeZone = null, hoveredZone = null, selectedZone = null) {
         for (const [name, zone] of Object.entries(ZONES)) {
-            this.drawZone(name, zone, name === activeZone);
+            const isActive = name === activeZone;
+            const isHovered = name === hoveredZone;
+            const isSelected = name === selectedZone;
+            this.drawZone(name, zone, isActive, isHovered, isSelected);
         }
     }
 
     /**
      * Draw a single zone with enhanced visuals
      */
-    drawZone(name, zone, isActive = false) {
+    drawZone(name, zone, isActive = false, isHovered = false, isSelected = false) {
         const ctx = this.ctx;
         const halfW = zone.width / 2;
         const halfH = zone.height / 2;
 
         ctx.save();
+
+        // Determine visual state
+        const isHighlighted = isActive || isHovered || isSelected;
 
         // Active zone pulse effect
         let pulseSize = 0;
@@ -86,6 +92,14 @@ export class Renderer {
             pulseSize = Math.sin(this.time * 4) * 3;
             ctx.shadowColor = zone.color;
             ctx.shadowBlur = 25 + Math.sin(this.time * 4) * 10;
+        } else if (isSelected) {
+            // Selected zone: steady glow
+            ctx.shadowColor = zone.color;
+            ctx.shadowBlur = 15;
+        } else if (isHovered) {
+            // Hovered zone: subtle glow
+            ctx.shadowColor = zone.color;
+            ctx.shadowBlur = 10;
         }
 
         // Zone background with gradient
@@ -94,13 +108,18 @@ export class Renderer {
             zone.x, zone.y, Math.max(zone.width, zone.height) * 0.7
         );
 
-        const alpha = isActive ? 'aa' : '55';
+        // Adjust alpha based on state
+        let alpha = '55';
+        if (isActive) alpha = 'aa';
+        else if (isSelected) alpha = '88';
+        else if (isHovered) alpha = '77';
+
         gradient.addColorStop(0, zone.color + alpha);
         gradient.addColorStop(1, zone.color + '22');
 
         ctx.fillStyle = gradient;
         ctx.strokeStyle = zone.color;
-        ctx.lineWidth = isActive ? 3 : 2;
+        ctx.lineWidth = isActive ? 3 : (isHighlighted ? 2.5 : 2);
 
         // Draw rounded rectangle
         const x = zone.x - halfW - pulseSize;
@@ -147,7 +166,7 @@ export class Renderer {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(zone.x - labelWidth/2, labelY - 10, labelWidth, 14);
 
-        ctx.fillStyle = isActive ? '#ffffff' : '#aaaaaa';
+        ctx.fillStyle = isHighlighted ? '#ffffff' : '#aaaaaa';
         ctx.fillText(zone.label, zone.x, labelY);
 
         ctx.restore();
