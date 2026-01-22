@@ -77,50 +77,48 @@
 
 ### Pending Items (⏳)
 
-#### Phase 5: Sound System 🔊
-- [ ] **5.1: Sound Manager** - JavaScript audio engine
+#### Phase 5: Sound System 🔊 ✅ COMPLETE
+- [x] **5.1: Sound Manager** - JavaScript audio engine
   - Web Audio API integration
-  - Volume control, spatial audio
+  - Volume control, category-based mixing
   - Preloading and caching
-- [ ] **5.2: Event Sound Mapping** - Connect tools to sounds
+- [x] **5.2: Event Sound Mapping** - Connect tools to sounds
   - tool_start → appropriate sound
   - tool_complete → success chime
   - tool_error → error sound
-- [ ] **5.3: Ambient Audio** - Background soundscapes
+- [x] **5.3: Ambient Audio** - Background soundscapes
   - Day/night ambient tracks
   - Weather sounds (rain, wind, thunder)
-  - Zone-specific ambience
+  - Volume controls per category
 
-#### Phase 6: DJ Booth Integration 🎵
-- [ ] **6.1: Suno Compiler Endpoints** - FastAPI routes
+#### Phase 6: DJ Booth Integration 🎵 ✅ COMPLETE
+- [x] **6.1: Suno Compiler Endpoints** - FastAPI routes
   - POST `/api/suno/compile` - Build prompt from intent
   - GET `/api/suno/presets` - List presets
-  - POST `/api/suno/presets/{name}` - Load preset
-- [ ] **6.2: Audio Editor Endpoints** - FastAPI routes
-  - POST `/api/audio/trim`
-  - POST `/api/audio/fade`
-  - POST `/api/audio/normalize`
-  - GET `/api/audio/list`
-  - GET `/api/audio/info/{filename}`
-- [ ] **6.3: DJ Booth UI Panel** - Frontend component
+  - GET `/api/suno/presets/{name}` - Load preset
+- [x] **6.2: Audio Editor Endpoints** - FastAPI routes
+  - POST `/api/audio/trim`, `/api/audio/fade`, `/api/audio/normalize`
+  - GET `/api/audio/list`, `/api/audio/info`
+  - POST `/api/audio/sfx-pipeline` - One-call SFX processing
+- [x] **6.3: DJ Booth UI Panel** - Frontend component
   - Preset selector dropdown
-  - Generate button
-  - Audio waveform preview
-  - Trim/fade quick controls
-- [ ] **6.4: Agent DJ Animation** - Visual feedback
+  - Generate button + compile button
+  - Edit buttons (trim/fade/normalize)
+  - Sound volume controls
+- [ ] **6.4: Agent DJ Animation** - Visual feedback (FUTURE)
   - Walk to booth when music tools called
   - Spinning record animation during generation
   - Dance animation on completion
 
-#### Phase 7: Tool Sync 🔧
-- [ ] **7.1: Sync to 81 Tools** - Match Streamlit toolset
-  - Add Suno Compiler tools (4)
-  - Add Audio Editor tools (10)
-  - Add any missing tools
-- [ ] **7.2: Zone Mapping Update** - event_service.py
-  - Map new tools to appropriate zones
+#### Phase 7: Tool Sync 🔧 ✅ COMPLETE
+- [x] **7.1: Sync to 79 Tools** - Match Streamlit toolset (EEG excluded)
+  - Added Suno Compiler tools (4)
+  - Added Audio Editor tools (10)
+  - Added Music tools (10)
+- [x] **7.2: Zone Mapping Update** - event_service.py
   - suno_prompt_* → dj_booth
   - audio_* → dj_booth
+  - music_* → dj_booth
 
 #### Phase 8: Polish & Integration ✨
 - [ ] **8.1: Multi-Agent Support** - Multiple agents on screen
