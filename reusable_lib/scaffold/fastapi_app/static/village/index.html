@@ -7,39 +7,89 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <a href="/" class="back-link">< Back to Chat</a>
+    <a href="/" class="back-link">◂ Back to Chat</a>
 
-    <div class="container">
-        <header>
-            <h1>VILLAGE GUI</h1>
-            <span class="subtitle">Agent Activity Visualization</span>
-        </header>
+    <div class="village-layout">
+        <!-- Left Panel: Agent Selection & Controls -->
+        <aside class="control-panel">
+            <div class="panel-section">
+                <h3>⚗ Agent</h3>
+                <select id="agent-select">
+                    <option value="CLAUDE" data-color="#00aaff">CLAUDE (Default)</option>
+                    <option value="AZOTH" data-color="#00ffaa">∴AZOTH∴</option>
+                    <option value="ELYSIAN" data-color="#ff69b4">∴ELYSIAN∴</option>
+                    <option value="VAJRA" data-color="#ffd700">∴VAJRA∴</option>
+                    <option value="KETHER" data-color="#9370db">∴KETHER∴</option>
+                </select>
+            </div>
 
-        <main>
+            <div class="panel-section">
+                <h3>🛠 Quick Tools</h3>
+                <div class="tool-buttons">
+                    <button onclick="triggerTool('memory_list', {})" class="tool-btn memory">
+                        🌿 Memory
+                    </button>
+                    <button onclick="triggerTool('fs_list_files', {path: '.'})" class="tool-btn files">
+                        📁 Files
+                    </button>
+                    <button onclick="triggerTool('get_current_time', {format: 'human'})" class="tool-btn time">
+                        ⏰ Time
+                    </button>
+                    <button onclick="triggerTool('agent_list', {})" class="tool-btn agents">
+                        🌉 Agents
+                    </button>
+                    <button onclick="triggerTool('execute_python', {code: 'print(\"Hello Village!\")'})" class="tool-btn code">
+                        ⚙️ Code
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>📊 Stats</h3>
+                <div id="stats-panel">
+                    <div class="stat-row">
+                        <span class="stat-label">Status:</span>
+                        <span id="stat-connection" class="stat-value disconnected">●</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Events:</span>
+                        <span id="stat-events" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Last Tool:</span>
+                        <span id="stat-last-tool" class="stat-value">-</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Canvas -->
+        <main class="canvas-container">
             <canvas id="village-canvas"></canvas>
         </main>
 
-        <footer>
-            <div id="event-log">Connecting...</div>
-        </footer>
-    </div>
-
-    <!-- Quick test button -->
-    <div style="position: fixed; bottom: 10px; right: 10px; display: flex; gap: 10px;">
-        <button onclick="testTool('memory_list')" style="padding: 8px 16px; background: #00b894; border: none; color: white; cursor: pointer; border-radius: 4px;">
-            Test Memory
-        </button>
-        <button onclick="testTool('fs_list_files')" style="padding: 8px 16px; background: #fdcb6e; border: none; color: black; cursor: pointer; border-radius: 4px;">
-            Test Files
-        </button>
-        <button onclick="testTool('get_current_time')" style="padding: 8px 16px; background: #6c5ce7; border: none; color: white; cursor: pointer; border-radius: 4px;">
-            Test Time
-        </button>
+        <!-- Right Panel: Activity Log -->
+        <aside class="activity-panel">
+            <div class="panel-header">
+                <h3>📜 Activity Log</h3>
+                <button onclick="clearLog()" class="clear-btn" title="Clear log">✕</button>
+            </div>
+            <div id="activity-log">
+                <div class="log-entry system">Waiting for events...</div>
+            </div>
+        </aside>
     </div>
 
     <script>
-        async function testTool(tool) {
-            const args = tool === 'fs_list_files' ? {path: '.'} : (tool === 'get_current_time' ? {format: 'human'} : {});
+        // Global reference for village app (set by village.js)
+        window.villageApp = null;
+
+        // Trigger a tool and update UI
+        async function triggerTool(tool, args) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.classList.add('loading');
+
             try {
                 const res = await fetch('/api/tools/execute', {
                     method: 'POST',
@@ -50,7 +100,75 @@
                 console.log('Tool result:', data);
             } catch(e) {
                 console.error('Tool error:', e);
+                addLogEntry('error', 'SYSTEM', tool, 'Request failed');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
             }
+        }
+
+        // Add entry to activity log
+        function addLogEntry(type, agent, tool, detail, zone = null) {
+            const log = document.getElementById('activity-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
+            const icon = type === 'start' ? '→' : type === 'complete' ? '✓' : type === 'error' ? '✗' : '•';
+            const zoneText = zone ? ` @ ${zone}` : '';
+
+            entry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-icon">${icon}</span>
+                <span class="log-agent">${agent}</span>
+                <span class="log-tool">${tool}</span>
+                <span class="log-zone">${zoneText}</span>
+            `;
+
+            // Remove "waiting" message if present
+            const waiting = log.querySelector('.system');
+            if (waiting) waiting.remove();
+
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+
+            // Flash effect
+            entry.classList.add('flash');
+            setTimeout(() => entry.classList.remove('flash'), 500);
+        }
+
+        // Clear activity log
+        function clearLog() {
+            const log = document.getElementById('activity-log');
+            log.innerHTML = '<div class="log-entry system">Log cleared</div>';
+        }
+
+        // Update stats display
+        function updateStats(stats) {
+            const conn = document.getElementById('stat-connection');
+            conn.textContent = stats.connection === 'connected' ? '● Connected' : '○ Disconnected';
+            conn.className = 'stat-value ' + stats.connection;
+
+            document.getElementById('stat-events').textContent = stats.eventCount;
+            document.getElementById('stat-last-tool').textContent = stats.lastTool || '-';
+        }
+
+        // Agent selector change
+        document.getElementById('agent-select').addEventListener('change', function() {
+            const agentId = this.value;
+            console.log('Switched to agent:', agentId);
+            // Notify village app
+            if (window.villageApp) {
+                window.villageApp.setCurrentAgent(agentId);
+            }
+            // Store preference
+            localStorage.setItem('village_agent', agentId);
+        });
+
+        // Restore agent preference
+        const savedAgent = localStorage.getItem('village_agent');
+        if (savedAgent) {
+            document.getElementById('agent-select').value = savedAgent;
         }
     </script>
     <script type="module" src="village.js"></script>

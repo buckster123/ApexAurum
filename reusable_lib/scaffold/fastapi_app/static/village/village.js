@@ -2,6 +2,7 @@
  * Village GUI - Main Application
  *
  * Coordinates WebSocket events, agents, and rendering.
+ * Phase 3: Integrated with HTML UI panels
  */
 
 import { ZONES, getZoneForTool } from './zones.js';
@@ -14,9 +15,10 @@ class VillageApp {
         this.canvas = document.getElementById('village-canvas');
         this.renderer = new Renderer(this.canvas);
 
-        // Agents
+        // Agents - restore from localStorage or default
         this.agents = new Map();
-        this.ensureAgent('CLAUDE');  // Default agent
+        this.currentAgentId = localStorage.getItem('village_agent') || 'CLAUDE';
+        this.ensureAgent(this.currentAgentId);
 
         // State
         this.status = {
@@ -28,10 +30,6 @@ class VillageApp {
         // Active zone (for highlighting)
         this.activeZone = null;
 
-        // Event log
-        this.eventLog = [];
-        this.maxLogEntries = 50;
-
         // WebSocket
         this.ws = null;
         this.reconnectAttempts = 0;
@@ -41,7 +39,19 @@ class VillageApp {
         // Start render loop
         this.animate();
 
+        // Export to window for UI interaction
+        window.villageApp = this;
+
         console.log('Village GUI initialized');
+    }
+
+    /**
+     * Set current agent (called from UI selector)
+     */
+    setCurrentAgent(agentId) {
+        this.currentAgentId = agentId;
+        this.ensureAgent(agentId);
+        console.log(`Active agent: ${agentId}`);
     }
 
     /**
@@ -71,13 +81,18 @@ class VillageApp {
             console.log('WebSocket connected');
             this.status.connection = 'connected';
             this.reconnectAttempts = 0;
-            this.addLog('system', 'Connected to Village GUI');
+            this.updateUI();
+
+            // Log to activity panel
+            if (window.addLogEntry) {
+                addLogEntry('system', 'SYSTEM', 'connect', 'WebSocket connected');
+            }
         };
 
         this.ws.onclose = () => {
             console.log('WebSocket disconnected');
             this.status.connection = 'disconnected';
-            this.addLog('system', 'Disconnected from server');
+            this.updateUI();
 
             // Reconnect with backoff
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -91,6 +106,7 @@ class VillageApp {
         this.ws.onerror = (error) => {
             console.error('WebSocket error:', error);
             this.status.connection = 'error';
+            this.updateUI();
         };
 
         this.ws.onmessage = (event) => {
@@ -117,19 +133,21 @@ class VillageApp {
 
             case 'connection':
                 console.log('Connection confirmed');
-                this.addLog('system', 'Connection confirmed');
                 break;
 
             default:
                 console.log('Unknown event type:', event.type);
         }
+
+        this.updateUI();
     }
 
     /**
      * Handle tool start event
      */
     handleToolStart(event) {
-        const agent = this.ensureAgent(event.agent_id);
+        const agentId = event.agent_id || this.currentAgentId;
+        const agent = this.ensureAgent(agentId);
         const zone = event.zone || getZoneForTool(event.tool);
 
         agent.moveTo(zone, ZONES);
@@ -138,21 +156,29 @@ class VillageApp {
         this.activeZone = zone;
         this.status.lastTool = event.tool;
 
-        this.addLog('tool_start', `${event.agent_id} -> ${event.tool} @ ${zone}`);
+        // Update activity log
+        if (window.addLogEntry) {
+            addLogEntry('start', agentId, event.tool, null, zone);
+        }
     }
 
     /**
      * Handle tool complete event
      */
     handleToolComplete(event) {
-        const agent = this.agents.get(event.agent_id);
+        const agentId = event.agent_id || this.currentAgentId;
+        const agent = this.agents.get(agentId);
+        const zone = event.zone || getZoneForTool(event.tool);
+
         if (agent) {
             agent.finishTool();
         }
 
-        const status = event.success ? 'OK' : 'FAIL';
-        const duration = event.duration_ms ? ` (${event.duration_ms}ms)` : '';
-        this.addLog('tool_complete', `${event.agent_id} <- ${event.tool} ${status}${duration}`);
+        // Update activity log
+        const type = event.success ? 'complete' : 'error';
+        if (window.addLogEntry) {
+            addLogEntry(type, agentId, event.tool, event.result_preview, zone);
+        }
 
         // Clear active zone after brief delay
         setTimeout(() => {
@@ -161,35 +187,12 @@ class VillageApp {
     }
 
     /**
-     * Add entry to event log
+     * Update UI panels (stats, etc.)
      */
-    addLog(type, message) {
-        const timestamp = new Date().toLocaleTimeString();
-        this.eventLog.unshift({ type, message, timestamp });
-
-        // Trim log
-        if (this.eventLog.length > this.maxLogEntries) {
-            this.eventLog.pop();
+    updateUI() {
+        if (window.updateStats) {
+            updateStats(this.status);
         }
-
-        // Update DOM log
-        this.updateLogDisplay();
-    }
-
-    /**
-     * Update the log display in DOM
-     */
-    updateLogDisplay() {
-        const logEl = document.getElementById('event-log');
-        if (!logEl) return;
-
-        const entries = this.eventLog.slice(0, 10).map(entry => {
-            const icon = entry.type === 'tool_start' ? '>' :
-                         entry.type === 'tool_complete' ? '<' : '*';
-            return `${entry.timestamp} ${icon} ${entry.message}`;
-        });
-
-        logEl.textContent = entries.join('\n');
     }
 
     /**
@@ -203,7 +206,6 @@ class VillageApp {
 
         // Render
         this.renderer.clear();
-        this.renderer.drawHeader();
         this.renderer.drawConnections();
         this.renderer.drawZones(this.activeZone);
 
@@ -211,8 +213,6 @@ class VillageApp {
         for (const agent of this.agents.values()) {
             agent.draw(this.renderer.ctx);
         }
-
-        this.renderer.drawStatus(this.status);
 
         // Continue loop
         requestAnimationFrame(() => this.animate());
