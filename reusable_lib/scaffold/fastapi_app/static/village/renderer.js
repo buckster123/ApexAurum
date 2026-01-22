@@ -2,9 +2,56 @@
  * Canvas Renderer - Enhanced with visual effects
  *
  * Handles drawing the village, zones, and UI elements.
+ * Now with Day/Night cycle!
  */
 
 import { ZONES, CANVAS_WIDTH, CANVAS_HEIGHT } from './zones.js';
+
+// Sky color palettes for different times of day
+const SKY_COLORS = {
+    // Night (0-5, 21-24)
+    night: {
+        top: '#0a0a12',
+        mid: '#12121f',
+        bottom: '#0a0a12',
+        starOpacity: 0.8
+    },
+    // Dawn (5-7)
+    dawn: {
+        top: '#1a1a2e',
+        mid: '#4a3f6b',
+        bottom: '#ff7b54',
+        starOpacity: 0.2
+    },
+    // Morning (7-10)
+    morning: {
+        top: '#4a90c2',
+        mid: '#87ceeb',
+        bottom: '#ffecd2',
+        starOpacity: 0
+    },
+    // Day (10-17)
+    day: {
+        top: '#2d6aa5',
+        mid: '#5da5d4',
+        bottom: '#87ceeb',
+        starOpacity: 0
+    },
+    // Dusk (17-19)
+    dusk: {
+        top: '#2d3a5a',
+        mid: '#b06e4f',
+        bottom: '#ff6b35',
+        starOpacity: 0.1
+    },
+    // Evening (19-21)
+    evening: {
+        top: '#1a1a2e',
+        mid: '#3d3d6b',
+        bottom: '#5a4a6b',
+        starOpacity: 0.5
+    }
+};
 
 export class Renderer {
     constructor(canvas) {
@@ -17,7 +64,92 @@ export class Renderer {
 
         // Animation state
         this.time = 0;
-        this.starField = this.generateStarField(50);
+        this.starField = this.generateStarField(80);  // More stars for night sky
+
+        // Day/Night cycle - use real time by default
+        this.useRealTime = true;
+        this.manualHour = 12;  // For manual override
+        this.timeSpeed = 1;    // 1 = real time, 60 = 1 hour per minute
+    }
+
+    /**
+     * Get current hour (0-24) based on settings
+     */
+    getCurrentHour() {
+        if (this.useRealTime) {
+            const now = new Date();
+            return now.getHours() + now.getMinutes() / 60;
+        }
+        return this.manualHour;
+    }
+
+    /**
+     * Get sky palette for current time
+     */
+    getSkyPalette(hour) {
+        // Determine time period and blend between palettes
+        let palette1, palette2, blend;
+
+        if (hour >= 21 || hour < 5) {
+            // Night
+            return SKY_COLORS.night;
+        } else if (hour >= 5 && hour < 7) {
+            // Dawn transition
+            blend = (hour - 5) / 2;
+            palette1 = SKY_COLORS.night;
+            palette2 = SKY_COLORS.dawn;
+        } else if (hour >= 7 && hour < 10) {
+            // Morning transition
+            blend = (hour - 7) / 3;
+            palette1 = SKY_COLORS.dawn;
+            palette2 = SKY_COLORS.morning;
+        } else if (hour >= 10 && hour < 17) {
+            // Full day
+            return SKY_COLORS.day;
+        } else if (hour >= 17 && hour < 19) {
+            // Dusk transition
+            blend = (hour - 17) / 2;
+            palette1 = SKY_COLORS.day;
+            palette2 = SKY_COLORS.dusk;
+        } else if (hour >= 19 && hour < 21) {
+            // Evening transition
+            blend = (hour - 19) / 2;
+            palette1 = SKY_COLORS.dusk;
+            palette2 = SKY_COLORS.evening;
+        }
+
+        // Blend colors
+        return this.blendPalettes(palette1, palette2, blend);
+    }
+
+    /**
+     * Blend two color palettes
+     */
+    blendPalettes(p1, p2, t) {
+        return {
+            top: this.lerpColor(p1.top, p2.top, t),
+            mid: this.lerpColor(p1.mid, p2.mid, t),
+            bottom: this.lerpColor(p1.bottom, p2.bottom, t),
+            starOpacity: p1.starOpacity + (p2.starOpacity - p1.starOpacity) * t
+        };
+    }
+
+    /**
+     * Linear interpolate between two hex colors
+     */
+    lerpColor(c1, c2, t) {
+        const r1 = parseInt(c1.slice(1, 3), 16);
+        const g1 = parseInt(c1.slice(3, 5), 16);
+        const b1 = parseInt(c1.slice(5, 7), 16);
+        const r2 = parseInt(c2.slice(1, 3), 16);
+        const g2 = parseInt(c2.slice(3, 5), 16);
+        const b2 = parseInt(c2.slice(5, 7), 16);
+
+        const r = Math.round(r1 + (r2 - r1) * t);
+        const g = Math.round(g1 + (g2 - g1) * t);
+        const b = Math.round(b1 + (b2 - b1) * t);
+
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 
     /**
@@ -38,27 +170,130 @@ export class Renderer {
     }
 
     /**
-     * Clear canvas with gradient background
+     * Clear canvas with dynamic sky based on time of day
      */
     clear() {
+        const hour = this.getCurrentHour();
+        const palette = this.getSkyPalette(hour);
+
         // Create gradient background
         const gradient = this.ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-        gradient.addColorStop(0, '#0a0a12');
-        gradient.addColorStop(0.5, '#12121f');
-        gradient.addColorStop(1, '#0a0a12');
+        gradient.addColorStop(0, palette.top);
+        gradient.addColorStop(0.5, palette.mid);
+        gradient.addColorStop(1, palette.bottom);
 
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw twinkling stars
+        // Draw sun or moon
+        this.drawCelestialBody(hour);
+
+        // Draw twinkling stars (only visible at night)
         this.time += 0.016;
-        this.starField.forEach(star => {
-            const twinkle = 0.3 + Math.sin(this.time * star.twinkleSpeed * 60 + star.phase) * 0.7;
-            this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle * 0.5})`;
-            this.ctx.beginPath();
-            this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            this.ctx.fill();
-        });
+        if (palette.starOpacity > 0) {
+            this.starField.forEach(star => {
+                const twinkle = 0.3 + Math.sin(this.time * star.twinkleSpeed * 60 + star.phase) * 0.7;
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle * palette.starOpacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                this.ctx.fill();
+            });
+        }
+
+        // Store current brightness for zone rendering
+        this.currentBrightness = this.getBrightness(hour);
+    }
+
+    /**
+     * Draw sun or moon based on time
+     */
+    drawCelestialBody(hour) {
+        const ctx = this.ctx;
+
+        // Calculate position along an arc
+        // Sun rises at 6, peaks at 12, sets at 18
+        // Moon rises at 18, peaks at 0, sets at 6
+
+        const isSun = hour >= 6 && hour < 20;
+        let progress;
+
+        if (isSun) {
+            // Sun path (6-20)
+            progress = (hour - 6) / 14;
+        } else {
+            // Moon path (20-6)
+            if (hour >= 20) {
+                progress = (hour - 20) / 10;
+            } else {
+                progress = (hour + 4) / 10;
+            }
+        }
+
+        // Arc path from left to right
+        const x = 50 + progress * (CANVAS_WIDTH - 100);
+        const arcHeight = 120;
+        const y = 80 + Math.sin(progress * Math.PI) * -arcHeight + arcHeight;
+
+        ctx.save();
+
+        if (isSun) {
+            // Draw sun
+            const sunGlow = ctx.createRadialGradient(x, y, 0, x, y, 40);
+            sunGlow.addColorStop(0, 'rgba(255, 220, 100, 0.9)');
+            sunGlow.addColorStop(0.3, 'rgba(255, 180, 50, 0.5)');
+            sunGlow.addColorStop(1, 'rgba(255, 150, 50, 0)');
+
+            ctx.fillStyle = sunGlow;
+            ctx.beginPath();
+            ctx.arc(x, y, 40, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sun core
+            ctx.fillStyle = '#ffdd66';
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Draw moon
+            const moonGlow = ctx.createRadialGradient(x, y, 0, x, y, 30);
+            moonGlow.addColorStop(0, 'rgba(230, 230, 255, 0.8)');
+            moonGlow.addColorStop(0.5, 'rgba(200, 200, 230, 0.3)');
+            moonGlow.addColorStop(1, 'rgba(150, 150, 200, 0)');
+
+            ctx.fillStyle = moonGlow;
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Moon core
+            ctx.fillStyle = '#e8e8f0';
+            ctx.beginPath();
+            ctx.arc(x, y, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Moon craters (subtle)
+            ctx.fillStyle = 'rgba(200, 200, 210, 0.5)';
+            ctx.beginPath();
+            ctx.arc(x - 3, y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 4, y + 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * Get brightness multiplier for current time (affects zone rendering)
+     */
+    getBrightness(hour) {
+        if (hour >= 10 && hour < 17) return 1.0;      // Full day
+        if (hour >= 7 && hour < 10) return 0.85;       // Morning
+        if (hour >= 17 && hour < 19) return 0.75;      // Dusk
+        if (hour >= 19 && hour < 21) return 0.5;       // Evening
+        if (hour >= 5 && hour < 7) return 0.4;         // Dawn
+        return 0.3;                                     // Night
     }
 
     /**
@@ -108,14 +343,20 @@ export class Renderer {
             zone.x, zone.y, Math.max(zone.width, zone.height) * 0.7
         );
 
-        // Adjust alpha based on state
-        let alpha = '55';
-        if (isActive) alpha = 'aa';
-        else if (isSelected) alpha = '88';
-        else if (isHovered) alpha = '77';
+        // Adjust alpha based on state and time of day
+        let baseAlpha = 0x55;
+        if (isActive) baseAlpha = 0xaa;
+        else if (isSelected) baseAlpha = 0x88;
+        else if (isHovered) baseAlpha = 0x77;
+
+        // Apply brightness from time of day
+        const brightness = this.currentBrightness || 1.0;
+        const adjustedAlpha = Math.round(baseAlpha * (0.5 + brightness * 0.5));
+        const alpha = adjustedAlpha.toString(16).padStart(2, '0');
+        const alphaLow = Math.round(0x22 * brightness).toString(16).padStart(2, '0');
 
         gradient.addColorStop(0, zone.color + alpha);
-        gradient.addColorStop(1, zone.color + '22');
+        gradient.addColorStop(1, zone.color + alphaLow);
 
         ctx.fillStyle = gradient;
         ctx.strokeStyle = zone.color;
@@ -310,5 +551,73 @@ export class Renderer {
         ctx.textAlign = 'right';
         ctx.fillText(`${fps} FPS`, CANVAS_WIDTH - 10, CANVAS_HEIGHT - 10);
         ctx.restore();
+    }
+
+    /**
+     * Draw time indicator (clock and time-of-day icon)
+     */
+    drawTimeIndicator() {
+        const ctx = this.ctx;
+        const hour = this.getCurrentHour();
+
+        ctx.save();
+
+        // Position top-right
+        const x = CANVAS_WIDTH - 75;
+        const y = 15;
+
+        // Background panel
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath();
+        ctx.roundRect(x - 5, y - 5, 70, 25, 5);
+        ctx.fill();
+
+        // Time icon based on period
+        let icon;
+        if (hour >= 21 || hour < 5) icon = '🌙';
+        else if (hour >= 5 && hour < 7) icon = '🌅';
+        else if (hour >= 7 && hour < 10) icon = '🌤️';
+        else if (hour >= 10 && hour < 17) icon = '☀️';
+        else if (hour >= 17 && hour < 19) icon = '🌇';
+        else icon = '🌆';
+
+        ctx.font = '14px serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(icon, x, y + 12);
+
+        // Time text
+        const hours = Math.floor(hour);
+        const mins = Math.floor((hour % 1) * 60);
+        const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+        ctx.fillStyle = '#cccccc';
+        ctx.font = '12px monospace';
+        ctx.fillText(timeStr, x + 22, y + 12);
+
+        ctx.restore();
+    }
+
+    /**
+     * Set manual time (for testing or fast-forward)
+     */
+    setTime(hour) {
+        this.useRealTime = false;
+        this.manualHour = hour % 24;
+    }
+
+    /**
+     * Resume real time
+     */
+    useRealTimeMode() {
+        this.useRealTime = true;
+    }
+
+    /**
+     * Fast forward time (for demos)
+     */
+    advanceTime(hours = 1) {
+        if (!this.useRealTime) {
+            this.manualHour = (this.manualHour + hours) % 24;
+        }
     }
 }

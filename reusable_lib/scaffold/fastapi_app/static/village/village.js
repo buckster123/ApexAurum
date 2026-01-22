@@ -360,6 +360,7 @@ class VillageApp {
 
         // Render
         this.renderer.clear();
+        this.renderer.drawTimeIndicator();
         this.renderer.drawConnections();
         this.renderer.drawZones(this.activeZone, this.hoveredZone, this.selectedZone);
 
@@ -370,6 +371,20 @@ class VillageApp {
 
         // Continue loop
         requestAnimationFrame(() => this.animate());
+    }
+
+    /**
+     * Set village time (for testing)
+     */
+    setTime(hour) {
+        this.renderer.setTime(hour);
+    }
+
+    /**
+     * Fast forward time
+     */
+    advanceTime(hours = 1) {
+        this.renderer.advanceTime(hours);
     }
 }
 

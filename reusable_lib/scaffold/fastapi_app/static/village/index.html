@@ -45,6 +45,17 @@
             </div>
 
             <div class="panel-section">
+                <h3>🌅 Time Control</h3>
+                <div class="time-controls">
+                    <button onclick="setVillageTime(6)" class="time-btn dawn">🌅 Dawn</button>
+                    <button onclick="setVillageTime(12)" class="time-btn day">☀️ Noon</button>
+                    <button onclick="setVillageTime(18)" class="time-btn dusk">🌇 Dusk</button>
+                    <button onclick="setVillageTime(0)" class="time-btn night">🌙 Night</button>
+                    <button onclick="useRealTime()" class="time-btn real">⏰ Real</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
                 <h3>📊 Stats</h3>
                 <div id="stats-panel">
                     <div class="stat-row">
@@ -108,6 +119,21 @@
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('loading');
+            }
+        }
+
+        // Time control functions
+        function setVillageTime(hour) {
+            if (window.villageApp) {
+                window.villageApp.setTime(hour);
+                addLogEntry('system', 'SYSTEM', 'time', `Set to ${hour}:00`);
+            }
+        }
+
+        function useRealTime() {
+            if (window.villageApp && window.villageApp.renderer) {
+                window.villageApp.renderer.useRealTimeMode();
+                addLogEntry('system', 'SYSTEM', 'time', 'Using real time');
             }
         }
 

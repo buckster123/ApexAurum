@@ -124,6 +124,43 @@ body {
 .tool-btn.agents { border-left: 3px solid #a29bfe; }
 .tool-btn.code { border-left: 3px solid #e17055; }
 
+/* Time controls (Phase 4.1) */
+.time-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.time-btn {
+    flex: 1;
+    min-width: 50px;
+    padding: 6px 8px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: var(--deep-blue);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.time-btn:hover {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.time-btn:active {
+    transform: scale(0.95);
+}
+
+.time-btn.dawn { border-bottom: 2px solid #ff7b54; }
+.time-btn.day { border-bottom: 2px solid #ffdd66; }
+.time-btn.dusk { border-bottom: 2px solid #ff6b35; }
+.time-btn.night { border-bottom: 2px solid #4a3f6b; }
+.time-btn.real { border-bottom: 2px solid #00aaff; }
+
 /* Stats panel */
 #stats-panel {
     font-size: 11px;
