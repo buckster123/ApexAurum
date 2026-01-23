@@ -122,7 +122,6 @@ def nursery_generate_data(
                         name=tool_name,
                         description=schema.get("description", ""),
                         parameters=schema.get("input_schema", {}).get("properties", {}),
-                        required=schema.get("input_schema", {}).get("required", []),
                     )
             except ImportError:
                 pass
