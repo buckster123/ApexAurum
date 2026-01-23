@@ -54,17 +54,6 @@ async def list_tools():
     }
 
 
-@router.get("/{tool_name}")
-async def get_tool(tool_name: str):
-    """
-    Get details about a specific tool.
-    """
-    tool = tool_service.get_tool(tool_name)
-    if not tool:
-        raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}")
-    return tool
-
-
 @router.post("/execute", response_model=ToolCallResponse)
 async def execute_tool(request: ToolCallRequest):
     """
@@ -271,3 +260,20 @@ async def get_enabled_tools():
         "count": len(enabled),
         "total": len(tool_service.tools)
     }
+
+
+# ============================================================================
+# Catch-all route MUST be last
+# ============================================================================
+
+@router.get("/{tool_name}")
+async def get_tool(tool_name: str):
+    """
+    Get details about a specific tool.
+
+    This is a catch-all route and must be defined AFTER all other GET routes.
+    """
+    tool = tool_service.get_tool(tool_name)
+    if not tool:
+        raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}")
+    return tool
