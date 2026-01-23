@@ -17,10 +17,17 @@ The Nursery becomes a first-class citizen of the Village - training events are c
 
 ## 📋 INTEGRATION PHASES
 
-### Phase 1: Village Event Hooks (Foundation)
-**Effort:** Small | **Impact:** High
+### Phase 1: Village Event Hooks (Foundation) ✅ COMPLETE
+**Effort:** Small | **Impact:** High | **Completed:** 2026-01-23
 
 **Goal:** Training events automatically post to Village memory.
+
+**Implementation Summary:**
+- Added `_village_post_event()` helper with dual-path posting (vector_add_knowledge + village_post)
+- Added `agent_id` parameter to: `nursery_generate_data`, `nursery_extract_conversations`, `nursery_train_cloud`, `nursery_train_local`
+- Village events posted on: dataset creation, training start, training completion
+- Agent attribution tracked in job records (`trainer_agent` field)
+- Tool schemas updated with `agent_id` parameter documentation
 
 #### 1.1 Training Completion Announcements
 ```python
@@ -303,10 +310,10 @@ introduction_ritual(
 
 ## 📊 IMPLEMENTATION PRIORITY
 
-| Phase | Effort | Impact | Priority |
-|-------|--------|--------|----------|
-| 1. Village Event Hooks | Small | High | 🔴 **NOW** |
-| 2. Shared Model Registry | Medium | High | 🟠 Next |
+| Phase | Effort | Impact | Status |
+|-------|--------|--------|--------|
+| 1. Village Event Hooks | Small | High | ✅ **COMPLETE** |
+| 2. Shared Model Registry | Medium | High | 🔴 **NOW** |
 | 3. Agent Training | Medium | Very High | 🟠 Next |
 | 4. Streamlit UI | Medium | High | 🟡 Soon |
 | 5. FastAPI Parity | Small | Medium | 🟡 Soon |

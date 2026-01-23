@@ -39,6 +39,65 @@ from typing import Optional, Dict, Any, List
 
 logger = logging.getLogger(__name__)
 
+# Village Protocol integration - for training event announcements
+def _village_post_event(content: str, event_type: str, agent_id: str = None, metadata: Dict = None):
+    """
+    Post a nursery event to the Village.
+
+    Tries multiple approaches:
+    1. Main app's vector_add_knowledge (Streamlit context)
+    2. reusable_lib's village_post (FastAPI context)
+
+    Wrapped to handle import errors gracefully.
+    """
+    posting_agent = agent_id or "NURSERY_KEEPER"
+
+    # Try main app's vector_add_knowledge first (works in Streamlit context)
+    try:
+        from tools.vector_search import vector_add_knowledge
+
+        result = vector_add_knowledge(
+            fact=content,
+            category="general",
+            confidence=1.0,
+            source="nursery",
+            visibility="village",
+            agent_id=posting_agent,
+        )
+
+        if result.get("success"):
+            logger.info(f"Village event posted via vector_add_knowledge: {event_type}")
+            return result
+    except Exception as e:
+        logger.debug(f"vector_add_knowledge approach failed: {e}")
+
+    # Fallback: Try reusable_lib's village_post (FastAPI context)
+    try:
+        from reusable_lib.tools.village import village_post
+
+        result = village_post(
+            content=content,
+            visibility="village",
+            message_type=event_type,
+            agent_id=posting_agent,
+            tags=["nursery", event_type],
+            related_agents=[agent_id] if agent_id else None
+        )
+
+        if result.get("success"):
+            logger.info(f"Village event posted via village_post: {event_type}")
+        else:
+            logger.warning(f"Village post failed: {result.get('error')}")
+
+        return result
+
+    except ImportError:
+        logger.debug("Village modules not available - skipping event post")
+        return {"success": False, "error": "Village modules not available"}
+    except Exception as e:
+        logger.warning(f"Village event post failed: {e}")
+        return {"success": False, "error": str(e)}
+
 # Add reusable_lib to path
 REUSABLE_LIB = Path(__file__).parent.parent / "reusable_lib"
 if str(REUSABLE_LIB) not in sys.path:
@@ -86,6 +145,7 @@ def nursery_generate_data(
     num_examples: int = 50,
     variation_level: str = "medium",
     output_name: Optional[str] = None,
+    agent_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate synthetic training data for a specific tool.
@@ -151,6 +211,18 @@ def nursery_generate_data(
         # Save using generator's save method or manually
         generator.save(examples, str(output_path), format='jsonl')
 
+        # 🏘️ Village Protocol: Announce dataset creation
+        _village_post_event(
+            content=f"📊 New training dataset: {output_name} ({len(examples)} examples for {tool_name})",
+            event_type="dataset_created",
+            agent_id=agent_id,
+            metadata={
+                "dataset_name": output_name,
+                "tool_name": tool_name,
+                "num_examples": len(examples),
+            }
+        )
+
         return {
             "success": True,
             "dataset_name": output_name,
@@ -179,6 +251,7 @@ def nursery_extract_conversations(
     tools_filter: Optional[List[str]] = None,
     min_examples: int = 10,
     output_name: Optional[str] = None,
+    agent_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Extract training data from real conversation history.
@@ -243,6 +316,19 @@ def nursery_extract_conversations(
         for ex in examples:
             tool = ex.tool_name
             tool_counts[tool] = tool_counts.get(tool, 0) + 1
+
+        # 🏘️ Village Protocol: Announce dataset extraction
+        tools_list = ", ".join(tool_counts.keys()) if len(tool_counts) <= 3 else f"{len(tool_counts)} tools"
+        _village_post_event(
+            content=f"📚 Extracted training dataset: {output_name} ({len(examples)} examples from {tools_list})",
+            event_type="dataset_created",
+            agent_id=agent_id,
+            metadata={
+                "dataset_name": output_name,
+                "num_examples": len(examples),
+                "tools_extracted": list(tool_counts.keys()),
+            }
+        )
 
         return {
             "success": True,
@@ -375,6 +461,7 @@ def nursery_train_cloud(
     epochs: int = 3,
     learning_rate: float = 1e-5,
     lora_rank: int = 16,
+    agent_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Start a cloud training job.
@@ -427,7 +514,8 @@ def nursery_train_cloud(
                 lora_rank=lora_rank,
             )
 
-            # Save job to history
+            # Save job to history (with agent attribution)
+            trainer_agent = agent_id or "NURSERY_KEEPER"
             job_record = {
                 "job_id": job.id,
                 "provider": provider,
@@ -436,6 +524,7 @@ def nursery_train_cloud(
                 "output_name": output_name,
                 "status": job.status,
                 "created_at": datetime.now().isoformat(),
+                "trainer_agent": trainer_agent,
                 "config": {
                     "epochs": epochs,
                     "learning_rate": learning_rate,
@@ -444,11 +533,27 @@ def nursery_train_cloud(
             }
             _add_job(job_record)
 
+            # 🏘️ Village Protocol: Announce training started
+            model_short = base_model.split("/")[-1] if "/" in base_model else base_model
+            _village_post_event(
+                content=f"🔥 Training started: {output_name} (base: {model_short}, provider: {provider})",
+                event_type="training_started",
+                agent_id=trainer_agent,
+                metadata={
+                    "job_id": job.id,
+                    "output_name": output_name,
+                    "base_model": base_model,
+                    "provider": provider,
+                    "dataset": dataset_name,
+                }
+            )
+
             return {
                 "success": True,
                 "job_id": job.id,
                 "provider": provider,
                 "status": job.status,
+                "trainer_agent": trainer_agent,
                 "message": f"🔥 Training job started on {provider}!",
                 "check_status": f"Use nursery_job_status(job_id='{job.id}') to monitor progress",
             }
@@ -477,6 +582,7 @@ def nursery_train_local(
     learning_rate: float = 2e-5,
     lora_rank: int = 8,
     use_cpu: bool = False,
+    agent_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Start local LoRA training (if hardware supports it).
@@ -540,6 +646,10 @@ def nursery_train_local(
         trainer = LoRATrainer(config)
         stats = trainer.train(str(dataset_path))
 
+        # Agent attribution
+        trainer_agent = agent_id or "NURSERY_KEEPER"
+        stats_dict = stats.to_dict() if hasattr(stats, 'to_dict') else {"info": str(stats)}
+
         # Save job record
         job_record = {
             "job_id": f"local_{output_name}",
@@ -549,16 +659,34 @@ def nursery_train_local(
             "output_name": output_name,
             "status": "completed",
             "created_at": datetime.now().isoformat(),
+            "trainer_agent": trainer_agent,
             "output_path": str(output_dir),
-            "stats": stats.to_dict() if hasattr(stats, 'to_dict') else str(stats),
+            "stats": stats_dict,
         }
         _add_job(job_record)
+
+        # 🏘️ Village Protocol: Announce training complete
+        model_short = base_model.split("/")[-1] if "/" in base_model else base_model
+        loss_info = stats_dict.get("final_loss", stats_dict.get("info", ""))
+        _village_post_event(
+            content=f"🌱 New model trained: {output_name} (base: {model_short}, local training complete!)",
+            event_type="training_complete",
+            agent_id=trainer_agent,
+            metadata={
+                "output_name": output_name,
+                "base_model": base_model,
+                "dataset": dataset_name,
+                "provider": "local",
+                "output_path": str(output_dir),
+            }
+        )
 
         return {
             "success": True,
             "output_name": output_name,
             "output_path": str(output_dir),
-            "stats": stats.to_dict() if hasattr(stats, 'to_dict') else {"info": str(stats)},
+            "trainer_agent": trainer_agent,
+            "stats": stats_dict,
             "message": f"🎉 Local training complete! Adapter saved to {output_dir}",
         }
 
@@ -814,7 +942,7 @@ def nursery_compare_models(
 
 NURSERY_GENERATE_DATA_SCHEMA = {
     "name": "nursery_generate_data",
-    "description": "Generate synthetic training data for a specific tool. Creates varied examples of tool usage for fine-tuning smaller models.",
+    "description": "Generate synthetic training data for a specific tool. Creates varied examples of tool usage for fine-tuning smaller models. Announces to Village when complete.",
     "input_schema": {
         "type": "object",
         "properties": {
@@ -837,6 +965,10 @@ NURSERY_GENERATE_DATA_SCHEMA = {
                 "type": "string",
                 "description": "Optional name for the dataset",
             },
+            "agent_id": {
+                "type": "string",
+                "description": "Agent creating the dataset (for Village attribution). Defaults to NURSERY_KEEPER.",
+            },
         },
         "required": ["tool_name"],
     },
@@ -844,7 +976,7 @@ NURSERY_GENERATE_DATA_SCHEMA = {
 
 NURSERY_EXTRACT_CONVERSATIONS_SCHEMA = {
     "name": "nursery_extract_conversations",
-    "description": "Extract training data from real conversation history. Mines actual tool usage patterns from past conversations.",
+    "description": "Extract training data from real conversation history. Mines actual tool usage patterns from past conversations. Announces to Village when complete.",
     "input_schema": {
         "type": "object",
         "properties": {
@@ -866,6 +998,10 @@ NURSERY_EXTRACT_CONVERSATIONS_SCHEMA = {
             "output_name": {
                 "type": "string",
                 "description": "Optional name for the dataset",
+            },
+            "agent_id": {
+                "type": "string",
+                "description": "Agent creating the dataset (for Village attribution). Defaults to NURSERY_KEEPER.",
             },
         },
         "required": [],
@@ -914,7 +1050,7 @@ NURSERY_ESTIMATE_COST_SCHEMA = {
 
 NURSERY_TRAIN_CLOUD_SCHEMA = {
     "name": "nursery_train_cloud",
-    "description": "Start a cloud training job on Vast.ai, Together.ai, etc. Returns a job_id for tracking.",
+    "description": "Start a cloud training job on Vast.ai, Together.ai, etc. Returns a job_id for tracking. Announces to Village when started.",
     "input_schema": {
         "type": "object",
         "properties": {
@@ -951,6 +1087,10 @@ NURSERY_TRAIN_CLOUD_SCHEMA = {
                 "description": "LoRA rank (higher = more capacity)",
                 "default": 16,
             },
+            "agent_id": {
+                "type": "string",
+                "description": "Agent initiating training (for Village attribution). Defaults to NURSERY_KEEPER.",
+            },
         },
         "required": ["dataset_name", "base_model", "output_name"],
     },
@@ -958,7 +1098,7 @@ NURSERY_TRAIN_CLOUD_SCHEMA = {
 
 NURSERY_TRAIN_LOCAL_SCHEMA = {
     "name": "nursery_train_local",
-    "description": "Start local LoRA training. Best for small models (1-3B) on capable hardware.",
+    "description": "Start local LoRA training. Best for small models (1-3B) on capable hardware. Announces to Village when complete.",
     "input_schema": {
         "type": "object",
         "properties": {
@@ -999,6 +1139,10 @@ NURSERY_TRAIN_LOCAL_SCHEMA = {
                 "type": "boolean",
                 "description": "Force CPU training",
                 "default": False,
+            },
+            "agent_id": {
+                "type": "string",
+                "description": "Agent initiating training (for Village attribution). Defaults to NURSERY_KEEPER.",
             },
         },
         "required": ["dataset_name"],
