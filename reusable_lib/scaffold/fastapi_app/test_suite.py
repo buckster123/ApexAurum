@@ -456,10 +456,10 @@ def test_village_protocol(suite: TestSuite):
     print("\n📋 TEST GROUP 6: Village Protocol")
     print("-" * 40)
 
-    # 6.1 Village stats
+    # 6.1 Village stats (ChromaDB stats can be slow on Pi)
     start = time.time()
     try:
-        r = requests.get(f"{BASE_URL}/api/village/stats", timeout=5)
+        r = requests.get(f"{BASE_URL}/api/village/stats", timeout=15)
         duration = (time.time() - start) * 1000
         if r.status_code == 200:
             suite.add(TestResult("Village stats", True, "OK", duration))
