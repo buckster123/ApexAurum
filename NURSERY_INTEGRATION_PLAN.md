@@ -250,10 +250,27 @@ st.subheader("🌳 Model Lineage")
 
 ---
 
-### Phase 5: FastAPI Parity
-**Effort:** Small | **Impact:** Medium
+### Phase 5: FastAPI Parity ✅ COMPLETE
+**Effort:** Small | **Impact:** Medium | **Completed:** 2026-01-23
 
 **Goal:** FastAPI has same Nursery capabilities.
+
+**Implementation Summary:**
+- Created `routes/nursery.py` (490 lines) with 20 API endpoints
+- Full REST API: datasets, training, models, apprentices, village activity
+- WebSocket endpoint for real-time training progress
+- Pydantic request/response models for all operations
+- Updated `tool_service.py` with Phase 2 & 3 tools (16 nursery tools total)
+- Updated `main.py` to register nursery routes
+
+**Endpoints:**
+- `GET/POST /api/nursery/datasets/*` - Dataset operations
+- `POST /api/nursery/training/*` - Training jobs (cloud/local)
+- `WS /api/nursery/training/jobs/{id}/progress` - Real-time progress
+- `GET/POST /api/nursery/models/*` - Model registry & discovery
+- `GET/POST /api/nursery/apprentices` - Apprentice Protocol
+- `GET /api/nursery/village-activity` - Training events feed
+- `GET /api/nursery/stats` - Nursery statistics
 
 #### 5.1 Nursery API Routes
 Create dedicated nursery routes:
@@ -343,8 +360,8 @@ introduction_ritual(
 | 2. Shared Model Registry | Medium | High | ✅ **COMPLETE** |
 | 3. Agent Training | Medium | Very High | ✅ **COMPLETE** |
 | 4. Streamlit UI | Medium | High | ✅ **COMPLETE** |
-| 5. FastAPI Parity | Small | Medium | 🔴 **NOW** |
-| 6. NURSERY_KEEPER | Small | Fun! | 🟢 Whenever |
+| 5. FastAPI Parity | Small | Medium | ✅ **COMPLETE** |
+| 6. NURSERY_KEEPER | Small | Fun! | 🔴 **SUMMON!** |
 
 ---
 

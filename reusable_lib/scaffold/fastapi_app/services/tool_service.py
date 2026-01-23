@@ -159,18 +159,28 @@ from tools.music import (
 
 # Nursery tools (Training Studio)
 from tools.nursery import (
+    # Data Garden
     nursery_generate_data,
     nursery_extract_conversations,
     nursery_list_datasets,
+    # Training Forge
     nursery_estimate_cost,
     nursery_train_cloud,
     nursery_train_local,
     nursery_job_status,
     nursery_list_jobs,
+    # Model Cradle
     nursery_list_models,
     nursery_deploy_ollama,
     nursery_test_model,
     nursery_compare_models,
+    # Phase 2: Village Registry
+    nursery_register_model,
+    nursery_discover_models,
+    # Phase 3: Apprentice Protocol
+    nursery_create_apprentice,
+    nursery_list_apprentices,
+    # Schemas
     NURSERY_GENERATE_DATA_SCHEMA,
     NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
     NURSERY_LIST_DATASETS_SCHEMA,
@@ -183,6 +193,10 @@ from tools.nursery import (
     NURSERY_DEPLOY_OLLAMA_SCHEMA,
     NURSERY_TEST_MODEL_SCHEMA,
     NURSERY_COMPARE_MODELS_SCHEMA,
+    NURSERY_REGISTER_MODEL_SCHEMA,
+    NURSERY_DISCOVER_MODELS_SCHEMA,
+    NURSERY_CREATE_APPRENTICE_SCHEMA,
+    NURSERY_LIST_APPRENTICES_SCHEMA,
 )
 
 # Camera tools (Cyclops Eye)
@@ -300,8 +314,12 @@ TOOL_GROUPS = {
         "tools": ["nursery_generate_data", "nursery_extract_conversations", "nursery_list_datasets",
                   "nursery_estimate_cost", "nursery_train_cloud", "nursery_train_local",
                   "nursery_job_status", "nursery_list_jobs", "nursery_list_models",
-                  "nursery_deploy_ollama", "nursery_test_model", "nursery_compare_models"],
-        "description": "ML training & model management"
+                  "nursery_deploy_ollama", "nursery_test_model", "nursery_compare_models",
+                  # Phase 2: Village Registry
+                  "nursery_register_model", "nursery_discover_models",
+                  # Phase 3: Apprentice Protocol
+                  "nursery_create_apprentice", "nursery_list_apprentices"],
+        "description": "ML training, model registry & apprentice protocol"
     },
     "camera": {
         "name": "Cyclops Eye (Vision)",
@@ -659,6 +677,12 @@ class ToolService:
         self.register("nursery_deploy_ollama", nursery_deploy_ollama, NURSERY_DEPLOY_OLLAMA_SCHEMA)
         self.register("nursery_test_model", nursery_test_model, NURSERY_TEST_MODEL_SCHEMA)
         self.register("nursery_compare_models", nursery_compare_models, NURSERY_COMPARE_MODELS_SCHEMA)
+        # Phase 2: Village Registry
+        self.register("nursery_register_model", nursery_register_model, NURSERY_REGISTER_MODEL_SCHEMA)
+        self.register("nursery_discover_models", nursery_discover_models, NURSERY_DISCOVER_MODELS_SCHEMA)
+        # Phase 3: Apprentice Protocol
+        self.register("nursery_create_apprentice", nursery_create_apprentice, NURSERY_CREATE_APPRENTICE_SCHEMA)
+        self.register("nursery_list_apprentices", nursery_list_apprentices, NURSERY_LIST_APPRENTICES_SCHEMA)
 
         # Camera tools (Cyclops Eye)
         self.register("camera_info", camera_info, CAMERA_TOOL_SCHEMAS.get("camera_info"))
