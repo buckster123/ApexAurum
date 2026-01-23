@@ -13,15 +13,20 @@ from typing import Dict, Any, List, Optional, Callable
 import sys
 from pathlib import Path
 
-# Path to reusable_lib directory
-lib_path = Path(__file__).parent.parent.parent.parent
-if str(lib_path) not in sys.path:
-    sys.path.insert(0, str(lib_path))
+# Path setup for dual tools/ imports:
+# - ApexAurum/tools/ (suno_compiler, audio_editor, music, vision, eeg)
+# - reusable_lib/tools/ (via reusable_lib.tools namespace)
+lib_path = Path(__file__).parent.parent.parent.parent  # reusable_lib/
+project_root = lib_path.parent  # ApexAurum/
 
-# Path to project root (for tools/ directory)
-project_root = lib_path.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+# IMPORTANT: Project root MUST be at index 0 for tools.* imports to find
+# ApexAurum/tools/ before reusable_lib/tools/
+# Remove existing entries and re-add in correct order
+for path in [str(project_root), str(lib_path)]:
+    if path in sys.path:
+        sys.path.remove(path)
+sys.path.insert(0, str(project_root))
+sys.path.insert(1, str(lib_path))
 
 from reusable_lib.tools import (
     get_current_time,

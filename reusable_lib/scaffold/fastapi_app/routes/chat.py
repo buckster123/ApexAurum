@@ -15,6 +15,8 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
+import requests as http_requests  # Renamed to avoid conflict
+
 from services.llm_service import get_llm_client
 from services.tool_service import ToolService
 from services.cost_service import get_cost_service
@@ -22,6 +24,49 @@ from services.context_service import get_context_manager
 from app_config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def native_ollama_stream(messages, model, system=None, max_tokens=None, temperature=None):
+    """
+    Stream from Ollama using native /api/chat endpoint.
+    Hailo-ollama doesn't support streaming on /v1/chat/completions.
+    """
+    host = settings.LLM_BASE_URL.replace("/v1", "")
+    url = f"{host}/api/chat"
+
+    # Build messages with system prompt
+    api_messages = []
+    if system:
+        api_messages.append({"role": "system", "content": system})
+    api_messages.extend(messages)
+
+    body = {
+        "model": model,
+        "messages": api_messages,
+        "stream": True
+    }
+
+    if max_tokens:
+        body["options"] = body.get("options", {})
+        body["options"]["num_predict"] = max_tokens
+    if temperature is not None:
+        body["options"] = body.get("options", {})
+        body["options"]["temperature"] = temperature
+
+    response = http_requests.post(url, json=body, stream=True, timeout=120)
+    response.raise_for_status()
+
+    for line in response.iter_lines():
+        if line:
+            try:
+                chunk = json.loads(line)
+                content = chunk.get("message", {}).get("content", "")
+                if content:
+                    yield content
+                if chunk.get("done", False):
+                    break
+            except json.JSONDecodeError:
+                continue
 router = APIRouter()
 
 # Global tool service instance
@@ -283,14 +328,29 @@ async def chat_stream(request: ChatRequest):
         try:
             full_content = ""
 
+            # Use native Ollama streaming for hailo-ollama (doesn't support /v1 streaming)
+            if provider.lower() == "ollama":
+                # Convert messages to list format
+                msg_list = [{"role": m.role, "content": m.content} for m in request.messages]
+                stream_gen = native_ollama_stream(
+                    msg_list,
+                    model=model,
+                    system=system_prompt,
+                    max_tokens=request.max_tokens,
+                    temperature=request.temperature
+                )
+            else:
+                # Use OpenAI-compatible streaming
+                stream_gen = client.chat_stream(
+                    prompt,
+                    model=model,
+                    system=system_prompt,
+                    max_tokens=request.max_tokens,
+                    temperature=request.temperature
+                )
+
             # Stream the initial response
-            for chunk in client.chat_stream(
-                prompt,
-                model=model,
-                system=system_prompt,
-                max_tokens=request.max_tokens,
-                temperature=request.temperature
-            ):
+            for chunk in stream_gen:
                 full_content += chunk
                 data = json.dumps({"content": chunk, "done": False})
                 yield f"data: {data}\n\n"
@@ -330,13 +390,27 @@ async def chat_stream(request: ChatRequest):
                         yield f"data: {json.dumps({'content': '\\n\\n', 'done': False})}\n\n"
 
                         follow_up_content = ""
-                        for chunk in client.chat_stream(
-                            follow_up_prompt,
-                            model=model,
-                            system="You are a helpful assistant. The user asked a question and a tool was executed. Provide a clear, natural response using the tool result.",
-                            max_tokens=request.max_tokens,
-                            temperature=request.temperature
-                        ):
+                        follow_up_system = "You are a helpful assistant. The user asked a question and a tool was executed. Provide a clear, natural response using the tool result."
+
+                        # Use native Ollama streaming for hailo-ollama
+                        if provider.lower() == "ollama":
+                            follow_up_gen = native_ollama_stream(
+                                [{"role": "user", "content": follow_up_prompt}],
+                                model=model,
+                                system=follow_up_system,
+                                max_tokens=request.max_tokens,
+                                temperature=request.temperature
+                            )
+                        else:
+                            follow_up_gen = client.chat_stream(
+                                follow_up_prompt,
+                                model=model,
+                                system=follow_up_system,
+                                max_tokens=request.max_tokens,
+                                temperature=request.temperature
+                            )
+
+                        for chunk in follow_up_gen:
                             follow_up_content += chunk
                             data = json.dumps({"content": chunk, "done": False})
                             yield f"data: {data}\n\n"

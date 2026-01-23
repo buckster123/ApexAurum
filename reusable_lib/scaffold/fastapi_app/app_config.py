@@ -30,7 +30,7 @@ class Settings:
     LLM_PROVIDER: str = "ollama"  # ollama, llamacpp, vllm, together, groq
     LLM_BASE_URL: str = "http://localhost:11434/v1"
     LLM_API_KEY: Optional[str] = None
-    DEFAULT_MODEL: str = "qwen2.5:3b"
+    DEFAULT_MODEL: str = "qwen2.5-instruct:1.5b"  # Available on Hailo-10H
     MAX_TOKENS: int = 4096
     TEMPERATURE: float = 0.7
 

@@ -112,3 +112,4 @@ website/
 
 # Archived prompts (experimental/deprecated)
 prompts/archive/
+reusable_lib/scaffold/fastapi_app/venv/

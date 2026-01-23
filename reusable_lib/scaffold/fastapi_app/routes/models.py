@@ -42,8 +42,22 @@ class ModelPullRequest(BaseModel):
 async def list_models():
     """
     List available models from the LLM endpoint.
+    Uses native Ollama API for hailo-ollama compatibility.
     """
     try:
+        # For Ollama/hailo-ollama, use native API (list_local_models)
+        # since /v1/models isn't supported
+        if settings.LLM_PROVIDER.lower() == "ollama":
+            client = get_ollama_client()
+            if client:
+                models = client.list_local_models()
+                return {
+                    "models": models,
+                    "count": len(models),
+                    "default": settings.DEFAULT_MODEL
+                }
+
+        # Fallback to OpenAI-compatible client
         client = get_llm_client()
         models = client.list_models()
         return {
@@ -146,8 +160,23 @@ async def list_all_models():
 async def check_llm_health():
     """
     Check if the LLM endpoint is healthy.
+    Uses native Ollama API for hailo-ollama compatibility.
     """
     try:
+        # For Ollama/hailo-ollama, use native API health check
+        if settings.LLM_PROVIDER.lower() == "ollama":
+            import requests
+            # Check native /api/tags endpoint
+            host = settings.LLM_BASE_URL.replace("/v1", "")
+            response = requests.get(f"{host}/api/tags", timeout=5)
+            healthy = response.status_code == 200
+            return {
+                "healthy": healthy,
+                "provider": settings.LLM_PROVIDER,
+                "endpoint": host
+            }
+
+        # Fallback to OpenAI-compatible health check
         client = get_llm_client()
         healthy = client.health_check()
         return {
