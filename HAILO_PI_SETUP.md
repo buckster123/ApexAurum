@@ -70,6 +70,14 @@ sudo modprobe hailo1x_pci
 - [x] OpenCV 4.13
 - [x] Supervision
 - [x] picamera2
+- [x] PEFT 0.18.1 (LoRA fine-tuning)
+- [x] Transformers 4.57.6
+- [x] HuggingFace Datasets + Accelerate
+
+### LoRa Radio (IoT Wireless)
+- [x] pyLoRa, adafruit-circuitpython-rfm9x/rfm69
+- [x] SPI enabled (/dev/spidev0.0, 0.1, 10.0)
+- [ ] Hardware needed (Waveshare SX1262 HAT ~$25)
 
 ### Development Tools
 - [x] Docker 29.1.5
@@ -241,9 +249,41 @@ docker run hello-world
 
 ### Phase 4: Full Integration
 - [x] Vision tools for agents (7 tools)
+- [x] LoRA fine-tuning system ready
 - [ ] Connect cameras to ApexAurum
 - [ ] Thermal camera for robotics
 - [ ] Multi-camera orchestration
+
+---
+
+## LoRA Fine-Tuning (reusable_lib/training/)
+
+Memory-efficient model fine-tuning for Pi 5:
+
+```python
+from reusable_lib.training.lora_trainer import LoRATrainer, TrainingConfig
+
+# Pi 5 optimized (4GB RAM safe)
+config = TrainingConfig.for_pi5(
+    model_name="gpt2",  # or Qwen2-0.5B, Gemma-2B
+    output_dir="./my_lora",
+    num_epochs=3,
+)
+
+trainer = LoRATrainer(config)
+trainer.load_model()
+trainer.train(dataset)
+trainer.save_model()
+```
+
+**Features:**
+- CPU/ARM64 optimized (no CUDA needed)
+- Gradient checkpointing for memory efficiency
+- Auto-detects LoRA target modules per architecture
+- Supports: GPT-2, Gemma, Llama, Qwen, Mistral, Phi
+- Pre-built tool-calling training examples
+
+**Test:** `python reusable_lib/training/example_train.py --test`
 
 ---
 
