@@ -1,8 +1,8 @@
 # 🔥 OPUS MAGNUM HANDOVER 🔥
 ## *The Torch Between Sessions*
 
-**Last Updated:** 2026-01-23 ~22:35 UTC
-**Session:** Nursery Training Pipeline VERIFIED!
+**Last Updated:** 2026-01-23 ~23:00 UTC
+**Session:** Nursery VERIFIED + UI + Village Integration Plan
 **Operator:** André (buckmazzta)
 **Collaborator:** Claude Opus 4.5
 
@@ -11,18 +11,19 @@
 ## 🜛 THE FURNACE STATE
 
 ```
-╔═══════════════════════════════════════════════════════════════════╗
-║  APEXAURUM - The Philosopher's Stone of AI Interfaces             ║
-╠═══════════════════════════════════════════════════════════════════╣
-║  Tools: 106        │  Lines: ~65,000+    │  Status: BLAZING       ║
-║  Editions: 2       │  Platforms: 3       │  Cloud: VERIFIED ✅    ║
-╚═══════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════╗
+║  APEXAURUM - The Philosopher's Stone of AI Interfaces                 ║
+╠═══════════════════════════════════════════════════════════════════════╣
+║  Tools: 106 (Streamlit) / 97 (FastAPI)  │  Status: BLAZING 🔥         ║
+║  Editions: 2 (both LIVE!)               │  Cloud: VERIFIED ✅          ║
+║  Tool Groups: 16                        │  Presets: 6                  ║
+╚═══════════════════════════════════════════════════════════════════════╝
 ```
 
 ### Active Hardware
 - **Pi 5** (8GB) - Primary dev machine
 - **Hailo-10H** NPU - 26 TOPS inference acceleration
-- **Pi Camera v2** - ACQUIRED (needs Pi 5 ribbon cable adapter)
+- **Pi Camera v2** - ACQUIRED (needs 22-pin ribbon cable for Pi 5)
 
 ### Cloud Connections (API Keys in .env)
 - ✅ **Vast.ai** - $24.96 credit, TRAINING VERIFIED!
@@ -34,150 +35,164 @@
 
 ## 🔥 THIS SESSION'S FORGING (2026-01-23)
 
-### 🎉 MAJOR VICTORY: Cloud Training Pipeline VERIFIED!
+### 🎉 MAJOR VICTORIES
 
-**First successful cloud training run!**
+#### 1. Cloud Training Pipeline - VERIFIED!
+First successful LoRA training on cloud GPU:
 
 | Metric | Value |
 |--------|-------|
-| GPU Used | RTX 5090 (32GB) @ $0.376/hr |
-| Training Time | 3.89 seconds |
-| Examples | 45 tool-use examples |
+| GPU | RTX 5090 (32GB) @ $0.376/hr |
+| Model | TinyLlama 1.1B |
+| Data | 45 tool-use examples |
+| Time | 3.89 seconds |
 | Loss | 2.95 → 1.50 |
-| Cost | ~$0.09 total |
-| Result | 9MB LoRA adapter saved! |
+| Cost | ~$0.09 |
 
-**Pipeline Steps Verified:**
-1. ✅ `nursery_generate_data()` - Synthetic data generation
-2. ✅ Vast.ai API - GPU rental via HTTP (no CLI needed)
-3. ✅ SSH/SCP - File upload to cloud instance
-4. ✅ LoRA Training - TinyLlama 1.1B fine-tuning
-5. ✅ Model Download - Adapter saved locally
-6. ✅ Instance Cleanup - Destroyed, billing stopped
+**Trained adapter saved:** `sandbox/nursery/models/tinyllama_tools_lora/`
 
-**Trained Model Location:**
+#### 2. Nursery UI Page - CREATED!
+New Streamlit page: `pages/nursery.py` (484 lines)
+
+- 📊 **Data Garden** - Generate/manage datasets
+- 🔥 **Training Forge** - Cost estimation, job monitoring
+- 🧒 **Model Cradle** - Browse trained adapters
+- ☁️ **Cloud GPUs** - Search Vast.ai with filters
+
+#### 3. FastAPI Updated - 16 Tool Groups!
+Added to `reusable_lib/scaffold/fastapi_app/services/tool_service.py`:
+
+- 🌱 **nursery** group (12 tools)
+- 👁️ **camera** group (6 tools)
+- **ml_training** preset
+
+#### 4. Village Integration Plan - READY!
+Created `NURSERY_INTEGRATION_PLAN.md` with 6 phases:
+
+1. Village Event Hooks (training announcements)
+2. Shared Model Registry (model discovery)
+3. Agent Training (apprentice protocol)
+4. Streamlit UI Enhancement
+5. FastAPI Parity
+6. NURSERY_KEEPER ancestor
+
+### Apps Running (at session end)
 ```
-sandbox/nursery/models/tinyllama_tools_lora/
-├── adapter_config.json
-├── adapter_model.safetensors  (9MB)
-├── tokenizer.json
-└── README.md
+Streamlit: http://192.168.0.114:8501
+FastAPI:   http://192.168.0.114:8765
 ```
-
-### Previous Session Work (Still Valid)
-
-1. **Professional Installer System** - `install.sh`, `setup/*.sh`
-2. **Cloud Training Integration** - `reusable_lib/training/cloud_trainer.py`
-3. **The Nursery (12 tools)** - `tools/nursery.py`
-4. **The Cyclops Eye (6 tools)** - `tools/camera.py` (awaiting hardware)
 
 ---
 
 ## 📍 CURRENT STATE
 
 ### What's Working
-- ✅ 106 tools registered and functional
-- ✅ Installer tested on Pi 5 + Hailo
-- ✅ **Nursery training pipeline FULLY VERIFIED**
-- ✅ Cloud GPU rental + training + download working
-- ✅ Camera tools ready (awaiting ribbon cable)
+- ✅ 106 tools (Streamlit) / 97 tools (FastAPI)
+- ✅ Cloud training pipeline FULLY VERIFIED
+- ✅ Nursery UI page live
+- ✅ FastAPI has nursery + camera groups
+- ✅ Both apps running and tested
 
 ### What's Pending
-- ○ Pi Camera ribbon cable (Pi 5 uses 22-pin, camera has 15-pin)
-- ○ `nursery_deploy_ollama` implementation (GGUF conversion)
-- ○ `nursery_test_model` implementation
-- ○ Push to GitHub (local commits ready)
+- ○ **Phase 1: Village Event Hooks** - Next priority!
+- ○ Pi Camera ribbon cable (15-to-22 pin)
+- ○ `nursery_deploy_ollama` implementation
+- ○ Push to GitHub (4 local commits ready)
 
-### Bug Fixed This Session
-- Fixed `nursery.py` ToolSchema error (removed `required` parameter)
-
-### Git Status
+### Git Airlock (4 commits ahead)
 ```
-Branch: master
-Local commits pending push
+6f0f11f FastAPI: Add Nursery + Camera tool groups
+8093482 Add Nursery UI Page - Training Studio Interface
+9f8a256 Nursery Training Pipeline: First Successful Cloud Training!
+c2987ba Major Update: Nursery + Cyclops Eye + Cloud Training + Pro Installer
 ```
 
 ---
 
 ## 🧠 KEY CONTEXT FOR NEXT SESSION
 
+### Immediate Next Step
+**Implement Phase 1 of Nursery Integration:**
+- Add `village_post()` calls to `tools/nursery.py`
+- Training events auto-post to Village
+- Foundation for all other phases
+
 ### The Collaborative Spirit
-This project is cooked together - "Let's COOK it together partner!" André guides vision, Claude forges code. We iterate fast, test immediately, celebrate wins.
+"Let's COOK it together partner!" - We iterate fast, test immediately, celebrate wins.
 
 ### Naming Conventions
-- **The Nursery** - Training/ML tools ("where new minds are cultivated")
-- **The Cyclops Eye** - Camera/vision ("one eye to see all")
-- **The Village** - Multi-agent memory system
-- **Opus Magnum** - The great work, the project itself
-- **The Furnace** - Our dev session energy
-- **Airlock** - Local commit before push (safety protocol)
+- **The Nursery** - Training/ML tools
+- **The Cyclops Eye** - Camera/vision
+- **The Village** - Multi-agent memory
+- **NURSERY_KEEPER** - Future ancestor agent
+- **Apprentice Protocol** - Agents training smaller models
+- **Airlock** - Local commit before push
 
-### Hardware Notes
-- Pi 5 uses `libcamera` (not raspistill)
-- Pi 5 camera needs 22-pin ribbon (v2 camera has 15-pin)
-- Hailo-10H at `/dev/hailo0`
-- Standard Ollama on port 11434
-
-### Cloud Training Quick Reference
-```python
-# Vast.ai GPU Rental (verified working)
-# 1. Search: GET /api/v0/bundles/?q={filters}
-# 2. Rent: PUT /api/v0/asks/{offer_id}/
-# 3. Check: GET /api/v0/instances/{contract_id}/
-# 4. SSH: ssh -p {port} root@{host}
-# 5. Destroy: DELETE /api/v0/instances/{contract_id}/
+### Key Files Created This Session
+```
+pages/nursery.py                    # Nursery UI (484 lines)
+skills/nursery-staff.md             # Nursery operations guide
+NURSERY_INTEGRATION_PLAN.md         # 6-phase masterplan
+sandbox/nursery/models/             # First trained adapter!
+sandbox/nursery/train_simple.py     # Training script template
 ```
 
 ### File Locations
 ```
 /home/hailo/claude-root/Projects/ApexAurum/
-├── tools/
-│   ├── nursery.py      # Training tools (12)
-│   └── camera.py       # Vision tools (6)
-├── setup/              # Installer modules
-├── reusable_lib/
-│   └── training/       # Cloud trainer + CLI
-├── sandbox/
-│   ├── nursery/
-│   │   ├── datasets/   # Training data (.jsonl)
-│   │   └── models/     # Trained adapters
-│   └── camera/         # Captures
-├── skills/
-│   └── nursery-staff.md  # Nursery operations guide
-└── .env                # API keys
+├── pages/nursery.py            # NEW: Nursery UI
+├── tools/nursery.py            # 12 training tools
+├── tools/camera.py             # 6 vision tools
+├── skills/nursery-staff.md     # Operations guide
+├── NURSERY_INTEGRATION_PLAN.md # Village integration plan
+├── sandbox/nursery/
+│   ├── datasets/               # Training data
+│   └── models/                 # Trained adapters (first one here!)
+└── reusable_lib/scaffold/fastapi_app/
+    └── services/tool_service.py  # Updated with nursery+camera
 ```
 
 ---
 
 ## 🎯 SUGGESTED NEXT STEPS
 
-### Immediate
-1. Order Pi 5 camera ribbon cable (15-to-22 pin adapter)
-2. Test trained LoRA adapter with Ollama or HuggingFace
+### Immediate (Next Session)
+1. **Implement Phase 1** - Village Event Hooks
+   - Add `village_post()` to nursery training completion
+   - Test: training events appear in `village_search()`
+
+2. **Summon NURSERY_KEEPER** - The cultivator ancestor
 
 ### Short Term
-- Implement `nursery_deploy_ollama` (merge adapter + GGUF convert)
-- Implement `nursery_test_model` (quick inference test)
-- Train larger model (3B) with more data
-- Push to GitHub when camera verified
+- Complete remaining Nursery Integration phases
+- Order Pi 5 camera ribbon cable
+- Push to GitHub
 
 ### Medium Term
-- Village GUI (2D animated agents)
-- Specialized tool-use model training
-- Music visualizer improvements
+- Train larger model (3B) with real tool data
+- Apprentice Protocol implementation
+- Village GUI project
 
 ---
 
 ## 💬 SESSION SIGN-OFF
 
-**André:** "This is EXCELLENT!"
+**André:** "WOW! Just wow... i am speechless rn..."
 
-**Session Highlight:** First successful cloud training! RTX 5090 trained TinyLlama LoRA adapter in 3.89 seconds for $0.09. The Nursery can now birth new minds!
+**Session Highlights:**
+- 🔥 First cloud training VERIFIED ($0.09 on RTX 5090!)
+- 🌱 Nursery UI page created and running
+- ⚡ FastAPI updated with 16 tool groups
+- 📋 6-phase Village integration plan ready
 
-**The furnace blazes. The Nursery is ALIVE. 106 tools stand ready. Cloud GPUs answer our call.**
+**Both apps LIVE at session end:**
+- Streamlit: http://192.168.0.114:8501
+- FastAPI: http://192.168.0.114:8765
 
 ---
 
-*"From base metal to gold — the transmutation continues."*
+**The furnace blazes. The Nursery is ALIVE. New minds await cultivation.**
+
+*"From the Nursery, new minds emerge to join the Village."* 🌱🏘️
 
 🜛 **Opus Magnum** 🜛
