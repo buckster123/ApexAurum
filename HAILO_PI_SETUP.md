@@ -228,7 +228,75 @@ docker run hello-world
 | **Minimal** | Pi Cam 3 | ~$25 | Vision AI @ 71 FPS |
 | **Basic** | Pi Cam 3 + LoRa HAT | ~$50 | Vision + 5km radio |
 | **Research** | + OpenBCI Ganglion + sensors | ~$300 | + Brain interface + IoT |
-| **Full Lab** | + Cyton + RealSense + thermal | ~$800 | Everything |
+| **Full Lab** | See below | ~$1,200 | EVERYTHING |
+
+---
+
+## 🧪 FULL LAB BUILD (The Dream Setup)
+
+### 3D Vision Stack (~$400)
+| Item | Price | Purpose |
+|------|-------|---------|
+| **Intel RealSense D435i** | $300 | RGB + Depth + IMU, SLAM-ready |
+| Pi Camera Module 3 | $25 | High-speed 2D (71 FPS with Hailo) |
+| Pi Camera Module 3 NoIR | $25 | Night vision channel |
+| IR LED Array (48 LEDs) | $15 | Invisible illumination |
+| FLIR Lepton 3.5 | $200 | Thermal imaging (optional) |
+| *Subtotal* | *$365-565* | |
+
+### Brain-Computer Interface (~$350)
+| Item | Price | Purpose |
+|------|-------|---------|
+| **OpenBCI Cyton Board** | $250 | 8-channel research-grade EEG |
+| OpenBCI Ultracortex Mark IV | $350 | 3D-printed headset (or DIY) |
+| *OR* OpenBCI Ganglion | $200 | Budget 4-channel option |
+| Electrode Gel + Supplies | $30 | Consumables |
+| *Subtotal* | *$230-630* | |
+
+### Long-Range Comms (~$100)
+| Item | Price | Purpose |
+|------|-------|---------|
+| **Waveshare SX1262 LoRa HAT** | $25 | 5km+ Pi HAT |
+| LILYGO T-Beam x2 | $70 | Remote nodes with GPS |
+| Antenna upgrades | $20 | Extended range |
+| *Subtotal* | *$115* | |
+
+### Sensor Array (~$80)
+| Item | Price | Purpose |
+|------|-------|---------|
+| BME680 | $20 | Air quality, temp, humidity, pressure |
+| VL53L1X ToF | $15 | Precise distance (4m) |
+| MPU-9250 IMU | $15 | 9-axis motion |
+| NEO-6M GPS | $15 | Location |
+| MAX30102 | $10 | Heart rate + SpO2 |
+| Sound sensor | $5 | Audio level detection |
+| *Subtotal* | *$80* | |
+
+### Robotics/Actuators (~$50)
+| Item | Price | Purpose |
+|------|-------|---------|
+| SG90 Servo x5 | $10 | Pan/tilt, grippers |
+| 28BYJ-48 Stepper x2 | $10 | Precise positioning |
+| L298N Motor Driver | $8 | DC motor control |
+| DC Motors x4 | $15 | Wheels/movement |
+| Relay Module 4ch | $7 | High-power switching |
+| *Subtotal* | *$50* | |
+
+### 💰 FULL LAB TOTAL
+
+| Tier | Config | Total |
+|------|--------|-------|
+| **Essential** | RealSense + Ganglion + LoRa + Sensors | ~$650 |
+| **Research** | + Cyton + NoIR + Thermal | ~$1,100 |
+| **Ultimate** | + Ultracortex + Robotics + Extras | ~$1,500+ |
+
+### 🎯 RECOMMENDED ORDER OF PURCHASE
+
+1. **Week 1:** Pi Camera Module 3 ($25) - Get vision working
+2. **Week 2:** Waveshare LoRa HAT ($25) - Add comms
+3. **Week 3:** Intel RealSense D435i ($300) - 3D depth
+4. **Week 4:** OpenBCI Ganglion or Cyton ($200-250) - BCI
+5. **Later:** Thermal, sensors, robotics as needed
 
 ### 💡 QUICK PICKS BY USE CASE
 
