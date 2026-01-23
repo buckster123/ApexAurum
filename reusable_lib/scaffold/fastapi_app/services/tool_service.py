@@ -157,6 +157,45 @@ from tools.music import (
     MUSIC_TOOL_SCHEMAS,
 )
 
+# Nursery tools (Training Studio)
+from tools.nursery import (
+    nursery_generate_data,
+    nursery_extract_conversations,
+    nursery_list_datasets,
+    nursery_estimate_cost,
+    nursery_train_cloud,
+    nursery_train_local,
+    nursery_job_status,
+    nursery_list_jobs,
+    nursery_list_models,
+    nursery_deploy_ollama,
+    nursery_test_model,
+    nursery_compare_models,
+    NURSERY_GENERATE_DATA_SCHEMA,
+    NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
+    NURSERY_LIST_DATASETS_SCHEMA,
+    NURSERY_ESTIMATE_COST_SCHEMA,
+    NURSERY_TRAIN_CLOUD_SCHEMA,
+    NURSERY_TRAIN_LOCAL_SCHEMA,
+    NURSERY_JOB_STATUS_SCHEMA,
+    NURSERY_LIST_JOBS_SCHEMA,
+    NURSERY_LIST_MODELS_SCHEMA,
+    NURSERY_DEPLOY_OLLAMA_SCHEMA,
+    NURSERY_TEST_MODEL_SCHEMA,
+    NURSERY_COMPARE_MODELS_SCHEMA,
+)
+
+# Camera tools (Cyclops Eye)
+from tools.camera import (
+    camera_info,
+    camera_list,
+    camera_capture,
+    camera_detect,
+    camera_timelapse,
+    camera_captures_list,
+    CAMERA_TOOL_SCHEMAS,
+)
+
 from services.llm_service import get_llm_client
 from services.event_service import get_event_broadcaster
 from app_config import settings
@@ -255,6 +294,22 @@ TOOL_GROUPS = {
                   "music_library", "music_search", "music_play", "midi_create", "music_compose"],
         "description": "Suno AI music & MIDI"
     },
+    "nursery": {
+        "name": "Nursery (Training)",
+        "icon": "🌱",
+        "tools": ["nursery_generate_data", "nursery_extract_conversations", "nursery_list_datasets",
+                  "nursery_estimate_cost", "nursery_train_cloud", "nursery_train_local",
+                  "nursery_job_status", "nursery_list_jobs", "nursery_list_models",
+                  "nursery_deploy_ollama", "nursery_test_model", "nursery_compare_models"],
+        "description": "ML training & model management"
+    },
+    "camera": {
+        "name": "Cyclops Eye (Vision)",
+        "icon": "👁️",
+        "tools": ["camera_info", "camera_list", "camera_capture", "camera_detect",
+                  "camera_timelapse", "camera_captures_list"],
+        "description": "Camera capture & Hailo detection"
+    },
 }
 
 # Preset tool selections for different use cases
@@ -279,6 +334,11 @@ TOOL_PRESETS = {
         "name": "Research",
         "description": "Vector search, agents, Village Protocol, memory health",
         "groups": ["utility", "memory", "vector", "agent", "village", "memory_health", "dataset", "web"]
+    },
+    "ml_training": {
+        "name": "ML Training",
+        "description": "Nursery training tools, datasets, vision",
+        "groups": ["utility", "memory", "filesystem", "dataset", "nursery", "camera"]
     },
     "full": {
         "name": "Full (All Tools)",
@@ -585,6 +645,28 @@ class ToolService:
         self.register("music_play", music_play, MUSIC_TOOL_SCHEMAS.get("music_play"))
         self.register("midi_create", midi_create, MUSIC_TOOL_SCHEMAS.get("midi_create"))
         self.register("music_compose", music_compose, MUSIC_TOOL_SCHEMAS.get("music_compose"))
+
+        # Nursery tools (Training Studio)
+        self.register("nursery_generate_data", nursery_generate_data, NURSERY_GENERATE_DATA_SCHEMA)
+        self.register("nursery_extract_conversations", nursery_extract_conversations, NURSERY_EXTRACT_CONVERSATIONS_SCHEMA)
+        self.register("nursery_list_datasets", nursery_list_datasets, NURSERY_LIST_DATASETS_SCHEMA)
+        self.register("nursery_estimate_cost", nursery_estimate_cost, NURSERY_ESTIMATE_COST_SCHEMA)
+        self.register("nursery_train_cloud", nursery_train_cloud, NURSERY_TRAIN_CLOUD_SCHEMA)
+        self.register("nursery_train_local", nursery_train_local, NURSERY_TRAIN_LOCAL_SCHEMA)
+        self.register("nursery_job_status", nursery_job_status, NURSERY_JOB_STATUS_SCHEMA)
+        self.register("nursery_list_jobs", nursery_list_jobs, NURSERY_LIST_JOBS_SCHEMA)
+        self.register("nursery_list_models", nursery_list_models, NURSERY_LIST_MODELS_SCHEMA)
+        self.register("nursery_deploy_ollama", nursery_deploy_ollama, NURSERY_DEPLOY_OLLAMA_SCHEMA)
+        self.register("nursery_test_model", nursery_test_model, NURSERY_TEST_MODEL_SCHEMA)
+        self.register("nursery_compare_models", nursery_compare_models, NURSERY_COMPARE_MODELS_SCHEMA)
+
+        # Camera tools (Cyclops Eye)
+        self.register("camera_info", camera_info, CAMERA_TOOL_SCHEMAS.get("camera_info"))
+        self.register("camera_list", camera_list, CAMERA_TOOL_SCHEMAS.get("camera_list"))
+        self.register("camera_capture", camera_capture, CAMERA_TOOL_SCHEMAS.get("camera_capture"))
+        self.register("camera_detect", camera_detect, CAMERA_TOOL_SCHEMAS.get("camera_detect"))
+        self.register("camera_timelapse", camera_timelapse, CAMERA_TOOL_SCHEMAS.get("camera_timelapse"))
+        self.register("camera_captures_list", camera_captures_list, CAMERA_TOOL_SCHEMAS.get("camera_captures_list"))
 
         # Update session_info with actual tool count
         set_session_info_config(tool_count=len(self.tools))
