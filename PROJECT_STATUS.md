@@ -1,8 +1,8 @@
 # ApexAurum - Claude Edition: Project Status Report
 
-**Generated:** 2026-01-06
-**Version:** 1.0 Beta (Village Protocol + Group Chat + Music Pipeline Phase 2A + Music Visualizer)
-**Status:** Production-Ready, Village Operational, Full Music Pipeline (Compose → Generate → Visualize)
+**Generated:** 2026-01-23
+**Version:** 1.0 Beta (Village Protocol + Group Chat + Full Music Pipeline + AI Compute)
+**Status:** Production-Ready, Village Operational, **AI Compute Ignited** (Hailo-10H @ 71 FPS)
 
 ---
 
@@ -1102,3 +1102,29 @@ ApexAurum - Claude Edition is a **mature, production-ready platform** with excep
 ---
 
 **Recommendation:** Project is **feature-complete with Village Protocol operational**. System now includes multi-agent persistent memory, group chat, and cultural transmission infrastructure. Optional enhancements available for future sessions.
+
+---
+
+## Hailo-Pi Deployment (2026-01-23)
+
+**Hardware:** Raspberry Pi 5 + Hailo-10H AI Accelerator
+
+### Capabilities
+- **Vision AI:** 71 FPS YOLOv11m object detection
+- **LLM Ready:** Hailo GenAI support (pending package download)
+- **Full Dev Environment:** 81 tools, 590 vectors, complete ApexAurum stack
+- **IoT Ready:** MQTT, Redis, I2C, SPI, GPIO
+
+### Performance
+| Model | FPS | Power |
+|-------|-----|-------|
+| YOLOv11m | 71 | ~2.5W |
+| ResNet50 | 307 | ~2W |
+| YOLOv5n-seg | 47 | ~2W |
+
+### Migration
+- 4.2GB folder copy = complete dev environment migration
+- All vectors, conversations, and settings preserved
+- Proves portable deployment model
+
+See: `HAILO_PI_SETUP.md` for full setup guide and camera recommendations.

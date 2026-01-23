@@ -973,3 +973,32 @@ grep ANTHROPIC_API_KEY .env
 - **Group Chat:** Multi-agent parallel dialogue with tools
 - **UI Polish:** Presets, monitoring, enhanced tool feedback
 - All major bugs fixed, production-ready
+
+---
+
+## In Development: Village GUI (Embodied Agent Interface)
+
+**Status:** Planning Complete, Implementation Ready
+**Target:** FastAPI + HTML5 Canvas (in `reusable_lib/scaffold/fastapi_app/`)
+
+**Vision:** 2D animated interface where agent avatars have spatial presence. When AZOTH calls `music_generate()`, his avatar walks to the DJ Booth. When calling `vector_search_knowledge()`, he walks to the Memory Garden.
+
+**Documentation:**
+- `sandbox/group_chat expansion/GUI-Village/implementation/00_ROADMAP.md` - Master plan
+- `sandbox/group_chat expansion/GUI-Village/implementation/HANDOVER_NOTES.md` - Critical context for session continuity
+- `sandbox/group_chat expansion/GUI-Village/saved/` - Vision docs from 6-voice council convergence
+
+**Architecture:**
+```
+[Canvas Frontend] ←─WebSocket─→ [EventBroadcaster] ←─hooks─→ [ToolService (40+ tools)]
+```
+
+**Phases:**
+- Phase 0: WebSocket infrastructure + event broadcasting
+- Phase 1: MVP frontend (zones, single agent, basic movement)
+- Phase 2: Visual polish (sprites, animations, multi-agent)
+- Phase 3: Interactivity (click zones, history, tool trigger from GUI)
+
+**Why FastAPI not Streamlit:** WebSocket support, no page reloads during animation, Canvas rendering.
+
+**Handover Note:** When resuming this project, read `HANDOVER_NOTES.md` first for critical context.
