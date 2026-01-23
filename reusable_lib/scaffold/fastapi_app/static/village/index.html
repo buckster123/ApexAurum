@@ -195,14 +195,17 @@
             </div>
         </main>
 
-        <!-- Right Panel: Activity Log -->
+        <!-- Right Panel: Tool History -->
         <aside class="activity-panel">
             <div class="panel-header">
-                <h3>📜 Activity Log</h3>
-                <button onclick="clearLog()" class="clear-btn" title="Clear log">✕</button>
+                <h3>🛠️ Tool History</h3>
+                <div class="panel-header-controls">
+                    <span id="tool-count" class="tool-count">0</span>
+                    <button onclick="clearHistory()" class="clear-btn" title="Clear history">✕</button>
+                </div>
             </div>
-            <div id="activity-log">
-                <div class="log-entry system">Waiting for events...</div>
+            <div id="tool-history">
+                <div class="history-empty">No tools executed yet</div>
             </div>
         </aside>
     </div>
@@ -285,40 +288,138 @@
             }
         }
 
-        // Add entry to activity log
-        function addLogEntry(type, agent, tool, detail, zone = null) {
-            const log = document.getElementById('activity-log');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
+        // Tool history state
+        let toolHistory = [];
+        let pendingTools = new Map(); // tool_name -> start_time
 
-            const time = new Date().toLocaleTimeString('en-US', {hour12: false});
-            const icon = type === 'start' ? '→' : type === 'complete' ? '✓' : type === 'error' ? '✗' : '•';
-            const zoneText = zone ? ` @ ${zone}` : '';
+        // Add entry to tool history (enhanced)
+        function addToolEntry(type, agent, tool, data = {}) {
+            const history = document.getElementById('tool-history');
+            const countEl = document.getElementById('tool-count');
+            const time = new Date();
+            const timeStr = time.toLocaleTimeString('en-US', {hour12: false});
 
-            entry.innerHTML = `
-                <span class="log-time">${time}</span>
-                <span class="log-icon">${icon}</span>
-                <span class="log-agent">${agent}</span>
-                <span class="log-tool">${tool}</span>
-                <span class="log-zone">${zoneText}</span>
-            `;
+            // Remove empty message
+            const empty = history.querySelector('.history-empty');
+            if (empty) empty.remove();
 
-            // Remove "waiting" message if present
-            const waiting = log.querySelector('.system');
-            if (waiting) waiting.remove();
+            if (type === 'start') {
+                // Track start time for duration calculation
+                pendingTools.set(`${agent}:${tool}`, { time: Date.now(), data });
 
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+                // Create entry card
+                const entry = document.createElement('div');
+                entry.className = 'tool-entry pending';
+                entry.id = `tool-${agent}-${tool}-${Date.now()}`;
+                entry.dataset.tool = tool;
+                entry.dataset.agent = agent;
 
-            // Flash effect
-            entry.classList.add('flash');
-            setTimeout(() => entry.classList.remove('flash'), 500);
+                const args = data.arguments ? JSON.stringify(data.arguments, null, 2) : '{}';
+                const argsPreview = args.length > 50 ? args.substring(0, 47) + '...' : args;
+
+                entry.innerHTML = `
+                    <div class="tool-entry-header" onclick="toggleToolDetail(this.parentElement)">
+                        <span class="tool-status">⏳</span>
+                        <span class="tool-name">${tool}</span>
+                        <span class="tool-agent">${agent}</span>
+                        <span class="tool-time">${timeStr}</span>
+                        <span class="tool-duration">...</span>
+                        <span class="tool-expand">▼</span>
+                    </div>
+                    <div class="tool-entry-detail" style="display:none;">
+                        <div class="tool-detail-section">
+                            <span class="detail-label">Zone:</span>
+                            <span class="detail-value">${data.zone || 'village_square'}</span>
+                        </div>
+                        <div class="tool-detail-section">
+                            <span class="detail-label">Args:</span>
+                            <pre class="detail-args">${escapeHtml(args)}</pre>
+                        </div>
+                        <div class="tool-detail-section result-section" style="display:none;">
+                            <span class="detail-label">Result:</span>
+                            <pre class="detail-result"></pre>
+                        </div>
+                    </div>
+                `;
+
+                history.insertBefore(entry, history.firstChild);
+
+            } else if (type === 'complete' || type === 'error') {
+                // Find pending entry and update it
+                const key = `${agent}:${tool}`;
+                const pending = pendingTools.get(key);
+                const duration = pending ? Date.now() - pending.time : 0;
+                pendingTools.delete(key);
+
+                // Find the entry (most recent pending one with this tool/agent)
+                const entries = history.querySelectorAll(`.tool-entry.pending[data-tool="${tool}"][data-agent="${agent}"]`);
+                const entry = entries[0]; // Most recent
+
+                if (entry) {
+                    entry.classList.remove('pending');
+                    entry.classList.add(type === 'error' ? 'error' : 'success');
+
+                    const status = entry.querySelector('.tool-status');
+                    status.textContent = type === 'error' ? '✗' : '✓';
+
+                    const durationEl = entry.querySelector('.tool-duration');
+                    durationEl.textContent = duration > 1000 ? `${(duration/1000).toFixed(1)}s` : `${duration}ms`;
+
+                    // Add result
+                    const resultSection = entry.querySelector('.result-section');
+                    const resultPre = entry.querySelector('.detail-result');
+                    if (data.result || data.error) {
+                        resultSection.style.display = 'block';
+                        const resultText = data.error || (typeof data.result === 'string' ? data.result : JSON.stringify(data.result, null, 2));
+                        resultPre.textContent = resultText.substring(0, 500) + (resultText.length > 500 ? '...' : '');
+                        resultPre.className = 'detail-result ' + (type === 'error' ? 'error-text' : '');
+                    }
+                }
+
+                // Update count
+                toolHistory.push({ type, agent, tool, time: timeStr, duration, data });
+                countEl.textContent = toolHistory.length;
+            }
         }
 
-        // Clear activity log
-        function clearLog() {
-            const log = document.getElementById('activity-log');
-            log.innerHTML = '<div class="log-entry system">Log cleared</div>';
+        // Legacy function for backwards compatibility
+        function addLogEntry(type, agent, tool, detail, zone = null) {
+            addToolEntry(type, agent, tool, {
+                zone,
+                result: detail,
+                arguments: {}
+            });
+        }
+
+        // Toggle detail visibility
+        function toggleToolDetail(entry) {
+            const detail = entry.querySelector('.tool-entry-detail');
+            const expand = entry.querySelector('.tool-expand');
+            if (detail.style.display === 'none') {
+                detail.style.display = 'block';
+                expand.textContent = '▲';
+                entry.classList.add('expanded');
+            } else {
+                detail.style.display = 'none';
+                expand.textContent = '▼';
+                entry.classList.remove('expanded');
+            }
+        }
+
+        // Clear tool history
+        function clearHistory() {
+            const history = document.getElementById('tool-history');
+            history.innerHTML = '<div class="history-empty">History cleared</div>';
+            toolHistory = [];
+            pendingTools.clear();
+            document.getElementById('tool-count').textContent = '0';
+        }
+
+        // HTML escape helper
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Update stats display

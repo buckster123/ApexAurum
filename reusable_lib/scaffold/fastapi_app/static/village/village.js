@@ -173,8 +173,11 @@ class VillageApp {
             this.updateUI();
 
             // Log to activity panel
-            if (window.addLogEntry) {
-                addLogEntry('system', 'SYSTEM', 'connect', 'WebSocket connected');
+            if (window.addToolEntry) {
+                addToolEntry('complete', 'SYSTEM', 'websocket', {
+                    zone: 'village_square',
+                    result: 'Connected to Village'
+                });
             }
         };
 
@@ -251,9 +254,12 @@ class VillageApp {
             soundManager.startThinking();
         }
 
-        // Update activity log
-        if (window.addLogEntry) {
-            addLogEntry('start', agentId, event.tool, null, zone);
+        // Update tool history (enhanced)
+        if (window.addToolEntry) {
+            addToolEntry('start', agentId, event.tool, {
+                zone: zone,
+                arguments: event.arguments || {}
+            });
         }
     }
 
@@ -285,10 +291,15 @@ class VillageApp {
             timestamp: Date.now()
         });
 
-        // Update activity log
-        const type = event.success ? 'complete' : 'error';
-        if (window.addLogEntry) {
-            addLogEntry(type, agentId, event.tool, event.result_preview, zone);
+        // Update tool history (enhanced)
+        const type = event.success !== false ? 'complete' : 'error';
+        if (window.addToolEntry) {
+            addToolEntry(type, agentId, event.tool, {
+                zone: zone,
+                result: event.result_preview,
+                error: event.error,
+                duration_ms: event.duration_ms
+            });
         }
 
         // Clear active zone after brief delay
