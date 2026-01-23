@@ -122,10 +122,16 @@
   - music_* → dj_booth
 
 #### Phase 8: Polish & Integration ✨
-- [ ] **8.1: Multi-Agent Support** - Multiple agents on screen
-- [ ] **8.2: Agent Interaction** - Agents can "talk" to each other
-- [ ] **8.3: Tool History Panel** - Scrollable log of tool executions
-- [ ] **8.4: Performance Optimization** - Smooth 60fps on Pi 5
+- [ ] **8.1: Multi-Agent Support** - Multiple agents on screen (FUTURE)
+- [ ] **8.2: Agent Interaction** - Agents can "talk" to each other (FUTURE)
+- [x] **8.3: Tool History Panel** - Scrollable log of tool executions ✅
+  - Expandable tool cards with args/results
+  - Status icons, duration tracking, color coding
+  - Click-to-expand for full details
+- [x] **8.4: Performance Optimization** - Smooth 60fps on Pi 5 ✅
+  - FPS display with color coding
+  - Performance Mode toggle (reduces particles)
+  - Frame timing and skip for low-end devices
 
 ---
 
@@ -317,10 +323,11 @@ print(r['output_file'])
 
 ---
 
-**Last Updated:** 2026-01-22 (Session 2)
-**Next Session:** Phase 8 Polish (multi-agent, interactions) or THE GRAND PUSH
-**Local Commits:** 13 ready to push (holding for grand unveiling)
+**Last Updated:** 2026-01-22 (Session 3)
+**Next Session:** Phase 8.1/8.2 (multi-agent) or THE GRAND PUSH
+**Local Commits:** 16 ready to push (holding for grand unveiling)
 **Tests:** 20/21 passing
+**Phase 8:** 8.3 + 8.4 COMPLETE
 
 ---
 
