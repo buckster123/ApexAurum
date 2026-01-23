@@ -196,12 +196,28 @@
             </div>
         </aside>
 
-        <!-- Center: Canvas -->
+        <!-- Center: Canvas + Chat -->
         <main class="canvas-container">
             <canvas id="village-canvas"></canvas>
             <!-- Zone detail popup (shown on zone click) -->
             <div id="zone-detail-panel" class="zone-detail-panel">
                 <!-- Populated by JavaScript -->
+            </div>
+
+            <!-- Chat Panel (collapsible) -->
+            <div id="chat-panel" class="chat-panel">
+                <div class="chat-header" onclick="toggleChatHistory()">
+                    <span>💬 Chat</span>
+                    <span id="chat-toggle" class="chat-toggle">▲</span>
+                </div>
+                <div id="chat-history" class="chat-history">
+                    <div class="chat-welcome">Talk to your agent! They'll use tools and you'll see them work in the village.</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Say something to your agent..."
+                           onkeydown="if(event.key==='Enter') sendChat()">
+                    <button onclick="sendChat()" id="chat-send-btn" class="chat-send-btn">↵</button>
+                </div>
             </div>
         </main>
 
@@ -714,6 +730,157 @@
             document.getElementById('sound-ui').value = (status.categoryVolumes.ui || 1) * 100;
             document.getElementById('sound-ambient').value = (status.categoryVolumes.ambient || 0.5) * 100;
             document.getElementById('mute-btn').textContent = status.muted ? '🔇' : '🔊';
+        }
+
+        // =================================================================
+        // Chat Functions (Standalone Mode)
+        // =================================================================
+
+        let chatHistory = [];
+        let chatExpanded = true;
+        let chatBusy = false;
+
+        // Toggle chat history visibility
+        function toggleChatHistory() {
+            const history = document.getElementById('chat-history');
+            const toggle = document.getElementById('chat-toggle');
+            chatExpanded = !chatExpanded;
+            history.style.display = chatExpanded ? 'block' : 'none';
+            toggle.textContent = chatExpanded ? '▼' : '▲';
+        }
+
+        // Send chat message
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message || chatBusy) return;
+
+            // Get current agent
+            const agentId = document.getElementById('agent-select').value;
+
+            // Add user message to history
+            addChatMessage('user', message);
+            input.value = '';
+
+            // Show typing indicator
+            chatBusy = true;
+            const sendBtn = document.getElementById('chat-send-btn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = '...';
+
+            const typingId = addChatMessage('typing', '...');
+
+            try {
+                // Build messages array for chat API
+                const messages = chatHistory
+                    .filter(m => m.role !== 'typing')
+                    .map(m => ({
+                        role: m.role === 'user' ? 'user' : 'assistant',
+                        content: m.content
+                    }));
+
+                // Add current message
+                messages.push({ role: 'user', content: message });
+
+                // Call chat API
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: messages,
+                        system_prompt: `You are ${agentId}, an AI assistant in the Village. When you need to perform actions, use your tools. Be concise but helpful.`,
+                        enable_tools: true,
+                        stream: false
+                    })
+                });
+
+                const data = await res.json();
+
+                // Remove typing indicator
+                removeChatMessage(typingId);
+
+                if (data.content) {
+                    // Extract text from content blocks
+                    let responseText = '';
+                    if (Array.isArray(data.content)) {
+                        responseText = data.content
+                            .filter(b => b.type === 'text')
+                            .map(b => b.text)
+                            .join('\n');
+                    } else {
+                        responseText = String(data.content);
+                    }
+
+                    addChatMessage('assistant', responseText, agentId);
+
+                    // Show speech bubble on agent
+                    if (window.villageApp) {
+                        const agent = window.villageApp.agents.get(agentId);
+                        if (agent) {
+                            agent.showSpeechBubble(responseText.substring(0, 100));
+                        }
+                    }
+                } else if (data.error) {
+                    addChatMessage('error', data.error);
+                }
+
+            } catch (e) {
+                console.error('Chat error:', e);
+                removeChatMessage(typingId);
+                addChatMessage('error', 'Failed to send message: ' + e.message);
+            } finally {
+                chatBusy = false;
+                sendBtn.disabled = false;
+                sendBtn.textContent = '↵';
+            }
+        }
+
+        // Add message to chat history display
+        function addChatMessage(role, content, agentId = null) {
+            const history = document.getElementById('chat-history');
+            const id = 'msg-' + Date.now();
+
+            // Remove welcome message if present
+            const welcome = history.querySelector('.chat-welcome');
+            if (welcome) welcome.remove();
+
+            const msg = document.createElement('div');
+            msg.className = `chat-message ${role}`;
+            msg.id = id;
+
+            if (role === 'user') {
+                msg.innerHTML = `<span class="chat-role">You:</span> ${escapeHtml(content)}`;
+            } else if (role === 'assistant') {
+                const name = agentId || 'Agent';
+                msg.innerHTML = `<span class="chat-role">${name}:</span> ${escapeHtml(content)}`;
+            } else if (role === 'typing') {
+                msg.innerHTML = `<span class="typing-indicator">●●●</span>`;
+            } else if (role === 'error') {
+                msg.innerHTML = `<span class="chat-error">⚠ ${escapeHtml(content)}</span>`;
+            }
+
+            history.appendChild(msg);
+            history.scrollTop = history.scrollHeight;
+
+            // Track in history (except typing)
+            if (role !== 'typing' && role !== 'error') {
+                chatHistory.push({ role, content, agentId, id });
+            }
+
+            return id;
+        }
+
+        // Remove message by ID
+        function removeChatMessage(id) {
+            const msg = document.getElementById(id);
+            if (msg) msg.remove();
+        }
+
+        // Clear chat history
+        function clearChat() {
+            const history = document.getElementById('chat-history');
+            history.innerHTML = '<div class="chat-welcome">Chat cleared. Say something!</div>';
+            chatHistory = [];
         }
 
         // Load presets on page load

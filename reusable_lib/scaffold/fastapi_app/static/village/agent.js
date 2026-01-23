@@ -116,6 +116,20 @@ export class Agent {
         this.danceTimer = 0;
         this.dancePhase = 0;
         this.musicalNotes = [];  // Floating music note particles
+
+        // Speech bubble (Chat mode)
+        this.speechBubble = null;
+        this.speechTimer = 0;
+        this.speechFade = 1;
+    }
+
+    /**
+     * Show speech bubble with text
+     */
+    showSpeechBubble(text, duration = 300) {
+        this.speechBubble = text.length > 80 ? text.substring(0, 77) + '...' : text;
+        this.speechTimer = duration;
+        this.speechFade = 1;
     }
 
     /**
@@ -419,6 +433,15 @@ export class Agent {
             this.thoughtTimer--;
         }
 
+        // Update speech bubble timer
+        if (this.speechTimer > 0) {
+            this.speechTimer--;
+            // Start fading in last 30 frames
+            if (this.speechTimer < 30) {
+                this.speechFade = this.speechTimer / 30;
+            }
+        }
+
         // Update mood when working
         if (this.state === 'working' && this.mood !== 'thinking') {
             this.setMood('thinking');
@@ -709,6 +732,52 @@ export class Agent {
             // Mood fill
             ctx.fillStyle = this.getMoodColor();
             ctx.fillRect(barX, barY, barWidth * this.moodIntensity, barHeight);
+        }
+
+        // Speech bubble (from chat)
+        if (this.speechBubble && this.speechTimer > 0) {
+            const bubbleAlpha = Math.min(1, this.speechTimer / 30) * this.speechFade;
+
+            ctx.save();
+            ctx.globalAlpha = bubbleAlpha;
+
+            // Measure text to size bubble
+            ctx.font = '11px system-ui, sans-serif';
+            const textWidth = Math.min(ctx.measureText(this.speechBubble).width, 150);
+            const bubbleWidth = textWidth + 20;
+            const bubbleHeight = 30;
+            const bubbleX = drawX - bubbleWidth / 2;
+            const bubbleY = drawY - radius - 55;
+
+            // Bubble background with rounded corners
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 8);
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Pointer triangle
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.moveTo(drawX - 8, bubbleY + bubbleHeight);
+            ctx.lineTo(drawX + 8, bubbleY + bubbleHeight);
+            ctx.lineTo(drawX, bubbleY + bubbleHeight + 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Text
+            ctx.fillStyle = '#222';
+            ctx.font = '11px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.speechBubble, drawX, bubbleY + bubbleHeight / 2 + 1);
+
+            ctx.restore();
         }
 
         ctx.restore();
