@@ -1,0 +1,435 @@
+{"user_query": "Run memory_consolidate with id2 for me", "tool_name": "memory_consolidate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the memory_migration_run tool", "tool_name": "memory_migration_run", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run audio_speed with file_path", "tool_name": "audio_speed", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "is my song ready?", "tool_name": "music_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Reverse a string (e.g., 'hello' becomes 'olleh') for me", "tool_name": "reverse_string", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "trim the audio from 10s to 30s", "tool_name": "audio_trim", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Check the status of agent abc123 for me", "tool_name": "agent_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get info about song.mp3 please", "tool_name": "audio_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use village_convergence_detect", "tool_name": "village_convergence_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to what did the agent find?", "tool_name": "agent_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run suno_prompt_build with intent", "tool_name": "suno_prompt_build", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the music_result tool", "tool_name": "music_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "How many words in 'hello world'?", "tool_name": "count_words", "tool_arguments": {"text": "hello world"}, "assistant_response": null}
+{"user_query": "Show me the contents of main.py", "tool_name": "fs_read_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you check the status of agent abc123", "tool_name": "agent_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use music_compose for me", "tool_name": "music_compose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Save Suno prompt parameters as a reusable preset f... for me", "tool_name": "suno_prompt_preset_save", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use audio_list_files please", "tool_name": "audio_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you check status of music task xyz", "tool_name": "music_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use music_play for me", "tool_name": "music_play", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Make the audio louder for me", "tool_name": "audio_normalize", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Save my email as test@example.com", "tool_name": "memory_store", "tool_arguments": {"key": "email", "value": "test@example.com"}, "assistant_response": null}
+{"user_query": "Edit a file by finding and replacing a string.\n\nTh...", "tool_name": "fs_edit", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Delete the key 'name' please", "tool_name": "memory_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use reverse_string", "tool_name": "reverse_string", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use memory_health_duplicates for me", "tool_name": "memory_health_duplicates", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List audio files in the music folder. for me", "tool_name": "audio_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the suno_prompt_preset_load tool", "tool_name": "suno_prompt_preset_load", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Execute: 2+2", "tool_name": "execute_python", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the memory_consolidate tool", "tool_name": "memory_consolidate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start EEG data streaming please", "tool_name": "eeg_stream_start", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Browse the music library with filters. Filter by a... for me", "tool_name": "music_library", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Disconnect from the EEG board and release resource...", "tool_name": "eeg_disconnect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Store this text in vectors for me", "tool_name": "vector_add", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List available datasets", "tool_name": "dataset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run suno_prompt_build with intent", "tool_name": "suno_prompt_build", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "make directory 'data'", "tool_name": "fs_mkdir", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run memory_health_stale with collection for me", "tool_name": "memory_health_stale", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show me active agents for me", "tool_name": "agent_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Calculate 100 divided by 4 please", "tool_name": "calculator", "tool_arguments": {"a": 100, "b": 4, "operation": "divide"}, "assistant_response": null}
+{"user_query": "what is in this picture?", "tool_name": "hailo_classify", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "search the python_docs dataset for 'exceptions'", "tool_name": "dataset_query", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get info about song.mp3", "tool_name": "audio_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to delete the key 'name'", "tool_name": "memory_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Add this document to the knowledge base", "tool_name": "vector_add", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run execute_python_sandbox with network", "tool_name": "execute_python_sandbox", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to search my memories for preferences", "tool_name": "memory_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the hailo_list_models tool please", "tool_name": "hailo_list_models", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use eeg_calibrate_baseline please", "tool_name": "eeg_calibrate_baseline", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Leave a structured forward-crumb for future instan...", "tool_name": "forward_crumb_leave", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "How am I feeling neurologically?", "tool_name": "eeg_experience_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Check the status of agent abc123 please", "tool_name": "agent_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "get current brain state", "tool_name": "eeg_experience_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to add to knowledge: python was created in 1991", "tool_name": "vector_add_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list audio files in the music folder.", "tool_name": "audio_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to start a research agent to find information about quantum computing", "tool_name": "agent_spawn", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_concat with crossfade_ms", "tool_name": "audio_concat", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the fs_edit tool for me", "tool_name": "fs_edit", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run memory_health_stale with collection", "tool_name": "memory_health_stale", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use suno_prompt_preset_save", "tool_name": "suno_prompt_preset_save", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Safely run: import math; print(math.pi) for me", "tool_name": "execute_python_safe", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Create a looped version of audio with optional cro... please", "tool_name": "audio_loop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the eeg_list_sessions tool please", "tool_name": "eeg_list_sessions", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to show all my memories", "tool_name": "memory_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to generate a song about summer with a happy vibe", "tool_name": "music_generate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Current timestamp please please", "tool_name": "get_current_time", "tool_arguments": {"format": "timestamp"}, "assistant_response": null}
+{"user_query": "Call the music_result tool please", "tool_name": "music_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to what is 5 plus 3?", "tool_name": "calculator", "tool_arguments": {"a": 5, "b": 3, "operation": "add"}, "assistant_response": null}
+{"user_query": "I need you to call the vector_search_village tool", "tool_name": "vector_search_village", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "detect objects in this image", "tool_name": "hailo_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to calculate 100 divided by 4", "tool_name": "calculator", "tool_arguments": {"a": 100, "b": 4, "operation": "divide"}, "assistant_response": null}
+{"user_query": "Browse the music library with filters. Filter by a... for me", "tool_name": "music_library", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use session_info for me", "tool_name": "session_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List files in the current directory for me", "tool_name": "fs_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use sandbox_workspace_write", "tool_name": "sandbox_workspace_write", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run midi_create with tempo please", "tool_name": "midi_create", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run vector_delete with collection", "tool_name": "vector_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "call the suno_prompt_preset_save tool", "tool_name": "suno_prompt_preset_save", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "search my memories for preferences", "tool_name": "memory_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the memory_consolidate tool", "tool_name": "memory_consolidate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start EEG session for me", "tool_name": "eeg_connect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run execute_python_sandbox with network for me", "tool_name": "execute_python_sandbox", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "delete the key 'name'", "tool_name": "memory_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use sandbox_workspace_list", "tool_name": "sandbox_workspace_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Safely run: import math; print(math.pi) please", "tool_name": "execute_python_safe", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Ask the council: What is consciousness for me", "tool_name": "socratic_council", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_get_waveform with file_path", "tool_name": "audio_get_waveform", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the fs_read_lines tool", "tool_name": "fs_read_lines", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Remove the folder 'old' for me", "tool_name": "fs_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "execute: 2+2", "tool_name": "execute_python", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run eeg_list_sessions with limit", "tool_name": "eeg_list_sessions", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "what's the hailo device status?", "tool_name": "hailo_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you edit a file by finding and replacing a string.\n\nth...", "tool_name": "fs_edit", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Detect poses in this image", "tool_name": "hailo_pose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Find people and their poses please", "tool_name": "hailo_pose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get info about song.mp3 please", "tool_name": "audio_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Current timestamp please please", "tool_name": "get_current_time", "tool_arguments": {"format": "timestamp"}, "assistant_response": null}
+{"user_query": "Make directory 'data' for me", "tool_name": "fs_mkdir", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you what objects are in photo.jpg?", "tool_name": "hailo_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run memory_health_duplicates with similarity_threshold", "tool_name": "memory_health_duplicates", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run music_library with agent_id", "tool_name": "music_library", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run eeg_stream_stop with generate_experience", "tool_name": "eeg_stream_stop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "How many words in 'hello world'? please", "tool_name": "count_words", "tool_arguments": {"text": "hello world"}, "assistant_response": null}
+{"user_query": "List generated songs for me", "tool_name": "music_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run a Hailo benchmark please", "tool_name": "hailo_benchmark", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Remember this fact: The sky is blue please", "tool_name": "vector_add_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you detect objects in this image", "tool_name": "hailo_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Remember my name is Alice for me", "tool_name": "memory_store", "tool_arguments": {"key": "user_name", "value": "Alice"}, "assistant_response": null}
+{"user_query": "I need you to remember this fact: the sky is blue", "tool_name": "vector_add_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Add this document to the knowledge base please", "tool_name": "vector_add", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run memory_health_low_access with max_access_count", "tool_name": "memory_health_low_access", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use suno_prompt_preset_load please", "tool_name": "suno_prompt_preset_load", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "start eeg data streaming", "tool_name": "eeg_stream_start", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use suno_prompt_preset_save", "tool_name": "suno_prompt_preset_save", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show Hailo chip info", "tool_name": "hailo_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use music_result", "tool_name": "music_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use sandbox_workspace_list please", "tool_name": "sandbox_workspace_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run music_compose with midi_file", "tool_name": "music_compose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to write 'hello' to test.txt", "tool_name": "fs_write_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the eeg_list_sessions tool", "tool_name": "eeg_list_sessions", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Connect to the EEG device please", "tool_name": "eeg_connect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the vector_search_village tool", "tool_name": "vector_search_village", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Delete a document from the vector database. Use th... please", "tool_name": "vector_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all available vector collections in the datab... for me", "tool_name": "vector_list_collections", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start a research agent to find information about quantum computing", "tool_name": "agent_spawn", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to add this document to the knowledge base", "tool_name": "vector_add", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the memory_health_stale tool", "tool_name": "memory_health_stale", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run eeg_calibrate_baseline with listener_name please", "tool_name": "eeg_calibrate_baseline", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start EEG session for me", "tool_name": "eeg_connect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List audio files in the music folder.", "tool_name": "audio_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to make the audio louder", "tool_name": "audio_normalize", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you create a file called notes.txt", "tool_name": "fs_write_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run music_library with agent_id", "tool_name": "music_library", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the audio_concat tool please", "tool_name": "audio_concat", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use village_convergence_detect", "tool_name": "village_convergence_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all running agents please", "tool_name": "agent_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you find my upbeat tracks", "tool_name": "music_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What time is it?", "tool_name": "get_current_time", "tool_arguments": {"format": "time"}, "assistant_response": null}
+{"user_query": "use audio_speed", "tool_name": "audio_speed", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use eeg_realtime_emotion for me", "tool_name": "eeg_realtime_emotion", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "list everything you remember", "tool_name": "memory_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Normalize the audio volume", "tool_name": "audio_normalize", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the memory_migration_run tool for me", "tool_name": "memory_migration_run", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run forward_crumb_leave with session_summary for me", "tool_name": "forward_crumb_leave", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use forward_crumbs_get", "tool_name": "forward_crumbs_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to show me what's in ./sandbox", "tool_name": "fs_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "add this song to favorites", "tool_name": "music_favorite", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use vector_delete", "tool_name": "vector_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "list generated songs", "tool_name": "music_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "call the sandbox_workspace_read tool", "tool_name": "sandbox_workspace_read", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all projects in the persistent sandbox worksp...", "tool_name": "sandbox_workspace_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search the python_docs dataset for 'exceptions' for me", "tool_name": "dataset_query", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run suno_prompt_build with mood", "tool_name": "suno_prompt_build", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to search the python_docs dataset for 'exceptions'", "tool_name": "dataset_query", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to what's my name?", "tool_name": "memory_retrieve", "tool_arguments": {"key": "user_name"}, "assistant_response": null}
+{"user_query": "I need you to add to knowledge: python was created in 1991", "tool_name": "vector_add_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start a research agent to find information about quantum computing", "tool_name": "agent_spawn", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use vector_search_village please", "tool_name": "vector_search_village", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to what's my name?", "tool_name": "memory_retrieve", "tool_arguments": {"key": "user_name"}, "assistant_response": null}
+{"user_query": "Leave a structured forward-crumb for future instan...", "tool_name": "forward_crumb_leave", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use suno_prompt_preset_list", "tool_name": "suno_prompt_preset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Count characters in this text please", "tool_name": "count_words", "tool_arguments": {"text": "Count characters in this text please"}, "assistant_response": null}
+{"user_query": "Can you safely run: import math; print(math.pi)", "tool_name": "execute_python_safe", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "search the village knowledge with agent-aware filt...", "tool_name": "vector_search_village", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "start eeg data streaming", "tool_name": "eeg_stream_start", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Generate a song about summer with a happy vibe", "tool_name": "music_generate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you ask the council: what is consciousness?", "tool_name": "socratic_council", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Write 'hello' to test.txt", "tool_name": "fs_write_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the session_info tool please", "tool_name": "session_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "forget my email", "tool_name": "memory_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Trim the audio from 10s to 30s", "tool_name": "audio_trim", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to list generated songs", "tool_name": "music_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to reverse a string (e.g., 'hello' becomes 'olleh')", "tool_name": "reverse_string", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "list all available suno prompt presets.", "tool_name": "suno_prompt_preset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Safely run: import math; print(math.pi)", "tool_name": "execute_python_safe", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Generate a song about summer with a happy vibe", "tool_name": "music_generate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use forward_crumbs_get", "tool_name": "forward_crumbs_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List available recorded EEG listening sessions", "tool_name": "eeg_list_sessions", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the session_info tool", "tool_name": "session_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run audio_concat with file_paths", "tool_name": "audio_concat", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you pick a number from 1 to 10", "tool_name": "random_number", "tool_arguments": {"min_value": 1, "max_value": 10}, "assistant_response": null}
+{"user_query": "I need you to run audio_speed with speed_factor", "tool_name": "audio_speed", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run memory_consolidate with id1", "tool_name": "memory_consolidate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Start EEG data streaming for me", "tool_name": "eeg_stream_start", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use hailo_analyze please", "tool_name": "hailo_analyze", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you start a research agent to find information about quantum computing", "tool_name": "agent_spawn", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use audio_loop for me", "tool_name": "audio_loop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you apply fade in and/or fade out effects to audio.", "tool_name": "audio_fade", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use vector_list_collections", "tool_name": "vector_list_collections", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to migrate existing vectors to include new metadata f...", "tool_name": "memory_migration_run", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "connect to the eeg device", "tool_name": "eeg_connect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "get detailed information about a file or directory...", "tool_name": "fs_get_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use audio_reverse", "tool_name": "audio_reverse", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show me active agents", "tool_name": "agent_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Play a song - increments play count and loads to s... please", "tool_name": "music_play", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the audio_concat tool", "tool_name": "audio_concat", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use midi_create", "tool_name": "midi_create", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "classify this image", "tool_name": "hailo_classify", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Pick a number from 1 to 10 for me", "tool_name": "random_number", "tool_arguments": {"min_value": 1, "max_value": 10}, "assistant_response": null}
+{"user_query": "start a research agent to find information about quantum computing", "tool_name": "agent_spawn", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run vector_search_village with query please", "tool_name": "vector_search_village", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you what email did i save?", "tool_name": "memory_retrieve", "tool_arguments": {"key": "email"}, "assistant_response": null}
+{"user_query": "Run audio_reverse with file_path for me", "tool_name": "audio_reverse", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search for documents about AI please", "tool_name": "vector_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the audio_fade tool", "tool_name": "audio_fade", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "show all my memories", "tool_name": "memory_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you get info about song.mp3", "tool_name": "audio_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What datasets do I have?", "tool_name": "dataset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the eeg_stream_stop tool", "tool_name": "eeg_stream_stop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run full analysis pipeline on an image combining d...", "tool_name": "hailo_analyze", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the midi_create tool", "tool_name": "midi_create", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "forget my email", "tool_name": "memory_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "list available datasets", "tool_name": "dataset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "search for songs about love", "tool_name": "music_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "check if ./data folder exists", "tool_name": "fs_exists", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run memory_health_low_access with max_access_count", "tool_name": "memory_health_low_access", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "find anything about colors", "tool_name": "memory_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list all available hailo models on the system, org...", "tool_name": "hailo_list_models", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get the result of a completed music generation. Re...", "tool_name": "music_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you delete the file temp.txt", "tool_name": "fs_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "show hailo chip info", "tool_name": "hailo_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "call the eeg_realtime_emotion tool", "tool_name": "eeg_realtime_emotion", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the midi_create tool please", "tool_name": "midi_create", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run fs_read_lines with path", "tool_name": "fs_read_lines", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Apply fade in and/or fade out effects to audio. for me", "tool_name": "audio_fade", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run sandbox_workspace_write with content", "tool_name": "sandbox_workspace_write", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use audio_loop", "tool_name": "audio_loop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the eeg_calibrate_baseline tool for me", "tool_name": "eeg_calibrate_baseline", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you remove the folder 'old'", "tool_name": "fs_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use music_play", "tool_name": "music_play", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to search knowledge for ai facts", "tool_name": "vector_search_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to add this song to favorites", "tool_name": "music_favorite", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get the results from agent abc123 for me", "tool_name": "agent_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "find my upbeat tracks", "tool_name": "music_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to search for documents about ai", "tool_name": "vector_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use hailo_analyze please", "tool_name": "hailo_analyze", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Apply fade in and/or fade out effects to audio. please", "tool_name": "audio_fade", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "How am I feeling neurologically?", "tool_name": "eeg_experience_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to test hailo performance", "tool_name": "hailo_benchmark", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to list files in the current directory", "tool_name": "fs_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you trim the audio from 10s to 30s", "tool_name": "audio_trim", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show me the contents of main.py please", "tool_name": "fs_read_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "find similar content to 'machine learning'", "tool_name": "vector_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_speed with file_path for me", "tool_name": "audio_speed", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all running agents", "tool_name": "agent_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the midi_create tool please", "tool_name": "midi_create", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run a Hailo benchmark please", "tool_name": "hailo_benchmark", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What is 5 plus 3? please", "tool_name": "calculator", "tool_arguments": {"a": 5, "b": 3, "operation": "add"}, "assistant_response": null}
+{"user_query": "Call the audio_speed tool please", "tool_name": "audio_speed", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run suno_prompt_build with intent for me", "tool_name": "suno_prompt_build", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use eeg_disconnect please", "tool_name": "eeg_disconnect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the fs_read_lines tool please", "tool_name": "fs_read_lines", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Classify this image please", "tool_name": "hailo_classify", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run memory_health_stale with days_unused", "tool_name": "memory_health_stale", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get current real-time emotional state during activ...", "tool_name": "eeg_realtime_emotion", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you execute: 2+2", "tool_name": "execute_python", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Find memories with very low access counts (rarely ... for me", "tool_name": "memory_health_low_access", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Check status of music task xyz for me", "tool_name": "music_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_reverse with file_path please", "tool_name": "audio_reverse", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the village_convergence_detect tool please", "tool_name": "village_convergence_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Count characters in this text please", "tool_name": "count_words", "tool_arguments": {"text": "Count characters in this text please"}, "assistant_response": null}
+{"user_query": "Edit a file by finding and replacing a string.\n\nTh... please", "tool_name": "fs_edit", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the memory_health_stale tool", "tool_name": "memory_health_stale", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "what time is it?", "tool_name": "get_current_time", "tool_arguments": {"format": "time"}, "assistant_response": null}
+{"user_query": "remove the folder 'old'", "tool_name": "fs_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use fs_get_info", "tool_name": "fs_get_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Save my email as test@example.com please", "tool_name": "memory_store", "tool_arguments": {"key": "email", "value": "test@example.com"}, "assistant_response": null}
+{"user_query": "Cut the first 5 seconds for me", "tool_name": "audio_trim", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Write 'hello' to test.txt for me", "tool_name": "fs_write_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "How am I feeling neurologically for me", "tool_name": "eeg_experience_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to find people and their poses", "tool_name": "hailo_pose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to make directory 'data'", "tool_name": "fs_mkdir", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "check if ./data folder exists", "tool_name": "fs_exists", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List everything you remember", "tool_name": "memory_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run music_compose with midi_file please", "tool_name": "music_compose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you what's the hailo device status?", "tool_name": "hailo_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Normalize the audio volume for me", "tool_name": "audio_normalize", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What do you know about Python? please", "tool_name": "vector_search_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use audio_get_waveform for me", "tool_name": "audio_get_waveform", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Is my song ready?", "tool_name": "music_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to stop eeg streaming and generate the ai-readable 'f...", "tool_name": "eeg_stream_stop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Is the agent done?", "tool_name": "agent_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What is in this picture?", "tool_name": "hailo_classify", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run this Python code: print('hello') please", "tool_name": "execute_python", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "read a file from the sandbox workspace.\n\nuse to re...", "tool_name": "sandbox_workspace_read", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run memory_health_duplicates with collection", "tool_name": "memory_health_duplicates", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use memory_health_duplicates", "tool_name": "memory_health_duplicates", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Safely run: import math; print(math.pi)", "tool_name": "execute_python_safe", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show all my memories", "tool_name": "memory_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to detect poses in this image", "tool_name": "hailo_pose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to how many words in 'hello world'?", "tool_name": "count_words", "tool_arguments": {"text": "hello world"}, "assistant_response": null}
+{"user_query": "Use audio_loop", "tool_name": "audio_loop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Create a folder called 'output' please", "tool_name": "fs_mkdir", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run reverse_string with text please", "tool_name": "reverse_string", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you save my email as test@example.com", "tool_name": "memory_store", "tool_arguments": {"key": "email", "value": "test@example.com"}, "assistant_response": null}
+{"user_query": "reverse a string (e.g., 'hello' becomes 'olleh')", "tool_name": "reverse_string", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to generate a song about summer with a happy vibe", "tool_name": "music_generate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you what time is it?", "tool_name": "get_current_time", "tool_arguments": {"format": "time"}, "assistant_response": null}
+{"user_query": "Use fs_get_info for me", "tool_name": "fs_get_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use session_info", "tool_name": "session_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run memory_health_low_access with min_age_days please", "tool_name": "memory_health_low_access", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Get current brain state for me", "tool_name": "eeg_experience_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to retrieve forward-crumbs left by previous instances...", "tool_name": "forward_crumbs_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search the python_docs dataset for 'exceptions'", "tool_name": "dataset_query", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run fs_read_lines with start_line for me", "tool_name": "fs_read_lines", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list available datasets", "tool_name": "dataset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run village_convergence_detect with similarity_threshold", "tool_name": "village_convergence_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What's the duration of this audio?", "tool_name": "audio_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you concatenate multiple audio files into one.", "tool_name": "audio_concat", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run sandbox_workspace_read with path", "tool_name": "sandbox_workspace_read", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use forward_crumb_leave", "tool_name": "forward_crumb_leave", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the suno_prompt_preset_list tool", "tool_name": "suno_prompt_preset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to use eeg_realtime_emotion", "tool_name": "eeg_realtime_emotion", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to what did the agent find?", "tool_name": "agent_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use audio_list_files", "tool_name": "audio_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "list files in the current directory", "tool_name": "fs_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Find my upbeat tracks", "tool_name": "music_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "edit a file by finding and replacing a string.\n\nth...", "tool_name": "fs_edit", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use suno_prompt_preset_save for me", "tool_name": "suno_prompt_preset_save", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "call the eeg_stream_stop tool", "tool_name": "eeg_stream_stop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list all available suno prompt presets.", "tool_name": "suno_prompt_preset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "what email did i save?", "tool_name": "memory_retrieve", "tool_arguments": {"key": "email"}, "assistant_response": null}
+{"user_query": "Can you retrieve forward-crumbs left by previous instances...", "tool_name": "forward_crumbs_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Create a file called notes.txt please", "tool_name": "fs_write_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to list all available hailo models on the system, org...", "tool_name": "hailo_list_models", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all available vector collections in the datab... for me", "tool_name": "vector_list_collections", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you write a file to the sandbox workspace.\n\nuse to cre...", "tool_name": "sandbox_workspace_write", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List available datasets", "tool_name": "dataset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Build an optimized Suno prompt from high-level int... please", "tool_name": "suno_prompt_build", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run hailo_analyze with tasks", "tool_name": "hailo_analyze", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Stop EEG streaming and generate the AI-readable 'f...", "tool_name": "eeg_stream_stop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run music_library with favorites_only", "tool_name": "music_library", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What's the Hailo device status?", "tool_name": "hailo_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use vector_list_collections", "tool_name": "vector_list_collections", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "add this document to the knowledge base", "tool_name": "vector_add", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Generate a song about summer with a happy vibe please", "tool_name": "music_generate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run fs_read_lines with path", "tool_name": "fs_read_lines", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run full analysis pipeline on an image combining d...", "tool_name": "hailo_analyze", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "play a song - increments play count and loads to s...", "tool_name": "music_play", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to give me a random number between 1 and 100", "tool_name": "random_number", "tool_arguments": {"min_value": 1, "max_value": 100}, "assistant_response": null}
+{"user_query": "use memory_health_low_access", "tool_name": "memory_health_low_access", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Add to knowledge: Python was created in 1991 for me", "tool_name": "vector_add_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "find anything about colors", "tool_name": "memory_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you find similar content to 'machine learning'", "tool_name": "vector_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the sandbox_workspace_read tool for me", "tool_name": "sandbox_workspace_read", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Multiply 7 by 9 please", "tool_name": "calculator", "tool_arguments": {"a": 7, "b": 9, "operation": "multiply"}, "assistant_response": null}
+{"user_query": "I need you to run vector_delete with collection", "tool_name": "vector_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What is in this picture? please", "tool_name": "hailo_classify", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run audio_get_waveform with num_points", "tool_name": "audio_get_waveform", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run a Hailo benchmark please", "tool_name": "hailo_benchmark", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you search my memories for preferences", "tool_name": "memory_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the memory_migration_run tool", "tool_name": "memory_migration_run", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run memory_migration_run with collection", "tool_name": "memory_migration_run", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "connect to the eeg device", "tool_name": "eeg_connect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the forward_crumb_leave tool", "tool_name": "forward_crumb_leave", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Mark task xyz as favorite for me", "tool_name": "music_favorite", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Find potential duplicate memories with high simila... for me", "tool_name": "memory_health_duplicates", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you get waveform amplitude data for visualization.", "tool_name": "audio_get_waveform", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Is the agent done for me", "tool_name": "agent_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run sandbox_workspace_write with path", "tool_name": "sandbox_workspace_write", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search knowledge for AI facts", "tool_name": "vector_search_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the fs_get_info tool", "tool_name": "fs_get_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the music_play tool", "tool_name": "music_play", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What do you know about Python?", "tool_name": "vector_search_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list generated songs", "tool_name": "music_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use memory_consolidate please", "tool_name": "memory_consolidate", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run execute_python_sandbox with code", "tool_name": "execute_python_sandbox", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "read the file config.json", "tool_name": "fs_read_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "show my recent music generations", "tool_name": "music_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What email did I save?", "tool_name": "memory_retrieve", "tool_arguments": {"key": "email"}, "assistant_response": null}
+{"user_query": "Can you what objects are in photo.jpg?", "tool_name": "hailo_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you create a folder called 'output'", "tool_name": "fs_mkdir", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use vector_delete", "tool_name": "vector_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the eeg_disconnect tool", "tool_name": "eeg_disconnect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to call the sandbox_workspace_list tool", "tool_name": "sandbox_workspace_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Delete the file temp.txt", "tool_name": "fs_delete", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Use forward_crumbs_get please", "tool_name": "forward_crumbs_get", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you remember my name is alice", "tool_name": "memory_store", "tool_arguments": {"key": "user_name", "value": "Alice"}, "assistant_response": null}
+{"user_query": "Use hailo_list_models please", "tool_name": "hailo_list_models", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to get waveform amplitude data for visualization.", "tool_name": "audio_get_waveform", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use eeg_disconnect", "tool_name": "eeg_disconnect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "ask the council: what is consciousness?", "tool_name": "socratic_council", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search the python_docs dataset for 'exceptions' for me", "tool_name": "dataset_query", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you run music_compose with midi_file", "tool_name": "music_compose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Pick a number from 1 to 10 for me", "tool_name": "random_number", "tool_arguments": {"min_value": 1, "max_value": 10}, "assistant_response": null}
+{"user_query": "Give me a random number between 1 and 100", "tool_name": "random_number", "tool_arguments": {"min_value": 1, "max_value": 100}, "assistant_response": null}
+{"user_query": "Call the music_compose tool for me", "tool_name": "music_compose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you get the results from agent abc123", "tool_name": "agent_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "use execute_python_sandbox", "tool_name": "execute_python_sandbox", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Check if ./data folder exists please", "tool_name": "fs_exists", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you test hailo performance", "tool_name": "hailo_benchmark", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_loop with file_path please", "tool_name": "audio_loop", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "call the eeg_calibrate_baseline tool", "tool_name": "eeg_calibrate_baseline", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "show me the contents of main.py", "tool_name": "fs_read_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show me what's in ./sandbox for me", "tool_name": "fs_list_files", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the sandbox_workspace_write tool please", "tool_name": "sandbox_workspace_write", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Find people and their poses for me", "tool_name": "hailo_pose", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_reverse with file_path please", "tool_name": "audio_reverse", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Mark task xyz as favorite for me", "tool_name": "music_favorite", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Mark task xyz as favorite for me", "tool_name": "music_favorite", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to run eeg_list_sessions with limit", "tool_name": "eeg_list_sessions", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Read a file from the sandbox workspace.\n\nUse to re...", "tool_name": "sandbox_workspace_read", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the eeg_realtime_emotion tool for me", "tool_name": "eeg_realtime_emotion", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "check if ./data folder exists", "tool_name": "fs_exists", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run suno_prompt_preset_load with name for me", "tool_name": "suno_prompt_preset_load", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What did the agent find for me", "tool_name": "agent_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run fs_get_info with path", "tool_name": "fs_get_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Search for documents about AI", "tool_name": "vector_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "List all available Suno prompt presets. please", "tool_name": "suno_prompt_preset_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Trim the audio from 10s to 30s", "tool_name": "audio_trim", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the music_result tool please", "tool_name": "music_result", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Does config.json exist?", "tool_name": "fs_exists", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you use vector_list_collections", "tool_name": "vector_list_collections", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run eeg_calibrate_baseline with listener_name", "tool_name": "eeg_calibrate_baseline", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you ask the council: what is consciousness?", "tool_name": "socratic_council", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Execute: 2+2 please", "tool_name": "execute_python", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Show me the contents of main.py for me", "tool_name": "fs_read_file", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you list all available hailo models on the system, org...", "tool_name": "hailo_list_models", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to execute python in full isolated docker sandbox.\n\nu...", "tool_name": "execute_python_sandbox", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "disconnect from the eeg board and release resource...", "tool_name": "eeg_disconnect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "check status of music task xyz", "tool_name": "music_status", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you load and compile a saved suno prompt preset.", "tool_name": "suno_prompt_preset_load", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Begin recording brain waves please", "tool_name": "eeg_stream_start", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you call the sandbox_workspace_list tool", "tool_name": "sandbox_workspace_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run suno_prompt_preset_load with name", "tool_name": "suno_prompt_preset_load", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Detect objects in this image please", "tool_name": "hailo_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "I need you to show me active agents", "tool_name": "agent_list", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Call the session_info tool", "tool_name": "session_info", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Ask the council: What is consciousness?", "tool_name": "socratic_council", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Run audio_reverse with output_path please", "tool_name": "audio_reverse", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Normalize the audio volume", "tool_name": "audio_normalize", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "run village_convergence_detect with limit", "tool_name": "village_convergence_detect", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "search for songs about love", "tool_name": "music_search", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "What do you know about Python? please", "tool_name": "vector_search_knowledge", "tool_arguments": {}, "assistant_response": null}
+{"user_query": "Can you apply fade in and/or fade out effects to audio.", "tool_name": "audio_fade", "tool_arguments": {}, "assistant_response": null}
