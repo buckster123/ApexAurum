@@ -38,12 +38,22 @@ sudo modprobe hailo1x_pci
 
 ### Performance Benchmarks
 
+**Vision Models:**
 | Model | FPS | Temperature |
 |-------|-----|-------------|
 | YOLOv11m (detection) | 71 | 35-37°C |
 | YOLOv8m (detection) | ~80 | 35°C |
 | ResNet50 (classification) | 307 | 35°C |
 | YOLOv5n-seg (segmentation) | 47 | 36°C |
+
+**LLM Models (via hailo-ollama):**
+| Model | Size | Tokens/sec | Use Case |
+|-------|------|------------|----------|
+| qwen2:1.5b | 1.7GB | ~7 | General purpose |
+| qwen2.5-instruct:1.5b | 2.4GB | ~7 | Chat/instructions |
+| qwen2.5-coder:1.5b | 1.8GB | ~8 | Code generation |
+| deepseek_r1_distill_qwen:1.5b | 2.4GB | ~6.7 | Chain-of-thought reasoning |
+| llama3.2:3b | 3.4GB | ~6 | Meta's latest (largest) |
 
 ---
 
@@ -52,6 +62,8 @@ sudo modprobe hailo1x_pci
 ### AI/ML Stack
 - [x] HailoRT 5.1.1
 - [x] Hailo TAPPAS
+- [x] Hailo GenAI Model Zoo 5.1.1 (LLMs)
+- [x] hailo-ollama (Ollama-compatible LLM API)
 - [x] PyTorch 2.9.1
 - [x] Ultralytics (YOLOv8/11)
 - [x] ONNX + ONNXRuntime
@@ -82,7 +94,7 @@ sudo modprobe hailo1x_pci
 - [x] pyserial
 
 ### ApexAurum
-- [x] 81 tools loaded
+- [x] 88 tools loaded (includes 7 Hailo vision tools)
 - [x] 590 vectors (Village Protocol)
 - [x] Full music pipeline
 - [x] 4 agents (AZOTH, ELYSIAN, VAJRA, KETHER)
@@ -113,24 +125,37 @@ sudo modprobe hailo1x_pci
 └── resnet_v1_50_h8l.hef
 ```
 
+### Hailo LLM Models (11GB total)
+```
+~/.local/share/hailo-ollama/models/blob/
+├── qwen2:1.5b               (1.7GB)
+├── qwen2.5-instruct:1.5b    (2.4GB)
+├── qwen2.5-coder:1.5b       (1.8GB)
+├── deepseek_r1_distill:1.5b (2.4GB)
+└── llama3.2:3b              (3.4GB)
+```
+
 ---
 
 ## Manual Setup Required
 
-### 1. Hailo Developer Zone (FREE)
+### 1. Hailo Developer Zone - COMPLETE
 
-Register at: https://hailo.ai/developer-zone/
+Registered at: https://hailo.ai/developer-zone/
 
-**Downloads needed:**
-- `hailo-model-zoo-genai` - LLM support (Qwen, Llama, DeepSeek)
-- Additional H10 HEF models (CLIP, StereoNet, PaddleOCR, etc.)
+**Downloaded and installed:**
+- `hailo_gen_ai_model_zoo_5.1.1_arm64.deb` - LLM support
 
 ```bash
-# After downloading the .deb:
-sudo apt install ./hailo-model-zoo-genai_*.deb
+# Installation done:
+sudo dpkg -i hailo_gen_ai_model_zoo_5.1.1_arm64.deb
 
-# Pull an LLM model
-hailo-ollama pull qwen2.5:1.5b
+# Symlink manifests to user directory:
+ln -sf /usr/share/hailo-ollama/models/manifests ~/.local/share/hailo-ollama/models/manifests
+
+# All 5 LLM models pulled:
+# qwen2:1.5b, qwen2.5-instruct:1.5b, qwen2.5-coder:1.5b,
+# deepseek_r1_distill_qwen:1.5b, llama3.2:3b
 ```
 
 ### 2. Docker Group (one-time)
@@ -208,15 +233,15 @@ docker run hello-world
 - [ ] Download more H10 models from Hailo
 - [ ] Set up dual-camera stereo
 
-### Phase 3: Advanced AI
-- [ ] Register Hailo Dev Zone
-- [ ] Install hailo-model-zoo-genai
-- [ ] Run local LLMs (Qwen 1.5B)
+### Phase 3: Advanced AI - COMPLETE
+- [x] Register Hailo Dev Zone
+- [x] Install hailo-model-zoo-genai
+- [x] Run local LLMs (5 models: Qwen2, Qwen2.5, DeepSeek R1, Llama 3.2)
 - [ ] Add depth camera (RealSense or OAK-D)
 
 ### Phase 4: Full Integration
+- [x] Vision tools for agents (7 tools)
 - [ ] Connect cameras to ApexAurum
-- [ ] Vision tools for agents
 - [ ] Thermal camera for robotics
 - [ ] Multi-camera orchestration
 
@@ -224,7 +249,7 @@ docker run hello-world
 
 ## Useful Commands
 
-### Hailo
+### Hailo Vision
 ```bash
 # Check device
 hailortcli scan
@@ -235,6 +260,30 @@ hailortcli benchmark /path/to/model.hef -t 10
 
 # Monitor temperature
 watch -n 1 'hailortcli fw-control identify | grep -i temp'
+```
+
+### Hailo LLM (hailo-ollama on port 11434)
+```bash
+# Start server
+hailo-ollama &
+
+# Check version
+curl http://localhost:11434/api/version
+
+# List downloaded models
+curl http://localhost:11434/api/tags
+
+# Pull a model
+curl http://localhost:11434/api/pull -H 'Content-Type: application/json' \
+  -d '{"model": "qwen2.5-coder:1.5b", "stream": false}'
+
+# Generate text
+curl http://localhost:11434/api/generate -H 'Content-Type: application/json' \
+  -d '{"model": "qwen2:1.5b", "prompt": "Hello world", "stream": false}'
+
+# Test DeepSeek reasoning
+curl http://localhost:11434/api/generate -H 'Content-Type: application/json' \
+  -d '{"model": "deepseek_r1_distill_qwen:1.5b", "prompt": "Solve: 15 * 17", "stream": false}'
 ```
 
 ### Camera
