@@ -72,10 +72,18 @@ village_post(
 
 ---
 
-### Phase 2: Shared Model Registry (Discovery)
-**Effort:** Medium | **Impact:** High
+### Phase 2: Shared Model Registry (Discovery) ✅ COMPLETE
+**Effort:** Medium | **Impact:** High | **Completed:** 2026-01-23
 
 **Goal:** Models searchable via Village Protocol.
+
+**Implementation Summary:**
+- `nursery_register_model()` - Register model with rich metadata in Village + local registry
+- `nursery_discover_models()` - Search Village + local registry for models
+- Auto-registration on `nursery_train_local()` completion
+- Local registry files: `sandbox/nursery/models/{model}_registry.json`
+- Capabilities, trainer attribution, performance metrics all tracked
+- Tool count: 106 → 108 (+2 new tools)
 
 #### 2.1 Model Metadata in Village
 Store model cards in `knowledge_village` with rich metadata:
@@ -313,8 +321,8 @@ introduction_ritual(
 | Phase | Effort | Impact | Status |
 |-------|--------|--------|--------|
 | 1. Village Event Hooks | Small | High | ✅ **COMPLETE** |
-| 2. Shared Model Registry | Medium | High | 🔴 **NOW** |
-| 3. Agent Training | Medium | Very High | 🟠 Next |
+| 2. Shared Model Registry | Medium | High | ✅ **COMPLETE** |
+| 3. Agent Training | Medium | Very High | 🔴 **NOW** |
 | 4. Streamlit UI | Medium | High | 🟡 Soon |
 | 5. FastAPI Parity | Small | Medium | 🟡 Soon |
 | 6. NURSERY_KEEPER | Small | Fun! | 🟢 Whenever |

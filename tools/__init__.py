@@ -227,6 +227,9 @@ from .nursery import (
     nursery_deploy_ollama,
     nursery_test_model,
     nursery_compare_models,
+    # Phase 2: Village Registry
+    nursery_register_model,
+    nursery_discover_models,
     # Schemas
     NURSERY_GENERATE_DATA_SCHEMA,
     NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
@@ -240,6 +243,8 @@ from .nursery import (
     NURSERY_DEPLOY_OLLAMA_SCHEMA,
     NURSERY_TEST_MODEL_SCHEMA,
     NURSERY_COMPARE_MODELS_SCHEMA,
+    NURSERY_REGISTER_MODEL_SCHEMA,
+    NURSERY_DISCOVER_MODELS_SCHEMA,
 )
 
 # Nursery tool schemas
@@ -256,6 +261,9 @@ NURSERY_TOOL_SCHEMAS = {
     "nursery_deploy_ollama": NURSERY_DEPLOY_OLLAMA_SCHEMA,
     "nursery_test_model": NURSERY_TEST_MODEL_SCHEMA,
     "nursery_compare_models": NURSERY_COMPARE_MODELS_SCHEMA,
+    # Phase 2: Village Registry
+    "nursery_register_model": NURSERY_REGISTER_MODEL_SCHEMA,
+    "nursery_discover_models": NURSERY_DISCOVER_MODELS_SCHEMA,
 }
 
 # Combine all schemas
@@ -403,6 +411,9 @@ ALL_TOOLS = {
     "nursery_deploy_ollama": nursery_deploy_ollama,
     "nursery_test_model": nursery_test_model,
     "nursery_compare_models": nursery_compare_models,
+    # Phase 2: Village Registry
+    "nursery_register_model": nursery_register_model,
+    "nursery_discover_models": nursery_discover_models,
 }
 
 __all__ = [
@@ -549,6 +560,9 @@ __all__ = [
     "nursery_deploy_ollama",
     "nursery_test_model",
     "nursery_compare_models",
+    # Phase 2: Village Registry
+    "nursery_register_model",
+    "nursery_discover_models",
 ]
 
 

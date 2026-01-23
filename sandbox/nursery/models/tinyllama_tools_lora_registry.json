@@ -1,0 +1,14 @@
+{
+  "model_name": "tinyllama_tools_lora",
+  "model_path": "/home/hailo/claude-root/Projects/ApexAurum/sandbox/nursery/models/tinyllama_tools_lora",
+  "description": "First Nursery-trained model! TinyLlama fine-tuned on tool-use examples.",
+  "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "capabilities": [
+    "tool_calling",
+    "memory_store"
+  ],
+  "trainer_agent": "AZOTH",
+  "performance": {},
+  "registered_at": "2026-01-23T23:24:09.475405",
+  "village_id": null
+}

@@ -681,12 +681,23 @@ def nursery_train_local(
             }
         )
 
+        # 🏘️ Phase 2: Auto-register model in Village registry
+        nursery_register_model(
+            model_name=output_name,
+            model_path=str(output_dir),
+            base_model=base_model,
+            trainer_agent=trainer_agent,
+            capabilities=["tool_calling"],  # Default for nursery-trained models
+            performance=stats_dict,
+        )
+
         return {
             "success": True,
             "output_name": output_name,
             "output_path": str(output_dir),
             "trainer_agent": trainer_agent,
             "stats": stats_dict,
+            "registered": True,
             "message": f"🎉 Local training complete! Adapter saved to {output_dir}",
         }
 
@@ -844,6 +855,242 @@ def nursery_list_models() -> Dict[str, Any]:
         "models": models,
         "total": len(models),
         "storage_path": str(MODELS_DIR),
+    }
+
+
+# =============================================================================
+# 🏘️ VILLAGE REGISTRY - Phase 2: Model Discovery via Village Protocol
+# =============================================================================
+
+def nursery_register_model(
+    model_name: str,
+    model_path: Optional[str] = None,
+    description: Optional[str] = None,
+    capabilities: Optional[List[str]] = None,
+    base_model: Optional[str] = None,
+    trainer_agent: Optional[str] = None,
+    performance: Optional[Dict] = None,
+) -> Dict[str, Any]:
+    """
+    Register a trained model in the Village registry.
+
+    Makes the model discoverable by other agents via village_search.
+    Auto-called on training completion, but can also be called manually
+    to register external or pre-existing models.
+
+    Args:
+        model_name: Name of the model (unique identifier)
+        model_path: Path to model files (auto-detected if in Nursery)
+        description: Human-readable description of model capabilities
+        capabilities: List of capabilities (e.g., ["tool_calling", "code_generation"])
+        base_model: Base model this was fine-tuned from
+        trainer_agent: Agent who trained this model (for attribution)
+        performance: Performance metrics dict (e.g., {"loss": 1.5, "accuracy": 0.85})
+
+    Returns:
+        Dict with registration status and registry ID
+    """
+    try:
+        # Auto-detect model path if not provided
+        if not model_path:
+            auto_path = MODELS_DIR / model_name
+            if auto_path.exists():
+                model_path = str(auto_path)
+
+        # Try to load adapter config for auto-population
+        adapter_config = {}
+        if model_path:
+            config_file = Path(model_path) / "adapter_config.json"
+            if config_file.exists():
+                with open(config_file) as f:
+                    adapter_config = json.load(f)
+
+        # Auto-populate from adapter config
+        if not base_model:
+            base_model = adapter_config.get("base_model_name_or_path", "unknown")
+
+        # Build description
+        if not description:
+            lora_rank = adapter_config.get("r", "?")
+            description = f"LoRA adapter (rank {lora_rank}) fine-tuned from {base_model}"
+
+        # Build registry content
+        content = f"""🌱 MODEL REGISTRY: {model_name}
+{description}
+
+Base Model: {base_model}
+Capabilities: {', '.join(capabilities or ['general'])}
+Trainer: {trainer_agent or 'NURSERY_KEEPER'}
+Path: {model_path or 'not specified'}"""
+
+        # Post to Village
+        result = _village_post_event(
+            content=content,
+            event_type="model_registry",
+            agent_id=trainer_agent or "NURSERY_KEEPER",
+            metadata={
+                "model_name": model_name,
+                "model_path": model_path,
+                "base_model": base_model,
+                "capabilities": capabilities or ["general"],
+                "performance": performance or {},
+            }
+        )
+
+        # Also save local registry file
+        registry_file = MODELS_DIR / f"{model_name}_registry.json"
+        registry_data = {
+            "model_name": model_name,
+            "model_path": model_path,
+            "description": description,
+            "base_model": base_model,
+            "capabilities": capabilities or ["general"],
+            "trainer_agent": trainer_agent or "NURSERY_KEEPER",
+            "performance": performance or {},
+            "registered_at": datetime.now().isoformat(),
+            "village_id": result.get("id") if result.get("success") else None,
+        }
+        with open(registry_file, "w") as f:
+            json.dump(registry_data, f, indent=2)
+
+        logger.info(f"Model registered: {model_name}")
+
+        return {
+            "success": True,
+            "model_name": model_name,
+            "registry_file": str(registry_file),
+            "village_posted": result.get("success", False),
+            "message": f"📋 Model '{model_name}' registered in Village registry",
+        }
+
+    except Exception as e:
+        logger.exception("Error registering model")
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
+def nursery_discover_models(
+    query: Optional[str] = None,
+    capability: Optional[str] = None,
+    trainer_filter: Optional[str] = None,
+    limit: int = 10,
+) -> Dict[str, Any]:
+    """
+    Search the Village for registered models.
+
+    Discovers models trained by any agent in the Village ecosystem.
+    Combines local registry files with Village semantic search.
+
+    Args:
+        query: Search query (semantic search in Village)
+        capability: Filter by capability (e.g., "tool_calling")
+        trainer_filter: Filter by trainer agent (e.g., "AZOTH")
+        limit: Maximum results to return
+
+    Returns:
+        Dict with discovered models and their metadata
+    """
+    discovered = []
+
+    # 1. Search local registry files
+    for registry_file in MODELS_DIR.glob("*_registry.json"):
+        try:
+            with open(registry_file) as f:
+                registry = json.load(f)
+
+            # Apply filters
+            if capability and capability not in registry.get("capabilities", []):
+                continue
+            if trainer_filter and registry.get("trainer_agent") != trainer_filter:
+                continue
+
+            # Check if model still exists
+            model_path = registry.get("model_path")
+            exists = model_path and Path(model_path).exists()
+
+            discovered.append({
+                "source": "local_registry",
+                "model_name": registry.get("model_name"),
+                "description": registry.get("description"),
+                "base_model": registry.get("base_model"),
+                "capabilities": registry.get("capabilities", []),
+                "trainer_agent": registry.get("trainer_agent"),
+                "model_path": model_path,
+                "exists": exists,
+                "registered_at": registry.get("registered_at"),
+            })
+        except Exception as e:
+            logger.warning(f"Error reading registry file {registry_file}: {e}")
+
+    # 2. Search Village for model_registry posts
+    try:
+        from tools.vector_search import vector_search_village
+
+        search_query = query or "model registry trained"
+        village_results = vector_search_village(
+            query=search_query,
+            top_k=limit * 2,  # Get more to filter
+        )
+
+        if village_results.get("success") and village_results.get("results"):
+            for result in village_results["results"]:
+                # Check if this is a model registry entry
+                content = result.get("content", "")
+                if "MODEL REGISTRY:" not in content and "model_registry" not in str(result.get("message_type", "")):
+                    continue
+
+                # Apply trainer filter
+                if trainer_filter and result.get("agent_id") != trainer_filter:
+                    continue
+
+                # Extract model name from content
+                model_name = "unknown"
+                if "MODEL REGISTRY:" in content:
+                    lines = content.split("\n")
+                    for line in lines:
+                        if "MODEL REGISTRY:" in line:
+                            model_name = line.split("MODEL REGISTRY:")[-1].strip()
+                            break
+
+                # Check if already in local results
+                if any(d.get("model_name") == model_name for d in discovered):
+                    continue
+
+                discovered.append({
+                    "source": "village",
+                    "model_name": model_name,
+                    "description": content[:200] + "..." if len(content) > 200 else content,
+                    "trainer_agent": result.get("agent_id"),
+                    "village_id": result.get("id"),
+                    "posted_at": result.get("posted_at"),
+                })
+
+    except ImportError:
+        logger.debug("Village search not available")
+    except Exception as e:
+        logger.warning(f"Village search failed: {e}")
+
+    # Sort by registration date (newest first)
+    discovered.sort(
+        key=lambda x: x.get("registered_at") or x.get("posted_at") or "",
+        reverse=True
+    )
+
+    # Apply limit
+    discovered = discovered[:limit]
+
+    return {
+        "success": True,
+        "models": discovered,
+        "total": len(discovered),
+        "query": query,
+        "filters": {
+            "capability": capability,
+            "trainer": trainer_filter,
+        },
+        "message": f"🔍 Found {len(discovered)} model(s) in registry",
     }
 
 
@@ -1266,5 +1513,77 @@ NURSERY_COMPARE_MODELS_SCHEMA = {
             },
         },
         "required": ["model_a", "model_b", "test_prompts"],
+    },
+}
+
+# =============================================================================
+# Phase 2: Village Registry Schemas
+# =============================================================================
+
+NURSERY_REGISTER_MODEL_SCHEMA = {
+    "name": "nursery_register_model",
+    "description": "Register a trained model in the Village registry. Makes it discoverable by other agents. Auto-called on training completion.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "model_name": {
+                "type": "string",
+                "description": "Unique name for the model",
+            },
+            "model_path": {
+                "type": "string",
+                "description": "Path to model files (auto-detected if in Nursery)",
+            },
+            "description": {
+                "type": "string",
+                "description": "Human-readable description of model capabilities",
+            },
+            "capabilities": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of capabilities (e.g., ['tool_calling', 'code_generation'])",
+            },
+            "base_model": {
+                "type": "string",
+                "description": "Base model this was fine-tuned from",
+            },
+            "trainer_agent": {
+                "type": "string",
+                "description": "Agent who trained this model (for attribution)",
+            },
+            "performance": {
+                "type": "object",
+                "description": "Performance metrics dict (e.g., {loss: 1.5, accuracy: 0.85})",
+            },
+        },
+        "required": ["model_name"],
+    },
+}
+
+NURSERY_DISCOVER_MODELS_SCHEMA = {
+    "name": "nursery_discover_models",
+    "description": "Search the Village for registered models. Discovers models trained by any agent in the ecosystem.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search query (semantic search in Village)",
+            },
+            "capability": {
+                "type": "string",
+                "description": "Filter by capability (e.g., 'tool_calling')",
+            },
+            "trainer_filter": {
+                "type": "string",
+                "description": "Filter by trainer agent (e.g., 'AZOTH')",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum results to return",
+                "default": 10,
+            },
+        },
+        "required": [],
     },
 }
