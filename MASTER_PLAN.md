@@ -2,7 +2,7 @@
 
 **Created:** 2026-01-22
 **Vision:** Complete both Streamlit and FastAPI versions to perfection, then share with the world.
-**Status:** IN PROGRESS
+**Status:** READY FOR GRAND PUSH 🚀
 
 ---
 
@@ -12,8 +12,8 @@
 |--------|----------------------|----------------------|
 | **Purpose** | Full chat interface with all tools | Embodied agent visualization |
 | **Tools** | 81 tools | 79 tools (EEG excluded) |
-| **Lines** | ~32,000+ total | ~8,500+ total |
-| **Status** | Production Ready | Phase 7 Complete |
+| **Lines** | ~32,000+ total | ~10,000+ total |
+| **Status** | Production Ready | Phase 8 Complete + Chat |
 
 ---
 
@@ -132,6 +132,20 @@
   - FPS display with color coding
   - Performance Mode toggle (reduces particles)
   - Frame timing and skip for low-end devices
+
+#### Phase 9: Standalone Chat Mode 💬 ✅ COMPLETE
+- [x] **9.1: Chat Panel** - Talk directly to agents in Village
+  - Collapsible chat history at bottom
+  - Input with Enter-to-send
+  - Typing indicator while processing
+- [x] **9.2: Speech Bubbles** - Agent responses appear above avatar
+  - Styled with agent color
+  - Fade out after ~5 seconds
+  - Pointer triangle to agent
+- [x] **9.3: Tool Visibility** - Watch tools execute while chatting
+  - Agent walks to zones
+  - Tool history updates
+  - Full integration with chat
 
 ---
 
@@ -323,12 +337,75 @@ print(r['output_file'])
 
 ---
 
-**Last Updated:** 2026-01-22 (Session 3)
-**Next Session:** Phase 8.1/8.2 (multi-agent) or THE GRAND PUSH
-**Local Commits:** 16 ready to push (holding for grand unveiling)
-**Tests:** 20/21 passing
-**Phase 8:** 8.3 + 8.4 COMPLETE
+**Last Updated:** 2026-01-23 (Session 3)
+**Next Session:** THE GRAND PUSH or Hailo 10H Integration
+**Local Commits:** 19 ready to push (holding for grand unveiling)
+**Tests:** 21/21 passing ✅
+**Village GUI:** COMPLETE (Phases 5-9)
+
+---
+
+## Part 9: Hailo 10H Integration (NEXT PHASE) 🧠
+
+### Hardware Specs
+- **NPU**: Hailo-10H (40 TOPS INT4 / 20 TOPS INT8)
+- **RAM**: 8GB LPDDR4X-4267 (dedicated, on-board)
+- **Interface**: PCIe Gen 2 x1 (Gen 3 with config override)
+- **Power**: ~3W max
+- **Price**: $130 USD
+
+### Available Models (Launch)
+| Model | Size | Use Case |
+|-------|------|----------|
+| `qwen2.5:1.5b` | 1.5B | General chat |
+| `qwen2.5-coder:1.5b` | 1.5B | Code assistance |
+| `llama3.2:1b` | 1B | Fast inference |
+| `deepseek_r1:1.5b` | 1.5B | Reasoning |
+| `whisper-base` | - | Speech-to-text |
+
+### Integration Points
+
+#### 10.1: Hailo-Ollama Server
+- Ollama-compatible REST API
+- Drop-in replacement for localhost:11434
+- Route local model calls through Hailo
+
+#### 10.2: Memory Operations Acceleration
+- Vector embedding on NPU
+- ChromaDB operations offloaded
+- Memory health checks faster
+
+#### 10.3: Agent Inference
+- Local agents run on Hailo
+- Parallel agent execution
+- Lower latency for tool calls
+
+#### 10.4: Vision-Language (VLM)
+- Qwen2.5-VL-3B support
+- Image understanding in Village
+- Screenshot analysis
+
+#### 10.5: Voice Interface
+- Whisper for STT
+- Voice commands in Village GUI
+- Audio transcription tools
+
+### Key Resources
+- **Docs**: https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html
+- **GitHub**: https://github.com/hailo-ai/hailo_model_zoo_genai
+- **Forum**: https://community.hailo.ai/
+
+### Implementation Order
+```
+1. Install Hailo runtime + drivers
+2. Test hailo-ollama server with qwen2.5:1.5b
+3. Route FastAPI local model calls to Hailo
+4. Add memory embedding acceleration
+5. Implement voice input (Whisper)
+6. Add VLM support for image tools
+```
 
 ---
 
 *"Two worlds, one vision. We cook until it's perfect."*
+*"And now... hardware acceleration awaits."*
