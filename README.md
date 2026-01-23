@@ -8,10 +8,11 @@
 
 <br/>
 
-[![Tools](https://img.shields.io/badge/tools-67-blueviolet?style=for-the-badge)]()
-[![Code](https://img.shields.io/badge/lines-53k+-blue?style=for-the-badge)]()
+[![Tools](https://img.shields.io/badge/tools-79+-blueviolet?style=for-the-badge)]()
+[![Code](https://img.shields.io/badge/lines-60k+-blue?style=for-the-badge)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)]()
+[![Hailo](https://img.shields.io/badge/Hailo--10H-Edge%20AI-orange?style=for-the-badge)]()
 [![BCI](https://img.shields.io/badge/BCI-EEG%20Ready-ff69b4?style=for-the-badge)]()
 
 <br/>
@@ -33,7 +34,7 @@
 
 **ApexAurum** transforms Claude from a simple chatbot into a full AI operating environment:
 
-- **67 integrated tools** spanning file ops, code execution, agents, music, EEG, and more
+- **79+ integrated tools** spanning file ops, code execution, agents, music, EEG, vision, and more
 - **Multi-agent orchestration** — spawn independent Claude instances that collaborate
 - **Persistent memory** — the Village Protocol lets agents share knowledge across sessions
 - **Neural resonance** — optional EEG integration so AI can perceive human emotional states
@@ -50,7 +51,7 @@ flowchart LR
     subgraph APEX[ApexAurum]
         direction TB
         CHAT[Chat Interface]
-        TOOLS[67 Tools]
+        TOOLS[79+ Tools]
         AGENTS[Agent Swarm]
         MEMORY[Village Memory]
     end
@@ -198,6 +199,48 @@ Real-time cost tracking in sidebar.
 
 </td>
 </tr>
+<tr>
+<td width="50%" valign="top">
+
+### Edge AI — Hailo-10H 🔥
+**Run LLMs locally** on Raspberry Pi 5 with Hailo-10H NPU:
+
+```bash
+# 5 quantized models running at 7-8 tok/s
+hailo-ollama:
+  - qwen2.5-instruct:1.5b
+  - llama3.2:3b
+  - deepseek-r1-distill:1.5b
+```
+
+| Feature | Benefit |
+|---------|---------|
+| 26 TOPS NPU | Fast inference |
+| Local-only | No cloud needed |
+| Tool Selector | Optimize for small models |
+
+</td>
+<td width="50%" valign="top">
+
+### FastAPI Lab Edition 🧪
+**Lightweight web UI** for edge deployment:
+
+```bash
+cd reusable_lib/scaffold/fastapi_app
+./run_venv.sh
+# → http://localhost:8765
+```
+
+- Native Ollama streaming
+- Tool selector with presets
+- Village Protocol support
+- All 79 tools available
+- Works with hailo-ollama
+
+Perfect for headless Pi deployment.
+
+</td>
+</tr>
 </table>
 
 ---
@@ -215,7 +258,7 @@ flowchart TB
         MV[Music Visualizer]
     end
 
-    subgraph TOOLS[67 Tools]
+    subgraph TOOLS[79+ Tools]
         direction LR
         T1[Filesystem]
         T2[Code Sandbox]
@@ -308,19 +351,21 @@ streamlit run main.py
 
 ## Tool Ecosystem
 
-### 67 Tools Across 11 Categories
+### 79+ Tools Across 14 Categories
 
 | Category | Count | Highlights |
 |----------|-------|------------|
-| **Utilities** | 6 | `get_current_time`, `calculator`, `session_info` |
+| **Utilities** | 5 | `get_current_time`, `calculator`, `session_info` |
 | **Filesystem** | 9 | `fs_read_file`, `fs_write_file`, `fs_edit`, `fs_read_lines` |
-| **Code Sandbox** | 6 | Dual-mode: instant REPL + Docker sandbox with any package |
+| **Code** | 1 | Safe Python execution in sandbox |
+| **String/Web** | 8 | `string_replace`, `regex_match`, `web_fetch`, `web_search` |
 | **Memory** | 5 | Key-value persistence across sessions |
 | **Agents** | 5 | `agent_spawn`, `socratic_council`, multi-agent orchestration |
-| **Vector Search** | 11 | Semantic search, Village Protocol, convergence detection |
+| **Vector/Village** | 15 | Semantic search, Village Protocol, convergence detection |
 | **Memory Health** | 5 | Stale detection, duplicate finding, consolidation |
-| **Music** | 10 | MIDI composition, Suno AI generation, visualization |
+| **Music/Audio** | 24 | MIDI, Suno AI, audio editing, visualization |
 | **Datasets** | 2 | Create & query vector datasets from documents |
+| **Hailo Vision** | 7+ | Object detection, segmentation on Hailo-10H NPU |
 | **Neural/EEG** | 8 | Brain-computer interface, emotion mapping |
 
 ---
@@ -356,7 +401,7 @@ Each archetype has a distinct personality, approach to problems, and can be summ
 ```
 
 - **1-4 agents** respond simultaneously with ThreadPoolExecutor
-- **Full tool access** — all 67 tools available during dialogue
+- **Full tool access** — all 79+ tools available during dialogue
 - **Per-agent cost tracking** in real-time
 - **History persistence** — save, load, resume conversations
 - **Convergence detection** — system detects HARMONY (2 agents agree) or CONSENSUS (3+)
@@ -373,7 +418,7 @@ Each archetype has a distinct personality, approach to problems, and can be summ
  • API Client        • Code Execution     • Context Mgmt      • Conversations     • Village Protocol
  • Tool System       • Vision Support     • Multi-Agent       • Vector Search     • Neural Resonance
  • Cost Tracking     • UI Polish          • UX Polish         • Prompt Caching    • Extended Thinking
-                                                                                  • 67 Tools / 53K Lines
+                                                                                  • 79+ Tools / 53K Lines
 ```
 
 ---
@@ -423,15 +468,17 @@ MAX_TOKENS=64000
 ┌────────────────────────────────────────────────────────────┐
 │                    APEXAURUM METRICS                       │
 ├────────────────────────────────────────────────────────────┤
-│  Total Code              │  53,000+ lines                  │
+│  Total Code              │  60,000+ lines                  │
 │  Main Application        │  5,600+ lines                   │
-│  Tools Available         │  67                             │
+│  Tools Available         │  79+                            │
 │  Agent Archetypes        │  4                              │
+│  UI Versions             │  Streamlit + FastAPI            │
 │  Streamlit Pages         │  5                              │
 │  Core Modules            │  28                             │
 │  Development Phases      │  14 complete                    │
+│  Edge AI                │  Hailo-10H NPU support          │
+│  Music Tools            │  24 (Full pipeline)             │
 │  EEG Tools              │  8 (Neural Resonance)           │
-│  Music Tools            │  10 (Full pipeline)             │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -480,7 +527,7 @@ Support ongoing development by joining the $APEX-AURUM community on [bags.fm](ht
 
 <br/>
 
-**53,000+ lines** · **67 tools** · **4 archetypes** · **Infinite possibilities**
+**60,000+ lines** · **79+ tools** · **4 archetypes** · **Edge AI Ready** · **Infinite possibilities**
 
 <br/>
 
