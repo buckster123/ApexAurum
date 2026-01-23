@@ -1,0 +1,393 @@
+{
+  "session_id": "listen_20260115_022741",
+  "track_id": "",
+  "track_title": "Test Track",
+  "listener": "Andr\u00e9",
+  "duration_ms": 3016,
+  "created_at": "2026-01-15T02:27:44.171237",
+  "summary": {
+    "overall_valence": 1.0,
+    "overall_arousal": 0.089,
+    "valence_range": [
+      1.0,
+      1.0
+    ],
+    "arousal_range": [
+      0.078,
+      0.096
+    ],
+    "peak_moments": [],
+    "chills_count": 0,
+    "attention_shifts": 0,
+    "emotional_peaks": 0
+  },
+  "moments": [
+    {
+      "timestamp_ms": 20,
+      "track_position": "0:00",
+      "valence": 1.0,
+      "arousal": 0.096,
+      "attention": 0.597,
+      "engagement": 0.239,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 110.7112,
+          "alpha": 179.6051,
+          "beta": 49.8183,
+          "gamma": 8.315
+        },
+        "Fp2": {
+          "theta": 105.7663,
+          "alpha": 190.9906,
+          "beta": 70.4738,
+          "gamma": 7.1941
+        },
+        "F3": {
+          "theta": 108.1233,
+          "alpha": 199.3811,
+          "beta": 67.0836,
+          "gamma": 4.7412
+        },
+        "F4": {
+          "theta": 111.7346,
+          "alpha": 201.0408,
+          "beta": 64.5539,
+          "gamma": 10.1441
+        },
+        "T7": {
+          "theta": 120.3066,
+          "alpha": 178.3075,
+          "beta": 61.0666,
+          "gamma": 7.1638
+        },
+        "T8": {
+          "theta": 117.1626,
+          "alpha": 204.8367,
+          "beta": 34.4834,
+          "gamma": 8.5613
+        },
+        "P3": {
+          "theta": 108.1027,
+          "alpha": 205.0288,
+          "beta": 64.4034,
+          "gamma": 8.9879
+        },
+        "P4": {
+          "theta": 111.1343,
+          "alpha": 198.794,
+          "beta": 35.3495,
+          "gamma": 6.7595
+        }
+      }
+    },
+    {
+      "timestamp_ms": 535,
+      "track_position": "0:00",
+      "valence": 1.0,
+      "arousal": 0.093,
+      "attention": 0.5,
+      "engagement": 0.216,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 115.1511,
+          "alpha": 194.433,
+          "beta": 34.4101,
+          "gamma": 6.8609
+        },
+        "Fp2": {
+          "theta": 119.6436,
+          "alpha": 184.3065,
+          "beta": 75.7851,
+          "gamma": 8.6289
+        },
+        "F3": {
+          "theta": 114.0867,
+          "alpha": 222.4106,
+          "beta": 37.951,
+          "gamma": 9.7903
+        },
+        "F4": {
+          "theta": 110.7657,
+          "alpha": 191.1998,
+          "beta": 72.0873,
+          "gamma": 7.7575
+        },
+        "T7": {
+          "theta": 113.0685,
+          "alpha": 197.0155,
+          "beta": 43.0441,
+          "gamma": 7.5875
+        },
+        "T8": {
+          "theta": 107.604,
+          "alpha": 200.5246,
+          "beta": 51.676,
+          "gamma": 6.222
+        },
+        "P3": {
+          "theta": 105.0787,
+          "alpha": 199.6325,
+          "beta": 65.6095,
+          "gamma": 8.9921
+        },
+        "P4": {
+          "theta": 120.4292,
+          "alpha": 196.9984,
+          "beta": 63.792,
+          "gamma": 9.0016
+        }
+      }
+    },
+    {
+      "timestamp_ms": 1050,
+      "track_position": "0:01",
+      "valence": 1.0,
+      "arousal": 0.088,
+      "attention": 0.5,
+      "engagement": 0.209,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 111.3871,
+          "alpha": 196.663,
+          "beta": 72.1428,
+          "gamma": 6.0215
+        },
+        "Fp2": {
+          "theta": 108.3644,
+          "alpha": 200.9426,
+          "beta": 53.5688,
+          "gamma": 8.4619
+        },
+        "F3": {
+          "theta": 125.2337,
+          "alpha": 187.3584,
+          "beta": 41.4335,
+          "gamma": 6.5308
+        },
+        "F4": {
+          "theta": 118.1858,
+          "alpha": 206.2683,
+          "beta": 72.0395,
+          "gamma": 8.6599
+        },
+        "T7": {
+          "theta": 114.6752,
+          "alpha": 207.3009,
+          "beta": 69.9984,
+          "gamma": 6.469
+        },
+        "T8": {
+          "theta": 109.4385,
+          "alpha": 204.426,
+          "beta": 41.5467,
+          "gamma": 7.7237
+        },
+        "P3": {
+          "theta": 120.9132,
+          "alpha": 197.077,
+          "beta": 36.3707,
+          "gamma": 8.8824
+        },
+        "P4": {
+          "theta": 111.9837,
+          "alpha": 202.512,
+          "beta": 34.8966,
+          "gamma": 8.1394
+        }
+      }
+    },
+    {
+      "timestamp_ms": 1562,
+      "track_position": "0:01",
+      "valence": 1.0,
+      "arousal": 0.089,
+      "attention": 0.521,
+      "engagement": 0.215,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 110.8357,
+          "alpha": 190.7115,
+          "beta": 50.1095,
+          "gamma": 8.0185
+        },
+        "Fp2": {
+          "theta": 110.129,
+          "alpha": 202.5522,
+          "beta": 59.5994,
+          "gamma": 7.9984
+        },
+        "F3": {
+          "theta": 117.1821,
+          "alpha": 190.7912,
+          "beta": 61.2138,
+          "gamma": 6.6723
+        },
+        "F4": {
+          "theta": 112.2006,
+          "alpha": 200.0501,
+          "beta": 49.2954,
+          "gamma": 6.8616
+        },
+        "T7": {
+          "theta": 118.0,
+          "alpha": 192.8105,
+          "beta": 55.9395,
+          "gamma": 7.7052
+        },
+        "T8": {
+          "theta": 121.4988,
+          "alpha": 205.1046,
+          "beta": 54.7532,
+          "gamma": 8.4114
+        },
+        "P3": {
+          "theta": 109.5332,
+          "alpha": 196.7336,
+          "beta": 56.8671,
+          "gamma": 6.9804
+        },
+        "P4": {
+          "theta": 108.9586,
+          "alpha": 193.5784,
+          "beta": 31.9472,
+          "gamma": 8.2459
+        }
+      }
+    },
+    {
+      "timestamp_ms": 2075,
+      "track_position": "0:02",
+      "valence": 1.0,
+      "arousal": 0.078,
+      "attention": 0.572,
+      "engagement": 0.211,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 117.544,
+          "alpha": 218.5791,
+          "beta": 27.534,
+          "gamma": 7.4804
+        },
+        "Fp2": {
+          "theta": 117.0832,
+          "alpha": 198.3703,
+          "beta": 72.087,
+          "gamma": 5.9267
+        },
+        "F3": {
+          "theta": 114.4715,
+          "alpha": 181.9044,
+          "beta": 66.8611,
+          "gamma": 8.2596
+        },
+        "F4": {
+          "theta": 108.4257,
+          "alpha": 202.4236,
+          "beta": 36.6671,
+          "gamma": 6.8053
+        },
+        "T7": {
+          "theta": 102.2904,
+          "alpha": 193.3629,
+          "beta": 56.0356,
+          "gamma": 6.5359
+        },
+        "T8": {
+          "theta": 109.2538,
+          "alpha": 194.032,
+          "beta": 32.2255,
+          "gamma": 8.4692
+        },
+        "P3": {
+          "theta": 109.596,
+          "alpha": 195.936,
+          "beta": 39.751,
+          "gamma": 9.2104
+        },
+        "P4": {
+          "theta": 108.0445,
+          "alpha": 199.8448,
+          "beta": 38.5495,
+          "gamma": 8.9044
+        }
+      }
+    },
+    {
+      "timestamp_ms": 2587,
+      "track_position": "0:02",
+      "valence": 1.0,
+      "arousal": 0.093,
+      "attention": 0.506,
+      "engagement": 0.217,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 116.3768,
+          "alpha": 202.1651,
+          "beta": 59.3247,
+          "gamma": 8.9249
+        },
+        "Fp2": {
+          "theta": 111.3835,
+          "alpha": 199.0534,
+          "beta": 59.589,
+          "gamma": 9.136
+        },
+        "F3": {
+          "theta": 106.4254,
+          "alpha": 192.5643,
+          "beta": 53.8151,
+          "gamma": 7.7697
+        },
+        "F4": {
+          "theta": 122.6107,
+          "alpha": 198.6532,
+          "beta": 60.153,
+          "gamma": 8.1831
+        },
+        "T7": {
+          "theta": 118.6241,
+          "alpha": 196.4747,
+          "beta": 55.2077,
+          "gamma": 6.0987
+        },
+        "T8": {
+          "theta": 111.4983,
+          "alpha": 195.9995,
+          "beta": 56.7476,
+          "gamma": 7.5403
+        },
+        "P3": {
+          "theta": 110.9175,
+          "alpha": 190.5705,
+          "beta": 56.055,
+          "gamma": 6.7612
+        },
+        "P4": {
+          "theta": 102.9806,
+          "alpha": 208.8566,
+          "beta": 40.148,
+          "gamma": 5.9312
+        }
+      }
+    }
+  ],
+  "experience_narrative": "Andr\u00e9 listened to 'Test Track'. The experience was calm and soothing (valence: 1.00, arousal: 0.09)."
+}

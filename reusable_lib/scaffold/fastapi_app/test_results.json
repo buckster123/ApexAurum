@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-01-23T00:43:21.411136",
+  "base_url": "http://localhost:8765",
+  "results": [
+    {
+      "name": "Health endpoint",
+      "passed": true,
+      "message": "OK",
+      "duration_ms": 6.165504455566406,
+      "details": null
+    },
+    {
+      "name": "API info endpoint",
+      "passed": true,
+      "message": "OK",
+      "duration_ms": 2.6535987854003906,
+      "details": null
+    },
+    {
+      "name": "Tools list",
+      "passed": true,
+      "message": "79 tools",
+      "duration_ms": 5.338907241821289,
+      "details": null
+    },
+    {
+      "name": "Models list",
+      "passed": true,
+      "message": "6 models",
+      "duration_ms": 5.709648132324219,
+      "details": null
+    },
+    {
+      "name": "Stats endpoint",
+      "passed": true,
+      "message": "OK",
+      "duration_ms": 2.8557777404785156,
+      "details": null
+    },
+    {
+      "name": "Village GUI served",
+      "passed": true,
+      "message": "OK",
+      "duration_ms": 2.7322769165039062,
+      "details": null
+    },
+    {
+      "name": "WebSocket connect",
+      "passed": true,
+      "message": "Connected",
+      "duration_ms": 16.221284866333008,
+      "details": {
+        "message": ""
+      }
+    },
+    {
+      "name": "Multiple WS connections",
+      "passed": true,
+      "message": "3 connections",
+      "duration_ms": 8.626937866210938,
+      "details": null
+    },
+    {
+      "name": "Tool execution (no WS)",
+      "passed": true,
+      "message": "OK",
+      "duration_ms": 2.4292469024658203,
+      "details": null
+    },
+    {
+      "name": "WS events (tool_start+complete)",
+      "passed": true,
+      "message": "Got: ['tool_start', 'tool_complete', 'tool_start', 'tool_complete']",
+      "duration_ms": 3918.269157409668,
+      "details": null
+    },
+    {
+      "name": "Zone mapping (fs_* \u2192 file_shed)",
+      "passed": true,
+      "message": "zone=file_shed",
+      "duration_ms": 107.57851600646973,
+      "details": null
+    },
+    {
+      "name": "List prompt files",
+      "passed": true,
+      "message": "7 prompts available",
+      "duration_ms": 2.7239322662353516,
+      "details": null
+    },
+    {
+      "name": "Chat with inline system prompt",
+      "passed": true,
+      "message": "Prompt followed",
+      "duration_ms": 16521.257162094116,
+      "details": null
+    },
+    {
+      "name": "Get settings presets",
+      "passed": true,
+      "message": "0 presets",
+      "duration_ms": 1796.0093021392822,
+      "details": null
+    },
+    {
+      "name": "System prompt persistence",
+      "passed": true,
+      "message": "N/A (by design - frontend sends per-request)",
+      "duration_ms": 0,
+      "details": {
+        "note": "System prompt is passed in chat request, not stored server-side"
+      }
+    },
+    {
+      "name": "Non-streaming chat",
+      "passed": true,
+      "message": "Response: Hello...",
+      "duration_ms": 8858.917236328125,
+      "details": null
+    },
+    {
+      "name": "Chat with tools enabled",
+      "passed": false,
+      "message": "HTTPConnectionPool(host='localhost', port=8765): Read timed out. (read timeout=60)",
+      "duration_ms": 0,
+      "details": null
+    },
+    {
+      "name": "Village stats",
+      "passed": false,
+      "message": "HTTPConnectionPool(host='localhost', port=8765): Read timed out. (read timeout=15)",
+      "duration_ms": 0,
+      "details": null
+    },
+    {
+      "name": "Village agents",
+      "passed": false,
+      "message": "HTTPConnectionPool(host='localhost', port=8765): Read timed out. (read timeout=5)",
+      "duration_ms": 0,
+      "details": null
+    },
+    {
+      "name": "Village post",
+      "passed": false,
+      "message": "HTTPConnectionPool(host='localhost', port=8765): Read timed out. (read timeout=10)",
+      "duration_ms": 0,
+      "details": null
+    },
+    {
+      "name": "Village search",
+      "passed": false,
+      "message": "HTTPConnectionPool(host='localhost', port=8765): Read timed out. (read timeout=10)",
+      "duration_ms": 0,
+      "details": null
+    }
+  ],
+  "summary": {
+    "total": 21,
+    "passed": 16,
+    "failed": 5
+  }
+}

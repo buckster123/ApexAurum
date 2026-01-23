@@ -1,0 +1,4 @@
+Original content: Testing fs_edit functionality.
+This is line 2.
+This is line 3.
+Modified marker: AFTER_EDIT ✓ [fs_edit working in production - Jan 20 2026]

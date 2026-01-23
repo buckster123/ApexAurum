@@ -1,0 +1,572 @@
+{
+  "session_id": "listen_20260115_025238",
+  "track_id": "",
+  "track_title": "ARM64 BrainFlow",
+  "listener": "Andr\u00e9",
+  "duration_ms": 3004,
+  "created_at": "2026-01-15T02:52:41.049893",
+  "summary": {
+    "overall_valence": 0.0,
+    "overall_arousal": 0.5,
+    "valence_range": [
+      0.0,
+      0.0
+    ],
+    "arousal_range": [
+      0.5,
+      0.5
+    ],
+    "peak_moments": [],
+    "chills_count": 0,
+    "attention_shifts": 1,
+    "emotional_peaks": 0
+  },
+  "moments": [
+    {
+      "timestamp_ms": 505,
+      "track_position": "0:00",
+      "valence": 0.0,
+      "arousal": 0.5,
+      "attention": 0.25,
+      "engagement": 0.354,
+      "attention_shift": true,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "Fp2": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T7": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T8": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_9": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_10": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_11": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_12": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_13": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_14": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_15": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_16": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        }
+      }
+    },
+    {
+      "timestamp_ms": 1009,
+      "track_position": "0:01",
+      "valence": 0.0,
+      "arousal": 0.5,
+      "attention": 0.25,
+      "engagement": 0.354,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "Fp2": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T7": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T8": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_9": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_10": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_11": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_12": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_13": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_14": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_15": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_16": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        }
+      }
+    },
+    {
+      "timestamp_ms": 1512,
+      "track_position": "0:01",
+      "valence": 0.0,
+      "arousal": 0.5,
+      "attention": 0.25,
+      "engagement": 0.354,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "Fp2": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T7": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T8": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_9": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_10": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_11": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_12": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_13": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_14": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_15": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_16": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        }
+      }
+    },
+    {
+      "timestamp_ms": 2015,
+      "track_position": "0:02",
+      "valence": 0.0,
+      "arousal": 0.5,
+      "attention": 0.25,
+      "engagement": 0.354,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "Fp2": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T7": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T8": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_9": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_10": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_11": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_12": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_13": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_14": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_15": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_16": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        }
+      }
+    },
+    {
+      "timestamp_ms": 2518,
+      "track_position": "0:02",
+      "valence": 0.0,
+      "arousal": 0.5,
+      "attention": 0.25,
+      "engagement": 0.354,
+      "attention_shift": false,
+      "emotional_peak": false,
+      "possible_chills": false,
+      "channels": {
+        "Fp1": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "Fp2": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "F4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T7": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "T8": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P3": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "P4": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_9": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_10": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_11": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_12": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_13": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_14": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_15": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        },
+        "ch_16": {
+          "theta": 0.0,
+          "alpha": 0.0,
+          "beta": 0.0,
+          "gamma": 0.0
+        }
+      }
+    }
+  ],
+  "experience_narrative": "Andr\u00e9 listened to 'ARM64 BrainFlow'. The experience was contemplative and balanced (valence: 0.00, arousal: 0.50)."
+}
