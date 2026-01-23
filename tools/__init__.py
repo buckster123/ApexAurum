@@ -199,6 +199,65 @@ from .vision import (
     VISION_TOOL_SCHEMAS,
 )
 
+# Camera Tools (The Cyclops Eye)
+from .camera import (
+    camera_info,
+    camera_list,
+    camera_capture,
+    camera_detect,
+    camera_timelapse,
+    camera_captures_list,
+    CAMERA_TOOL_SCHEMAS,
+)
+
+# Nursery Tools (Training & Model Management)
+from .nursery import (
+    # Data Garden
+    nursery_generate_data,
+    nursery_extract_conversations,
+    nursery_list_datasets,
+    # Training Forge
+    nursery_estimate_cost,
+    nursery_train_cloud,
+    nursery_train_local,
+    nursery_job_status,
+    nursery_list_jobs,
+    # Model Cradle
+    nursery_list_models,
+    nursery_deploy_ollama,
+    nursery_test_model,
+    nursery_compare_models,
+    # Schemas
+    NURSERY_GENERATE_DATA_SCHEMA,
+    NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
+    NURSERY_LIST_DATASETS_SCHEMA,
+    NURSERY_ESTIMATE_COST_SCHEMA,
+    NURSERY_TRAIN_CLOUD_SCHEMA,
+    NURSERY_TRAIN_LOCAL_SCHEMA,
+    NURSERY_JOB_STATUS_SCHEMA,
+    NURSERY_LIST_JOBS_SCHEMA,
+    NURSERY_LIST_MODELS_SCHEMA,
+    NURSERY_DEPLOY_OLLAMA_SCHEMA,
+    NURSERY_TEST_MODEL_SCHEMA,
+    NURSERY_COMPARE_MODELS_SCHEMA,
+)
+
+# Nursery tool schemas
+NURSERY_TOOL_SCHEMAS = {
+    "nursery_generate_data": NURSERY_GENERATE_DATA_SCHEMA,
+    "nursery_extract_conversations": NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
+    "nursery_list_datasets": NURSERY_LIST_DATASETS_SCHEMA,
+    "nursery_estimate_cost": NURSERY_ESTIMATE_COST_SCHEMA,
+    "nursery_train_cloud": NURSERY_TRAIN_CLOUD_SCHEMA,
+    "nursery_train_local": NURSERY_TRAIN_LOCAL_SCHEMA,
+    "nursery_job_status": NURSERY_JOB_STATUS_SCHEMA,
+    "nursery_list_jobs": NURSERY_LIST_JOBS_SCHEMA,
+    "nursery_list_models": NURSERY_LIST_MODELS_SCHEMA,
+    "nursery_deploy_ollama": NURSERY_DEPLOY_OLLAMA_SCHEMA,
+    "nursery_test_model": NURSERY_TEST_MODEL_SCHEMA,
+    "nursery_compare_models": NURSERY_COMPARE_MODELS_SCHEMA,
+}
+
 # Combine all schemas
 ALL_TOOL_SCHEMAS = {
     **UTILITY_TOOL_SCHEMAS,
@@ -213,6 +272,8 @@ ALL_TOOL_SCHEMAS = {
     **SUNO_COMPILER_TOOL_SCHEMAS,
     **AUDIO_EDITOR_TOOL_SCHEMAS,
     **VISION_TOOL_SCHEMAS,
+    **CAMERA_TOOL_SCHEMAS,
+    **NURSERY_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -322,6 +383,26 @@ ALL_TOOLS = {
     "hailo_analyze": hailo_analyze,
     "hailo_benchmark": hailo_benchmark,
     "hailo_list_models": hailo_list_models,
+    # Camera Tools (The Cyclops Eye)
+    "camera_info": camera_info,
+    "camera_list": camera_list,
+    "camera_capture": camera_capture,
+    "camera_detect": camera_detect,
+    "camera_timelapse": camera_timelapse,
+    "camera_captures_list": camera_captures_list,
+    # Nursery Tools (Training & Model Management)
+    "nursery_generate_data": nursery_generate_data,
+    "nursery_extract_conversations": nursery_extract_conversations,
+    "nursery_list_datasets": nursery_list_datasets,
+    "nursery_estimate_cost": nursery_estimate_cost,
+    "nursery_train_cloud": nursery_train_cloud,
+    "nursery_train_local": nursery_train_local,
+    "nursery_job_status": nursery_job_status,
+    "nursery_list_jobs": nursery_list_jobs,
+    "nursery_list_models": nursery_list_models,
+    "nursery_deploy_ollama": nursery_deploy_ollama,
+    "nursery_test_model": nursery_test_model,
+    "nursery_compare_models": nursery_compare_models,
 }
 
 __all__ = [
@@ -436,6 +517,8 @@ __all__ = [
     "SUNO_COMPILER_TOOL_SCHEMAS",
     "AUDIO_EDITOR_TOOL_SCHEMAS",
     "VISION_TOOL_SCHEMAS",
+    "CAMERA_TOOL_SCHEMAS",
+    "NURSERY_TOOL_SCHEMAS",
     "ALL_TOOL_SCHEMAS",
     "ALL_TOOLS",
     # Vision Tools (Hailo-10H)
@@ -446,6 +529,26 @@ __all__ = [
     "hailo_analyze",
     "hailo_benchmark",
     "hailo_list_models",
+    # Camera Tools (The Cyclops Eye)
+    "camera_info",
+    "camera_list",
+    "camera_capture",
+    "camera_detect",
+    "camera_timelapse",
+    "camera_captures_list",
+    # Nursery Tools (Training & Model Management)
+    "nursery_generate_data",
+    "nursery_extract_conversations",
+    "nursery_list_datasets",
+    "nursery_estimate_cost",
+    "nursery_train_cloud",
+    "nursery_train_local",
+    "nursery_job_status",
+    "nursery_list_jobs",
+    "nursery_list_models",
+    "nursery_deploy_ollama",
+    "nursery_test_model",
+    "nursery_compare_models",
 ]
 
 

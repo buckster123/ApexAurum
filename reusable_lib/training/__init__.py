@@ -3,6 +3,7 @@
 #
 # Tools for generating fine-tuning datasets and training small models locally.
 # Supports multiple output formats and memory-efficient LoRA training.
+# Cloud training integration for Vast.ai, RunPod, Modal, Together.ai, Replicate.
 
 from .data_extractor import (
     TrainingDataExtractor,
@@ -31,6 +32,20 @@ from .synthetic_generator import (
     generate_training_data,
 )
 
+from .cloud_trainer import (
+    CloudTrainer,
+    CloudProvider,
+    TrainingJob,
+    GPUInstance,
+    TogetherTrainer,
+    ReplicateTrainer,
+    VastAITrainer,
+    RunPodTrainer,
+    ModalTrainer,
+    quick_cloud_train,
+    estimate_training_cost,
+)
+
 __all__ = [
     # Data extraction (from real conversations)
     'TrainingDataExtractor',
@@ -40,7 +55,7 @@ __all__ = [
     'ExportFormat',
     'extract_tool_calls_from_conversations',
     'generate_training_dataset',
-    # LoRA training
+    # LoRA training (local)
     'LoRATrainer',
     'TrainingConfig',
     'TrainingStats',
@@ -53,4 +68,16 @@ __all__ = [
     'SyntheticExample',
     'DEFAULT_TOOLS',
     'generate_training_data',
+    # Cloud training
+    'CloudTrainer',
+    'CloudProvider',
+    'TrainingJob',
+    'GPUInstance',
+    'TogetherTrainer',
+    'ReplicateTrainer',
+    'VastAITrainer',
+    'RunPodTrainer',
+    'ModalTrainer',
+    'quick_cloud_train',
+    'estimate_training_cost',
 ]

@@ -4,15 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 52 integrated tools, music generation via Suno AI with village memory integration, music visualization (video generation), dataset creation for agent knowledge, and context management with auto-summarization.
+ApexAurum - Claude Edition is a production-grade AI chat interface built on Anthropic's Claude API. It features multi-agent orchestration, adaptive memory architecture, vector search, intelligent prompt caching (50-90% cost savings), 106 integrated tools, music generation via Suno AI with village memory integration, music visualization (video generation), dataset creation for agent knowledge, The Nursery (cloud/local ML training), The Cyclops Eye (camera vision), and context management with auto-summarization.
 
-**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Full Music Pipeline (Compose → Generate → Visualize) (~26,400+ lines of code)
+**Status:** V1.0 Beta - Production Ready with Village Protocol + Group Chat + Full Music Pipeline + Nursery + Vision (~65,000+ lines of code)
 
-## Essential Reading Before Starting
+## 🔥 SESSION START PROTOCOL
 
-1. **START_HERE.md** - Quick start guide
-2. **PROJECT_STATUS.md** - Current implementation status and what's pending
-3. **DEVELOPMENT_GUIDE.md** - Detailed developer onboarding guide
+**ALWAYS read HANDOVER.md first!** It contains:
+- Current project state and what's working
+- Last session's accomplishments
+- Pending tasks and next steps
+- Key context (API keys, hardware, naming conventions)
+- The collaborative spirit ("Let's COOK it together!")
+
+```bash
+# Quick status check
+python -c "from tools import ALL_TOOLS; print(f'{len(ALL_TOOLS)} tools loaded')"
+# Should be 106+
+```
+
+## Essential Reading
+
+1. **HANDOVER.md** - 🔥 Session continuity torch (READ FIRST!)
+2. **START_HERE.md** - Quick start guide
+3. **PROJECT_STATUS.md** - Current implementation status
+4. **DEVELOPMENT_GUIDE.md** - Detailed developer onboarding
 
 ## Quick Start Commands
 
@@ -34,7 +50,7 @@ Access at: http://localhost:8501
 ### Testing
 
 ```bash
-# Verify tool count (should be 52)
+# Verify tool count (should be 106+)
 python -c "from tools import ALL_TOOLS; print(f'{len(ALL_TOOLS)} tools loaded')"
 
 # Test agent functionality
