@@ -782,11 +782,12 @@ class ToolService:
             parts.append("\n(No tools available)")
             return "\n".join(parts)
 
-        # Add tool instructions
+        # Add tool instructions with concrete examples
         parts.append(f"\n## Available Tools ({len(schemas_to_use)})\n")
-        parts.append("You have access to the following tools. To use a tool, respond with a JSON object in this exact format:")
-        parts.append('```json\n{"tool": "tool_name", "arguments": {"arg1": "value1"}}\n```\n')
-        parts.append("After receiving a tool result, incorporate it into your response naturally.\n")
+        parts.append("To use a tool, respond with ONLY a JSON object like this:")
+        parts.append('```json\n{"tool": "memory_store", "arguments": {"key": "name", "value": "Alice"}}\n```')
+        parts.append("IMPORTANT: Use the exact parameter names shown for each tool below. Do not use generic names like 'arg1'.")
+        parts.append("After receiving a tool result, provide a natural response to the user.\n")
         parts.append("### Tools:\n")
 
         for name, schema in schemas_to_use.items():
