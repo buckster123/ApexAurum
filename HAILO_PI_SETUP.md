@@ -178,16 +178,73 @@ docker run hello-world
 
 ---
 
-## Camera Shopping List
+## 🛒 MASTER SHOPPING LIST
 
-### RECOMMENDED STARTER KIT (~$130)
+### 🎯 PRIORITY 1: VISION (~$50-130)
 
-| Item | Price | Link |
-|------|-------|------|
-| Pi Camera Module 3 | $25 | https://www.raspberrypi.com/products/camera-module-3/ |
-| Pi Camera Module 3 NoIR | $25 | https://www.raspberrypi.com/products/camera-module-3/?variant=camera-module-3-noir |
-| IR LED Ring (for NoIR) | $10 | Amazon/AliExpress search: "raspberry pi IR illuminator" |
-| Logitech C920 (USB backup) | $70 | https://www.logitech.com/products/webcams/c920-pro-hd-webcam.html |
+| Item | Price | Why |
+|------|-------|-----|
+| **Pi Camera Module 3** | $25 | Autofocus, HDR, 71 FPS with Hailo |
+| Pi Camera Module 3 NoIR | $25 | Night vision (add IR LEDs) |
+| IR LED Ring | $10 | For NoIR night operation |
+| *OR* Logitech C920 | $70 | USB fallback, reliable |
+
+### 📻 PRIORITY 2: LoRa RADIO (~$25-50)
+
+*Libraries already installed! Just needs hardware.*
+
+| Item | Price | Range | Notes |
+|------|-------|-------|-------|
+| **Waveshare SX1262 LoRa HAT** | $25 | 5km+ | Plug-and-play Pi HAT, 868/915MHz |
+| Adafruit RFM95W Breakout | $20 | 2km+ | Needs wiring, great docs |
+| LILYGO T-Beam (pair) | $70 | 10km+ | ESP32+LoRa+GPS, USB serial |
+| RAK2287 Concentrator | $99 | 15km+ | Full LoRaWAN gateway |
+
+### 🧠 PRIORITY 3: EEG/BCI (~$200-400)
+
+*ApexAurum has EEG tools ready!*
+
+| Item | Price | Channels | Notes |
+|------|-------|----------|-------|
+| **OpenBCI Cyton** | $250 | 8ch | Research-grade, great API |
+| OpenBCI Ganglion | $200 | 4ch | Budget option |
+| Muse 2 Headband | $250 | 4ch | Consumer, meditation focus |
+| Neurosity Crown | $1000 | 8ch | Premium, focus tracking |
+
+### 🌡️ PRIORITY 4: SENSORS & IoT (~$20-50)
+
+| Item | Price | Use Case |
+|------|-------|----------|
+| BME680 Breakout | $20 | Temp/humidity/pressure/air quality |
+| VL53L1X ToF Sensor | $15 | Distance sensing (4m range) |
+| MPU-6050 IMU | $5 | Motion/orientation |
+| GPS Module (NEO-6M) | $15 | Location tracking |
+| Servo Kit (SG90 x5) | $10 | Basic robotics |
+
+### 🔥 COMPLETE BUILD OPTIONS
+
+| Build | Components | Total | What You Get |
+|-------|------------|-------|--------------|
+| **Minimal** | Pi Cam 3 | ~$25 | Vision AI @ 71 FPS |
+| **Basic** | Pi Cam 3 + LoRa HAT | ~$50 | Vision + 5km radio |
+| **Research** | + OpenBCI Ganglion + sensors | ~$300 | + Brain interface + IoT |
+| **Full Lab** | + Cyton + RealSense + thermal | ~$800 | Everything |
+
+### 💡 QUICK PICKS BY USE CASE
+
+| I want to... | Get this | Cost |
+|--------------|----------|------|
+| Try vision AI | Pi Camera Module 3 | $25 |
+| Add night vision | + NoIR + IR LEDs | +$35 |
+| Talk to remote sensors | Waveshare LoRa HAT | $25 |
+| Track brain states | OpenBCI Ganglion | $200 |
+| Make a robot | Servos + IMU + ToF | $30 |
+| Detect body heat | FLIR Lepton | $200 |
+| Get 3D depth | Intel RealSense D435i | $300 |
+
+---
+
+## Camera Deep Dive
 
 ### OFFICIAL PI CAMERAS
 
