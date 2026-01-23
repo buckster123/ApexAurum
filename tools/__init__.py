@@ -230,6 +230,9 @@ from .nursery import (
     # Phase 2: Village Registry
     nursery_register_model,
     nursery_discover_models,
+    # Phase 3: Apprentice Protocol
+    nursery_create_apprentice,
+    nursery_list_apprentices,
     # Schemas
     NURSERY_GENERATE_DATA_SCHEMA,
     NURSERY_EXTRACT_CONVERSATIONS_SCHEMA,
@@ -245,6 +248,8 @@ from .nursery import (
     NURSERY_COMPARE_MODELS_SCHEMA,
     NURSERY_REGISTER_MODEL_SCHEMA,
     NURSERY_DISCOVER_MODELS_SCHEMA,
+    NURSERY_CREATE_APPRENTICE_SCHEMA,
+    NURSERY_LIST_APPRENTICES_SCHEMA,
 )
 
 # Nursery tool schemas
@@ -264,6 +269,9 @@ NURSERY_TOOL_SCHEMAS = {
     # Phase 2: Village Registry
     "nursery_register_model": NURSERY_REGISTER_MODEL_SCHEMA,
     "nursery_discover_models": NURSERY_DISCOVER_MODELS_SCHEMA,
+    # Phase 3: Apprentice Protocol
+    "nursery_create_apprentice": NURSERY_CREATE_APPRENTICE_SCHEMA,
+    "nursery_list_apprentices": NURSERY_LIST_APPRENTICES_SCHEMA,
 }
 
 # Combine all schemas
@@ -414,6 +422,9 @@ ALL_TOOLS = {
     # Phase 2: Village Registry
     "nursery_register_model": nursery_register_model,
     "nursery_discover_models": nursery_discover_models,
+    # Phase 3: Apprentice Protocol
+    "nursery_create_apprentice": nursery_create_apprentice,
+    "nursery_list_apprentices": nursery_list_apprentices,
 }
 
 __all__ = [
@@ -563,6 +574,9 @@ __all__ = [
     # Phase 2: Village Registry
     "nursery_register_model",
     "nursery_discover_models",
+    # Phase 3: Apprentice Protocol
+    "nursery_create_apprentice",
+    "nursery_list_apprentices",
 ]
 
 

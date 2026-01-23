@@ -1094,6 +1094,339 @@ def nursery_discover_models(
     }
 
 
+# =============================================================================
+# 🧑‍🎓 APPRENTICE PROTOCOL - Phase 3: Agents Train Their Own Models
+# =============================================================================
+
+def _convert_knowledge_to_training(
+    knowledge_entries: List[Dict],
+    specialization: str,
+    master_agent: str,
+) -> str:
+    """
+    Convert Village knowledge entries into training data format.
+
+    Takes an agent's Village posts and converts them into instruction-following
+    examples suitable for fine-tuning.
+
+    Args:
+        knowledge_entries: List of Village search results
+        specialization: Focus area for the apprentice
+        master_agent: The master agent's ID
+
+    Returns:
+        Path to generated training dataset
+    """
+    training_examples = []
+
+    for entry in knowledge_entries:
+        content = entry.get("content", "")
+        if not content or len(content) < 20:
+            continue
+
+        # Create instruction-following format
+        # The apprentice learns to respond in the style of its master
+        example = {
+            "messages": [
+                {
+                    "role": "system",
+                    "content": f"You are an apprentice of {master_agent}, specializing in {specialization}. "
+                               f"Respond in the style and with the knowledge of your master."
+                },
+                {
+                    "role": "user",
+                    "content": f"What do you know about: {specialization}?"
+                },
+                {
+                    "role": "assistant",
+                    "content": content
+                }
+            ]
+        }
+        training_examples.append(example)
+
+        # Also create Q&A style examples from the content
+        if len(content) > 100:
+            # Use first sentence as "question context"
+            sentences = content.split(". ")
+            if len(sentences) > 1:
+                qa_example = {
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": f"You are an apprentice of {master_agent}."
+                        },
+                        {
+                            "role": "user",
+                            "content": sentences[0] + "?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": ". ".join(sentences[1:])
+                        }
+                    ]
+                }
+                training_examples.append(qa_example)
+
+    # Save as training dataset
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dataset_name = f"apprentice_{master_agent.lower()}_{specialization.replace(' ', '_')}_{timestamp}"
+    output_path = DATASETS_DIR / f"{dataset_name}.jsonl"
+
+    with open(output_path, "w") as f:
+        for example in training_examples:
+            f.write(json.dumps(example) + "\n")
+
+    logger.info(f"Generated apprentice dataset: {dataset_name} ({len(training_examples)} examples)")
+
+    return dataset_name
+
+
+def nursery_create_apprentice(
+    master_agent: str,
+    apprentice_name: str,
+    specialization: str,
+    training_data_query: Optional[str] = None,
+    base_model: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    min_examples: int = 20,
+    auto_train: bool = False,
+) -> Dict[str, Any]:
+    """
+    Create an apprentice model for an agent.
+
+    The Apprentice Protocol allows agents to "raise" smaller models that inherit
+    their knowledge and specialization. The apprentice is trained on the master's
+    Village posts and can be deployed for specialized tasks.
+
+    Args:
+        master_agent: The master agent's ID (e.g., "AZOTH", "ELYSIAN")
+        apprentice_name: Name for the apprentice (e.g., "memory_specialist")
+        specialization: What the apprentice should specialize in
+        training_data_query: Custom query to find training data (default: uses specialization)
+        base_model: Base model to fine-tune (default: TinyLlama 1.1B)
+        min_examples: Minimum training examples required (default: 20)
+        auto_train: If True, automatically start local training (default: False)
+
+    Returns:
+        Dict with apprentice creation status and training info
+
+    Example:
+        >>> nursery_create_apprentice(
+        ...     master_agent="AZOTH",
+        ...     apprentice_name="tool_master",
+        ...     specialization="tool calling and function use",
+        ...     auto_train=True
+        ... )
+    """
+    try:
+        # 1. Gather master's knowledge from Village
+        logger.info(f"Gathering knowledge from {master_agent} for apprentice '{apprentice_name}'...")
+
+        knowledge_entries = []
+
+        # Try main app's vector search first
+        try:
+            from tools.vector_search import vector_search_village
+
+            query = training_data_query or specialization
+            village_results = vector_search_village(
+                query=query,
+                agent_filter=master_agent,
+                top_k=100,
+            )
+
+            if village_results.get("success") and village_results.get("results"):
+                knowledge_entries.extend(village_results["results"])
+                logger.info(f"Found {len(knowledge_entries)} entries from Village")
+
+        except Exception as e:
+            logger.warning(f"Village search failed: {e}")
+
+        # Also try reusable_lib village
+        try:
+            from reusable_lib.tools.village import village_search
+
+            results = village_search(
+                query=training_data_query or specialization,
+                agent_filter=master_agent,
+                n_results=100,
+            )
+
+            if results.get("success") and results.get("messages"):
+                knowledge_entries.extend(results["messages"])
+                logger.info(f"Found {len(results['messages'])} additional entries")
+
+        except Exception as e:
+            logger.debug(f"reusable_lib village search failed: {e}")
+
+        if len(knowledge_entries) < min_examples:
+            return {
+                "success": False,
+                "error": f"Insufficient training data. Found {len(knowledge_entries)} entries, need {min_examples}.",
+                "hint": f"The master agent '{master_agent}' needs more Village posts about '{specialization}'.",
+                "entries_found": len(knowledge_entries),
+            }
+
+        # 2. Convert knowledge to training data
+        logger.info(f"Converting {len(knowledge_entries)} entries to training format...")
+        dataset_name = _convert_knowledge_to_training(
+            knowledge_entries=knowledge_entries,
+            specialization=specialization,
+            master_agent=master_agent,
+        )
+
+        # Count actual examples in dataset
+        dataset_path = DATASETS_DIR / f"{dataset_name}.jsonl"
+        with open(dataset_path) as f:
+            num_examples = sum(1 for _ in f)
+
+        # 3. Create apprentice record
+        apprentice_id = f"{master_agent.lower()}_apprentice_{apprentice_name}"
+        apprentice_record = {
+            "apprentice_id": apprentice_id,
+            "apprentice_name": apprentice_name,
+            "master_agent": master_agent,
+            "specialization": specialization,
+            "base_model": base_model,
+            "dataset_name": dataset_name,
+            "num_examples": num_examples,
+            "created_at": datetime.now().isoformat(),
+            "status": "dataset_ready",
+            "trained": False,
+        }
+
+        # Save apprentice record
+        apprentice_file = MODELS_DIR / f"{apprentice_id}_apprentice.json"
+        with open(apprentice_file, "w") as f:
+            json.dump(apprentice_record, f, indent=2)
+
+        # 4. Announce to Village
+        _village_post_event(
+            content=f"🧑‍🎓 Apprentice Protocol: {master_agent} is raising apprentice '{apprentice_name}' "
+                    f"(specializing in {specialization}, {num_examples} training examples)",
+            event_type="apprentice_created",
+            agent_id=master_agent,
+            metadata={
+                "apprentice_id": apprentice_id,
+                "specialization": specialization,
+            }
+        )
+
+        result = {
+            "success": True,
+            "apprentice_id": apprentice_id,
+            "master_agent": master_agent,
+            "apprentice_name": apprentice_name,
+            "specialization": specialization,
+            "dataset_name": dataset_name,
+            "num_examples": num_examples,
+            "status": "dataset_ready",
+            "message": f"🧑‍🎓 Apprentice '{apprentice_name}' created for {master_agent}! "
+                       f"Dataset ready with {num_examples} examples.",
+        }
+
+        # 5. Auto-train if requested
+        if auto_train:
+            logger.info(f"Auto-training apprentice {apprentice_id}...")
+            train_result = nursery_train_local(
+                dataset_name=dataset_name,
+                base_model=base_model,
+                output_name=apprentice_id,
+                agent_id=master_agent,
+            )
+
+            if train_result.get("success"):
+                # Update apprentice record
+                apprentice_record["status"] = "trained"
+                apprentice_record["trained"] = True
+                apprentice_record["model_path"] = train_result.get("output_path")
+                apprentice_record["training_stats"] = train_result.get("stats")
+                with open(apprentice_file, "w") as f:
+                    json.dump(apprentice_record, f, indent=2)
+
+                result["status"] = "trained"
+                result["trained"] = True
+                result["model_path"] = train_result.get("output_path")
+                result["message"] += f" Training complete!"
+            else:
+                result["training_error"] = train_result.get("error")
+                result["message"] += f" (Training failed: {train_result.get('error')})"
+
+        else:
+            result["next_step"] = f"Run: nursery_train_local(dataset_name='{dataset_name}', output_name='{apprentice_id}', agent_id='{master_agent}')"
+
+        return result
+
+    except Exception as e:
+        logger.exception("Error creating apprentice")
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
+def nursery_list_apprentices(
+    master_filter: Optional[str] = None,
+    trained_only: bool = False,
+) -> Dict[str, Any]:
+    """
+    List all apprentices in the Nursery.
+
+    Args:
+        master_filter: Filter by master agent (e.g., "AZOTH")
+        trained_only: Only show trained apprentices
+
+    Returns:
+        Dict with list of apprentices and their status
+    """
+    apprentices = []
+
+    for apprentice_file in MODELS_DIR.glob("*_apprentice.json"):
+        try:
+            with open(apprentice_file) as f:
+                record = json.load(f)
+
+            # Apply filters
+            if master_filter and record.get("master_agent") != master_filter:
+                continue
+            if trained_only and not record.get("trained"):
+                continue
+
+            # Check if model exists (if trained)
+            model_exists = False
+            if record.get("model_path"):
+                model_exists = Path(record["model_path"]).exists()
+
+            apprentices.append({
+                "apprentice_id": record.get("apprentice_id"),
+                "apprentice_name": record.get("apprentice_name"),
+                "master_agent": record.get("master_agent"),
+                "specialization": record.get("specialization"),
+                "status": record.get("status"),
+                "trained": record.get("trained", False),
+                "model_exists": model_exists,
+                "num_examples": record.get("num_examples"),
+                "created_at": record.get("created_at"),
+            })
+
+        except Exception as e:
+            logger.warning(f"Error reading apprentice file {apprentice_file}: {e}")
+
+    # Sort by creation date (newest first)
+    apprentices.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+
+    return {
+        "success": True,
+        "apprentices": apprentices,
+        "total": len(apprentices),
+        "filters": {
+            "master": master_filter,
+            "trained_only": trained_only,
+        },
+        "message": f"🧑‍🎓 Found {len(apprentices)} apprentice(s)",
+    }
+
+
 def nursery_deploy_ollama(
     model_name: str,
     ollama_name: Optional[str] = None,
@@ -1582,6 +1915,72 @@ NURSERY_DISCOVER_MODELS_SCHEMA = {
                 "type": "integer",
                 "description": "Maximum results to return",
                 "default": 10,
+            },
+        },
+        "required": [],
+    },
+}
+
+# =============================================================================
+# Phase 3: Apprentice Protocol Schemas
+# =============================================================================
+
+NURSERY_CREATE_APPRENTICE_SCHEMA = {
+    "name": "nursery_create_apprentice",
+    "description": "Create an apprentice model for an agent. The apprentice inherits knowledge from the master's Village posts and specializes in a specific domain.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "master_agent": {
+                "type": "string",
+                "description": "The master agent's ID (e.g., 'AZOTH', 'ELYSIAN')",
+            },
+            "apprentice_name": {
+                "type": "string",
+                "description": "Name for the apprentice (e.g., 'tool_master', 'memory_keeper')",
+            },
+            "specialization": {
+                "type": "string",
+                "description": "What the apprentice should specialize in (e.g., 'tool calling', 'creative writing')",
+            },
+            "training_data_query": {
+                "type": "string",
+                "description": "Custom query to find training data from Village (default: uses specialization)",
+            },
+            "base_model": {
+                "type": "string",
+                "description": "Base model to fine-tune (default: TinyLlama 1.1B)",
+                "default": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+            },
+            "min_examples": {
+                "type": "integer",
+                "description": "Minimum training examples required",
+                "default": 20,
+            },
+            "auto_train": {
+                "type": "boolean",
+                "description": "Automatically start local training after dataset creation",
+                "default": False,
+            },
+        },
+        "required": ["master_agent", "apprentice_name", "specialization"],
+    },
+}
+
+NURSERY_LIST_APPRENTICES_SCHEMA = {
+    "name": "nursery_list_apprentices",
+    "description": "List all apprentices in the Nursery. Filter by master agent or training status.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "master_filter": {
+                "type": "string",
+                "description": "Filter by master agent (e.g., 'AZOTH')",
+            },
+            "trained_only": {
+                "type": "boolean",
+                "description": "Only show trained apprentices",
+                "default": False,
             },
         },
         "required": [],

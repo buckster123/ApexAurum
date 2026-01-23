@@ -128,10 +128,19 @@ def nursery_discover_models(query: str = None, capability: str = None):
 
 ---
 
-### Phase 3: Agent Training Capabilities (Autonomy)
-**Effort:** Medium | **Impact:** Very High
+### Phase 3: Agent Training Capabilities (Autonomy) ✅ COMPLETE
+**Effort:** Medium | **Impact:** Very High | **Completed:** 2026-01-23
 
 **Goal:** Agents can train their own specialist models.
+
+**Implementation Summary:**
+- `nursery_create_apprentice()` - Master agents raise apprentice models from their Village knowledge
+- `nursery_list_apprentices()` - List all apprentices with filtering
+- `_convert_knowledge_to_training()` - Convert Village posts to instruction-following format
+- Auto-train option for immediate training after dataset creation
+- Apprentice records stored as JSON: `sandbox/nursery/models/{id}_apprentice.json`
+- Village announcement on apprentice creation
+- Tool count: 108 → 110 (+2 new tools)
 
 #### 3.1 Agent-Attributed Training
 Track which agent initiated training:
@@ -322,8 +331,8 @@ introduction_ritual(
 |-------|--------|--------|--------|
 | 1. Village Event Hooks | Small | High | ✅ **COMPLETE** |
 | 2. Shared Model Registry | Medium | High | ✅ **COMPLETE** |
-| 3. Agent Training | Medium | Very High | 🔴 **NOW** |
-| 4. Streamlit UI | Medium | High | 🟡 Soon |
+| 3. Agent Training | Medium | Very High | ✅ **COMPLETE** |
+| 4. Streamlit UI | Medium | High | 🔴 **NOW** |
 | 5. FastAPI Parity | Small | Medium | 🟡 Soon |
 | 6. NURSERY_KEEPER | Small | Fun! | 🟢 Whenever |
 
