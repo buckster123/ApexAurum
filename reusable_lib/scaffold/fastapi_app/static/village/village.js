@@ -436,12 +436,29 @@ class VillageApp {
     }
 
     /**
-     * Animation loop
+     * Animation loop with frame timing
      */
-    animate() {
-        // Update all agents
+    animate(timestamp = 0) {
+        // Frame timing for smooth animation
+        if (!this.lastFrameTime) this.lastFrameTime = timestamp;
+        const deltaTime = timestamp - this.lastFrameTime;
+        this.lastFrameTime = timestamp;
+
+        // FPS tracking (update every 30 frames)
+        this.frameCount = (this.frameCount || 0) + 1;
+        if (this.frameCount % 30 === 0) {
+            this.currentFPS = Math.round(1000 / deltaTime);
+        }
+
+        // Performance mode: skip frames if falling behind (< 30fps)
+        if (this.performanceMode && deltaTime > 50 && this.frameCount % 2 === 0) {
+            requestAnimationFrame((t) => this.animate(t));
+            return;
+        }
+
+        // Update all agents with deltaTime
         for (const agent of this.agents.values()) {
-            agent.update();
+            agent.update(deltaTime);
         }
 
         // Render
@@ -459,12 +476,30 @@ class VillageApp {
         this.renderer.drawWeatherOverlay();
 
         // Update ambient sound based on time (check every ~60 frames)
-        if (this.soundInitialized && Math.random() < 0.016) {
+        if (this.soundInitialized && this.frameCount % 60 === 0) {
             this.updateAmbientSound();
         }
 
         // Continue loop
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame((t) => this.animate(t));
+    }
+
+    /**
+     * Toggle performance mode (reduces effects for Pi/low-end devices)
+     */
+    setPerformanceMode(enabled) {
+        this.performanceMode = enabled;
+        if (this.renderer) {
+            this.renderer.setPerformanceMode(enabled);
+        }
+        console.log(`[Village] Performance mode: ${enabled ? 'ON' : 'OFF'}`);
+    }
+
+    /**
+     * Get current FPS
+     */
+    getFPS() {
+        return this.currentFPS || 60;
     }
 
     /**

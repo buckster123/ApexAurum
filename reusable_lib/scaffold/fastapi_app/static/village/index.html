@@ -101,6 +101,16 @@
                         <span class="stat-label">Last Tool:</span>
                         <span id="stat-last-tool" class="stat-value">-</span>
                     </div>
+                    <div class="stat-row">
+                        <span class="stat-label">FPS:</span>
+                        <span id="stat-fps" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-row perf-toggle">
+                        <label>
+                            <input type="checkbox" id="perf-mode" onchange="togglePerformanceMode(this.checked)">
+                            Performance Mode
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -430,6 +440,34 @@
 
             document.getElementById('stat-events').textContent = stats.eventCount;
             document.getElementById('stat-last-tool').textContent = stats.lastTool || '-';
+        }
+
+        // Performance mode toggle
+        function togglePerformanceMode(enabled) {
+            if (window.villageApp) {
+                window.villageApp.setPerformanceMode(enabled);
+                localStorage.setItem('village_perf_mode', enabled ? '1' : '0');
+            }
+        }
+
+        // FPS display update
+        function updateFPSDisplay() {
+            if (window.villageApp) {
+                const fps = window.villageApp.getFPS();
+                const fpsEl = document.getElementById('stat-fps');
+                fpsEl.textContent = fps;
+                fpsEl.className = 'stat-value ' + (fps >= 50 ? 'good' : fps >= 30 ? 'warn' : 'bad');
+            }
+        }
+
+        // Update FPS every second
+        setInterval(updateFPSDisplay, 1000);
+
+        // Restore performance mode preference
+        if (localStorage.getItem('village_perf_mode') === '1') {
+            document.getElementById('perf-mode').checked = true;
+            // Wait for villageApp to initialize
+            setTimeout(() => togglePerformanceMode(true), 500);
         }
 
         // Agent selector change

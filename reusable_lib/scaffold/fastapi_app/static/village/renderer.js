@@ -78,6 +78,24 @@ export class Renderer {
         this.lightningFlash = 0;  // Flash intensity (decays)
         this.lastLightning = 0;
         this.initWeatherParticles();
+
+        // Performance mode (Phase 8.4)
+        this.performanceMode = false;
+    }
+
+    /**
+     * Set performance mode (reduces particle counts and effects)
+     */
+    setPerformanceMode(enabled) {
+        this.performanceMode = enabled;
+        if (enabled) {
+            // Reduce particles for better performance
+            this.starField = this.generateStarField(30);  // 30 vs 80 stars
+            this.weatherParticles = this.weatherParticles.slice(0, 100);  // 100 vs 200 particles
+        } else {
+            this.starField = this.generateStarField(80);
+            this.initWeatherParticles();
+        }
     }
 
     /**
