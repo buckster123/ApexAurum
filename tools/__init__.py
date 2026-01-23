@@ -11,6 +11,7 @@ Collection of tools for Claude to use:
 - Music: AI music generation via Suno API
 - Datasets: Vector dataset creation and querying
 - EEG: Neural Resonance brain-computer interface (OpenBCI)
+- Vision: Hailo-10H accelerated computer vision (detection, classification, pose)
 
 Each tool module provides:
 - Tool implementation functions
@@ -186,6 +187,18 @@ EEG_TOOL_SCHEMAS = {
     "eeg_list_sessions": EEG_LIST_SESSIONS_SCHEMA,
 }
 
+# Vision Tools (Hailo-10H Accelerated)
+from .vision import (
+    hailo_info,
+    hailo_detect,
+    hailo_classify,
+    hailo_pose,
+    hailo_analyze,
+    hailo_benchmark,
+    hailo_list_models,
+    VISION_TOOL_SCHEMAS,
+)
+
 # Combine all schemas
 ALL_TOOL_SCHEMAS = {
     **UTILITY_TOOL_SCHEMAS,
@@ -199,6 +212,7 @@ ALL_TOOL_SCHEMAS = {
     **EEG_TOOL_SCHEMAS,
     **SUNO_COMPILER_TOOL_SCHEMAS,
     **AUDIO_EDITOR_TOOL_SCHEMAS,
+    **VISION_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -300,6 +314,14 @@ ALL_TOOLS = {
     "audio_reverse": audio_reverse,
     "audio_list_files": audio_list_files,
     "audio_get_waveform": audio_get_waveform,
+    # Vision Tools (Hailo-10H)
+    "hailo_info": hailo_info,
+    "hailo_detect": hailo_detect,
+    "hailo_classify": hailo_classify,
+    "hailo_pose": hailo_pose,
+    "hailo_analyze": hailo_analyze,
+    "hailo_benchmark": hailo_benchmark,
+    "hailo_list_models": hailo_list_models,
 }
 
 __all__ = [
@@ -413,8 +435,17 @@ __all__ = [
     "EEG_TOOL_SCHEMAS",
     "SUNO_COMPILER_TOOL_SCHEMAS",
     "AUDIO_EDITOR_TOOL_SCHEMAS",
+    "VISION_TOOL_SCHEMAS",
     "ALL_TOOL_SCHEMAS",
     "ALL_TOOLS",
+    # Vision Tools (Hailo-10H)
+    "hailo_info",
+    "hailo_detect",
+    "hailo_classify",
+    "hailo_pose",
+    "hailo_analyze",
+    "hailo_benchmark",
+    "hailo_list_models",
 ]
 
 
