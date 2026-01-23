@@ -140,3 +140,134 @@ async def get_anthropic_schemas():
     Get tool schemas in Anthropic/Claude format.
     """
     return {"tools": tool_service.get_anthropic_schemas()}
+
+
+# ============================================================================
+# Tool Selection / Settings
+# ============================================================================
+
+class ToolGroupUpdate(BaseModel):
+    """Update a tool group's enabled state."""
+    enabled: bool
+
+
+class ToolUpdate(BaseModel):
+    """Update a single tool's enabled state."""
+    enabled: bool
+
+
+class PresetApply(BaseModel):
+    """Apply a tool preset."""
+    preset_id: str
+
+
+@router.get("/settings/groups")
+async def get_tool_groups():
+    """
+    Get all tool groups with their tools and enabled states.
+
+    Returns groups organized by category with individual tool states.
+    """
+    groups = tool_service.get_tool_groups()
+    enabled_count = len(tool_service.get_enabled_tools())
+    total_count = len(tool_service.tools)
+
+    return {
+        "groups": groups,
+        "enabled_count": enabled_count,
+        "total_count": total_count,
+        "summary": f"{enabled_count}/{total_count} tools enabled"
+    }
+
+
+@router.get("/settings/presets")
+async def get_tool_presets():
+    """
+    Get available tool presets (Minimal, Standard, Creative, etc.).
+    """
+    from services.tool_service import TOOL_PRESETS
+    presets = []
+    for preset_id, preset_info in TOOL_PRESETS.items():
+        # Calculate how many tools this preset enables
+        enabled_groups = set(preset_info.get("groups", []))
+        tool_count = sum(
+            len(tool_service.get_tool_groups().get(g, {}).get("tools", []))
+            for g in enabled_groups
+        )
+        # Add extra_tools
+        tool_count += len(preset_info.get("extra_tools", []))
+
+        presets.append({
+            "id": preset_id,
+            "name": preset_info["name"],
+            "description": preset_info["description"],
+            "tool_count": tool_count
+        })
+    return {"presets": presets}
+
+
+@router.post("/settings/presets/apply")
+async def apply_tool_preset(request: PresetApply):
+    """
+    Apply a tool preset.
+
+    This enables/disables groups of tools based on the preset configuration.
+    """
+    result = tool_service.apply_preset(request.preset_id)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
+
+
+@router.put("/settings/groups/{group_id}")
+async def update_tool_group(group_id: str, request: ToolGroupUpdate):
+    """
+    Enable or disable an entire tool group.
+    """
+    from services.tool_service import TOOL_GROUPS
+    if group_id not in TOOL_GROUPS:
+        raise HTTPException(status_code=404, detail=f"Group not found: {group_id}")
+
+    tool_service.set_group_enabled(group_id, request.enabled)
+    group = tool_service.get_tool_groups()[group_id]
+    enabled_count = len(tool_service.get_enabled_tools())
+
+    return {
+        "group_id": group_id,
+        "enabled": request.enabled,
+        "affected_tools": len(group["tools"]),
+        "total_enabled": enabled_count
+    }
+
+
+@router.put("/settings/tools/{tool_name}")
+async def update_tool(tool_name: str, request: ToolUpdate):
+    """
+    Enable or disable a single tool.
+    """
+    if tool_name not in tool_service.tools:
+        raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}")
+
+    tool_service.set_tool_enabled(tool_name, request.enabled)
+    enabled_count = len(tool_service.get_enabled_tools())
+
+    return {
+        "tool": tool_name,
+        "enabled": request.enabled,
+        "total_enabled": enabled_count
+    }
+
+
+@router.get("/enabled")
+async def get_enabled_tools():
+    """
+    Get list of currently enabled tools.
+
+    This is what will be injected into the system prompt when tools are enabled.
+    """
+    enabled = tool_service.get_enabled_tools()
+    return {
+        "tools": enabled,
+        "count": len(enabled),
+        "total": len(tool_service.tools)
+    }

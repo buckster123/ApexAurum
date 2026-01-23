@@ -745,14 +745,38 @@
                 </div>
 
                 <div class="sidebar-card">
-                    <h3>Tools <span id="tool-count" style="color: var(--gold);">(0)</span></h3>
+                    <h3>Tools <span id="tool-count" style="color: var(--gold);">(0/0)</span></h3>
                     <label class="checkbox-wrapper">
                         <input type="checkbox" id="use-tools" checked>
                         <span>Enable Instruments</span>
                     </label>
-                    <div class="tool-list" id="tool-list" style="max-height: 100px; overflow-y: auto;">
-                        <span class="tool-tag">Loading...</span>
+
+                    <!-- Tool Preset Selector -->
+                    <div style="margin: 8px 0;">
+                        <select id="tool-preset" style="width: 100%; font-size: 0.8rem; padding: 6px; background: var(--bg-secondary); border: 1px solid var(--gold-dim); color: var(--text-primary); border-radius: 4px;">
+                            <option value="">-- Tool Presets --</option>
+                        </select>
                     </div>
+
+                    <!-- Expandable Tool Groups -->
+                    <details id="tool-groups-panel" style="margin-top: 8px;">
+                        <summary style="cursor: pointer; color: var(--gold); font-size: 0.8rem; user-select: none;">
+                            ⚙️ Configure Groups
+                        </summary>
+                        <div id="tool-groups" style="max-height: 200px; overflow-y: auto; margin-top: 8px; padding: 4px; background: var(--bg-secondary); border-radius: 4px;">
+                            <span style="color: var(--text-muted); font-size: 0.75rem;">Loading...</span>
+                        </div>
+                    </details>
+
+                    <!-- Enabled Tools List (collapsed by default) -->
+                    <details style="margin-top: 8px;">
+                        <summary style="cursor: pointer; color: var(--text-muted); font-size: 0.75rem; user-select: none;">
+                            📋 View Enabled Tools
+                        </summary>
+                        <div class="tool-list" id="tool-list" style="max-height: 100px; overflow-y: auto; margin-top: 4px;">
+                            <span class="tool-tag">Loading...</span>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="sidebar-card">
@@ -815,6 +839,11 @@
             providerSelect.addEventListener('change', () => {
                 loadModels();
                 document.getElementById('current-model').textContent = modelSelect.value;
+            });
+
+            // Tool preset change handler
+            document.getElementById('tool-preset').addEventListener('change', (e) => {
+                applyToolPreset(e.target.value);
             });
 
             // Village agent change handler
@@ -949,15 +978,80 @@
 
         async function loadTools() {
             try {
-                const res = await fetch('/api/tools');
-                const data = await res.json();
+                // Load tool groups with states
+                const groupsRes = await fetch('/api/tools/settings/groups');
+                const groupsData = await groupsRes.json();
 
-                document.getElementById('tool-count').textContent = `(${data.count})`;
-                document.getElementById('tool-list').innerHTML = data.tools.map(t =>
-                    `<span class="tool-tag" title="${t.description}">${t.name}</span>`
+                document.getElementById('tool-count').textContent = `(${groupsData.enabled_count}/${groupsData.total_count})`;
+
+                // Render tool groups with checkboxes
+                const groupsHtml = Object.entries(groupsData.groups).map(([id, group]) => {
+                    const enabledTools = Object.values(group.tool_states).filter(v => v).length;
+                    const totalTools = group.tools.length;
+                    return `
+                        <div style="margin-bottom: 6px; padding: 4px; border-bottom: 1px solid var(--border);">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" ${group.enabled ? 'checked' : ''}
+                                       onchange="toggleToolGroup('${id}', this.checked)"
+                                       style="accent-color: var(--gold);">
+                                <span>${group.icon} ${group.name}</span>
+                                <span style="color: var(--text-muted); font-size: 0.7rem; margin-left: auto;">${enabledTools}/${totalTools}</span>
+                            </label>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('tool-groups').innerHTML = groupsHtml;
+
+                // Load enabled tools list
+                const enabledRes = await fetch('/api/tools/enabled');
+                const enabledData = await enabledRes.json();
+                document.getElementById('tool-list').innerHTML = enabledData.tools.map(t =>
+                    `<span class="tool-tag">${t}</span>`
                 ).join('');
+
+                // Load presets
+                const presetsRes = await fetch('/api/tools/settings/presets');
+                const presetsData = await presetsRes.json();
+                const presetSelect = document.getElementById('tool-preset');
+                presetSelect.innerHTML = '<option value="">-- Tool Presets --</option>' +
+                    presetsData.presets.map(p =>
+                        `<option value="${p.id}" title="${p.description}">${p.name} (${p.tool_count})</option>`
+                    ).join('');
+
             } catch (e) {
                 console.error('Failed to load tools:', e);
+            }
+        }
+
+        async function toggleToolGroup(groupId, enabled) {
+            try {
+                await fetch(`/api/tools/settings/groups/${groupId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled })
+                });
+                await loadTools();  // Refresh UI
+            } catch (e) {
+                console.error('Failed to toggle group:', e);
+            }
+        }
+
+        async function applyToolPreset(presetId) {
+            if (!presetId) return;
+            try {
+                const res = await fetch('/api/tools/settings/presets/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ preset_id: presetId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await loadTools();  // Refresh UI
+                    // Reset selector to placeholder
+                    document.getElementById('tool-preset').value = '';
+                }
+            } catch (e) {
+                console.error('Failed to apply preset:', e);
             }
         }
 

@@ -163,19 +163,269 @@ from app_config import settings
 
 logger = logging.getLogger(__name__)
 
+# Tool Groups - categorize tools for selection UI
+TOOL_GROUPS = {
+    "utility": {
+        "name": "Utility",
+        "icon": "🔧",
+        "tools": ["get_current_time", "calculator", "count_words", "random_number", "session_info"],
+        "description": "Basic utilities: time, math, word count"
+    },
+    "memory": {
+        "name": "Memory",
+        "icon": "🧠",
+        "tools": ["memory_store", "memory_retrieve", "memory_search", "memory_delete", "memory_list"],
+        "description": "Key-value persistent memory"
+    },
+    "filesystem": {
+        "name": "Filesystem",
+        "icon": "📁",
+        "tools": ["fs_read_file", "fs_write_file", "fs_list_files", "fs_mkdir", "fs_delete",
+                  "fs_exists", "fs_get_info", "fs_read_lines", "fs_edit"],
+        "description": "File operations in sandbox"
+    },
+    "code": {
+        "name": "Code Execution",
+        "icon": "💻",
+        "tools": ["execute_python"],
+        "description": "Run Python code safely"
+    },
+    "string": {
+        "name": "String",
+        "icon": "📝",
+        "tools": ["string_replace", "string_split", "string_join", "regex_match", "regex_replace", "string_case"],
+        "description": "Text manipulation"
+    },
+    "web": {
+        "name": "Web",
+        "icon": "🌐",
+        "tools": ["web_fetch", "web_search"],
+        "description": "Fetch URLs, search web"
+    },
+    "vector": {
+        "name": "Vector DB",
+        "icon": "🔍",
+        "tools": ["vector_add", "vector_search", "vector_delete", "vector_list_collections",
+                  "vector_get_stats", "vector_add_knowledge", "vector_search_knowledge"],
+        "description": "Semantic search & knowledge"
+    },
+    "agent": {
+        "name": "Agents",
+        "icon": "🤖",
+        "tools": ["agent_spawn", "agent_status", "agent_result", "agent_list", "socratic_council"],
+        "description": "Multi-agent orchestration"
+    },
+    "village": {
+        "name": "Village Protocol",
+        "icon": "🏘️",
+        "tools": ["village_post", "village_search", "village_get_thread", "village_list_agents",
+                  "summon_ancestor", "introduction_ritual", "village_detect_convergence", "village_get_stats"],
+        "description": "Multi-agent memory realm"
+    },
+    "memory_health": {
+        "name": "Memory Health",
+        "icon": "🏥",
+        "tools": ["memory_health_stale", "memory_health_low_access", "memory_health_duplicates",
+                  "memory_consolidate", "memory_health_summary"],
+        "description": "Adaptive memory maintenance"
+    },
+    "dataset": {
+        "name": "Datasets",
+        "icon": "📊",
+        "tools": ["dataset_list", "dataset_query"],
+        "description": "Query vector datasets"
+    },
+    "suno": {
+        "name": "Suno Compiler",
+        "icon": "🎼",
+        "tools": ["suno_prompt_build", "suno_prompt_preset_save", "suno_prompt_preset_load", "suno_prompt_preset_list"],
+        "description": "Music prompt generation"
+    },
+    "audio": {
+        "name": "Audio Editor",
+        "icon": "🎚️",
+        "tools": ["audio_info", "audio_trim", "audio_fade", "audio_normalize", "audio_loop",
+                  "audio_concat", "audio_speed", "audio_reverse", "audio_list_files", "audio_get_waveform"],
+        "description": "Audio file manipulation"
+    },
+    "music": {
+        "name": "Music Generation",
+        "icon": "🎵",
+        "tools": ["music_generate", "music_status", "music_result", "music_list", "music_favorite",
+                  "music_library", "music_search", "music_play", "midi_create", "music_compose"],
+        "description": "Suno AI music & MIDI"
+    },
+}
+
+# Preset tool selections for different use cases
+TOOL_PRESETS = {
+    "minimal": {
+        "name": "Minimal (Fast)",
+        "description": "Basic tools for small models - time, memory, web, file basics",
+        "groups": ["utility", "memory", "web"],
+        "extra_tools": ["fs_read_file", "fs_write_file", "fs_list_files"]
+    },
+    "standard": {
+        "name": "Standard",
+        "description": "Common tools - files, code, strings, web, datasets",
+        "groups": ["utility", "memory", "filesystem", "code", "string", "web", "dataset"]
+    },
+    "creative": {
+        "name": "Creative",
+        "description": "Music and audio - Suno, MIDI, audio editing, files",
+        "groups": ["utility", "suno", "audio", "music", "filesystem"]
+    },
+    "research": {
+        "name": "Research",
+        "description": "Vector search, agents, Village Protocol, memory health",
+        "groups": ["utility", "memory", "vector", "agent", "village", "memory_health", "dataset", "web"]
+    },
+    "full": {
+        "name": "Full (All Tools)",
+        "description": "Everything enabled",
+        "groups": list(TOOL_GROUPS.keys())
+    }
+}
+
 
 class ToolService:
     """
     Service for managing and executing AI tools.
     """
 
-    def __init__(self):
+    def __init__(self, settings_path: Optional[Path] = None):
         """Initialize with built-in tools."""
         self.tools: Dict[str, Callable] = {}
         self.schemas: Dict[str, Dict] = {}
 
+        # Tool selection state
+        self.settings_path = settings_path or Path("./data/tool_settings.json")
+        self.excluded_tools: set = set()
+        self.excluded_groups: set = set()
+
+        # Load saved settings
+        self._load_settings()
+
         # Register built-in tools
         self._register_builtin_tools()
+
+    def _load_settings(self):
+        """Load tool settings from file."""
+        try:
+            if self.settings_path.exists():
+                import json
+                with open(self.settings_path) as f:
+                    data = json.load(f)
+                    self.excluded_tools = set(data.get("excluded_tools", []))
+                    self.excluded_groups = set(data.get("excluded_groups", []))
+                    logger.info(f"Loaded tool settings: {len(self.excluded_groups)} groups, {len(self.excluded_tools)} tools excluded")
+        except Exception as e:
+            logger.warning(f"Could not load tool settings: {e}")
+
+    def save_settings(self):
+        """Save tool settings to file."""
+        try:
+            import json
+            self.settings_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.settings_path, 'w') as f:
+                json.dump({
+                    "excluded_tools": list(self.excluded_tools),
+                    "excluded_groups": list(self.excluded_groups)
+                }, f, indent=2)
+            logger.info(f"Saved tool settings")
+        except Exception as e:
+            logger.error(f"Could not save tool settings: {e}")
+
+    def get_tool_groups(self) -> Dict[str, Any]:
+        """Get all tool groups with their tools and enabled state."""
+        groups = {}
+        for group_id, group_info in TOOL_GROUPS.items():
+            groups[group_id] = {
+                **group_info,
+                "enabled": group_id not in self.excluded_groups,
+                "tool_states": {
+                    tool: tool not in self.excluded_tools
+                    for tool in group_info["tools"]
+                }
+            }
+        return groups
+
+    def get_tool_presets(self) -> Dict[str, Any]:
+        """Get available tool presets."""
+        return TOOL_PRESETS
+
+    def apply_preset(self, preset_id: str) -> Dict[str, Any]:
+        """Apply a tool preset."""
+        if preset_id not in TOOL_PRESETS:
+            return {"success": False, "error": f"Unknown preset: {preset_id}"}
+
+        preset = TOOL_PRESETS[preset_id]
+        enabled_groups = set(preset.get("groups", []))
+
+        # Exclude all groups not in preset
+        self.excluded_groups = set(TOOL_GROUPS.keys()) - enabled_groups
+
+        # Handle extra_tools (tools enabled even if their group is disabled)
+        extra_tools = set(preset.get("extra_tools", []))
+
+        # Reset tool exclusions, then exclude tools from disabled groups
+        self.excluded_tools = set()
+        for group_id, group_info in TOOL_GROUPS.items():
+            if group_id in self.excluded_groups:
+                for tool in group_info["tools"]:
+                    if tool not in extra_tools:
+                        self.excluded_tools.add(tool)
+
+        self.save_settings()
+
+        enabled_count = len(self.get_enabled_tools())
+        return {
+            "success": True,
+            "preset": preset_id,
+            "enabled_count": enabled_count,
+            "message": f"Applied '{preset['name']}' preset: {enabled_count} tools enabled"
+        }
+
+    def set_group_enabled(self, group_id: str, enabled: bool):
+        """Enable or disable an entire tool group."""
+        if group_id not in TOOL_GROUPS:
+            return
+
+        if enabled:
+            self.excluded_groups.discard(group_id)
+            # Also enable all tools in the group
+            for tool in TOOL_GROUPS[group_id]["tools"]:
+                self.excluded_tools.discard(tool)
+        else:
+            self.excluded_groups.add(group_id)
+            # Also disable all tools in the group
+            for tool in TOOL_GROUPS[group_id]["tools"]:
+                self.excluded_tools.add(tool)
+
+        self.save_settings()
+
+    def set_tool_enabled(self, tool_name: str, enabled: bool):
+        """Enable or disable a single tool."""
+        if enabled:
+            self.excluded_tools.discard(tool_name)
+        else:
+            self.excluded_tools.add(tool_name)
+        self.save_settings()
+
+    def is_tool_enabled(self, tool_name: str) -> bool:
+        """Check if a tool is enabled."""
+        return tool_name not in self.excluded_tools
+
+    def get_enabled_tools(self) -> List[str]:
+        """Get list of enabled tool names."""
+        return [name for name in self.tools.keys() if name not in self.excluded_tools]
+
+    def get_enabled_schemas(self) -> List[Dict]:
+        """Get schemas only for enabled tools."""
+        return [
+            schema for name, schema in self.schemas.items()
+            if name not in self.excluded_tools
+        ]
 
     def _register_builtin_tools(self):
         """Register tools from reusable_lib."""
@@ -503,7 +753,7 @@ class ToolService:
         """Get schemas in Anthropic/Claude format."""
         return list(self.schemas.values())
 
-    def build_system_prompt(self, base_prompt: Optional[str] = None) -> str:
+    def build_system_prompt(self, base_prompt: Optional[str] = None, use_enabled_only: bool = True) -> str:
         """
         Build a system prompt that includes tool descriptions.
 
@@ -512,6 +762,7 @@ class ToolService:
 
         Args:
             base_prompt: Optional base system prompt to prepend
+            use_enabled_only: If True, only include enabled tools (respects exclusions)
 
         Returns:
             System prompt with tool instructions
@@ -521,14 +772,24 @@ class ToolService:
         if base_prompt:
             parts.append(base_prompt.strip())
 
+        # Get schemas (filtered or all)
+        if use_enabled_only:
+            schemas_to_use = {name: self.schemas[name] for name in self.get_enabled_tools() if name in self.schemas}
+        else:
+            schemas_to_use = self.schemas
+
+        if not schemas_to_use:
+            parts.append("\n(No tools available)")
+            return "\n".join(parts)
+
         # Add tool instructions
-        parts.append("\n## Available Tools\n")
+        parts.append(f"\n## Available Tools ({len(schemas_to_use)})\n")
         parts.append("You have access to the following tools. To use a tool, respond with a JSON object in this exact format:")
         parts.append('```json\n{"tool": "tool_name", "arguments": {"arg1": "value1"}}\n```\n')
         parts.append("After receiving a tool result, incorporate it into your response naturally.\n")
         parts.append("### Tools:\n")
 
-        for name, schema in self.schemas.items():
+        for name, schema in schemas_to_use.items():
             desc = schema.get("description", "No description")
             params = schema.get("input_schema", {}).get("properties", {})
             required = schema.get("input_schema", {}).get("required", [])

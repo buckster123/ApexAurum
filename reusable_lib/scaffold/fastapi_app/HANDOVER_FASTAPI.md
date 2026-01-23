@@ -24,20 +24,76 @@ The FastAPI Lab Edition is now operational with hailo-ollama on the Raspberry Pi
 
 ### Known Issues
 
-#### 1. Tools-Enabled Mode Timeout (HIGH PRIORITY)
-- **Symptom:** When "Enable Instruments" checkbox is checked, requests timeout
-- **Likely Cause:** Tool prompt injection makes the request too large/slow for small 1.5B models
-- **Location:** `routes/chat.py` - `chat_stream()` function
-- **Investigation needed:**
-  - Check if system prompt with 79 tool schemas exceeds context window
-  - Consider reducing tool set for small models
-  - Add timeout handling / streaming keepalive
-  - Test with larger model (llama3.2:3b)
+#### 1. Tools-Enabled Mode Timeout (MITIGATED)
+- **Symptom:** When "Enable Instruments" checkbox is checked, requests timeout with 79 tools
+- **Root Cause:** Tool prompt injection makes request too large for small 1.5B models
+- **Mitigation:** Use Tool Selector (see below) to reduce active tool count
+- **Recommendation:** Use "Minimal" preset (15 tools) or "Standard" (30 tools) for Hailo models
 
-#### 2. sentence-transformers Not Installed
-- **Symptom:** Vector DB stats fail silently
-- **Fix:** `./venv/bin/pip install sentence-transformers`
-- **Impact:** Low - vector search still works with ChromaDB defaults
+#### 2. sentence-transformers ✅ INSTALLED
+- Now installed in venv with ARM64 support
+- Runs on Pi 5 CPU (not Hailo accelerator - requires HEF format)
+
+---
+
+## New Feature: Tool Selector System
+
+### Overview
+Reduces tool count to prevent context overflow on small models.
+
+### Presets (in UI sidebar)
+| Preset | Tools | Use Case |
+|--------|-------|----------|
+| Minimal | 15 | Fast responses on 1.5B models |
+| Standard | 30 | General purpose without heavy features |
+| Creative | 38 | Music/audio focused |
+| Research | 39 | Vector search, agents, Village |
+| Full | 79 | All tools (use with larger models) |
+
+### API Endpoints
+```bash
+# Get tool groups with states
+GET /api/tools/settings/groups
+
+# Get available presets
+GET /api/tools/settings/presets
+
+# Apply a preset
+POST /api/tools/settings/presets/apply
+{"preset_id": "minimal"}
+
+# Toggle a group
+PUT /api/tools/settings/groups/{group_id}
+{"enabled": false}
+
+# Toggle individual tool
+PUT /api/tools/settings/tools/{tool_name}
+{"enabled": false}
+
+# Get enabled tools list
+GET /api/tools/enabled
+```
+
+### Tool Groups (14 groups)
+| Group | Tools | Description |
+|-------|-------|-------------|
+| utility | 5 | Time, calculator, word count |
+| memory | 5 | Key-value persistent memory |
+| filesystem | 9 | File operations in sandbox |
+| code | 1 | Python execution |
+| string | 6 | Text manipulation |
+| web | 2 | Fetch URLs, web search |
+| vector | 7 | Semantic search, knowledge |
+| agent | 5 | Multi-agent orchestration |
+| village | 8 | Village Protocol |
+| memory_health | 5 | Memory maintenance |
+| dataset | 2 | Vector dataset queries |
+| suno | 4 | Music prompt generation |
+| audio | 10 | Audio file editing |
+| music | 10 | Suno AI music, MIDI |
+
+### Settings Persistence
+Tool exclusions saved to `data/tool_settings.json`
 
 ---
 
@@ -126,31 +182,34 @@ http://192.168.0.114:8765
 
 ## Next Steps (Priority Order)
 
-### 1. Fix Tools-Enabled Timeout
-Options to investigate:
-- Reduce tool schemas sent to model (category filter?)
-- Increase timeout in `native_ollama_stream()`
-- Add streaming keepalive pings
-- Test if issue is model-specific (try llama3.2:3b)
+### 1. ✅ Tool Selector System - COMPLETE
+- 14 tool groups with toggle UI
+- 5 presets (Minimal, Standard, Creative, Research, Full)
+- Settings persist to data/tool_settings.json
+- UI in sidebar with collapsible groups
 
-### 2. Install sentence-transformers
-```bash
-./venv/bin/pip install sentence-transformers
-```
+### 2. ✅ sentence-transformers - INSTALLED
+- Installed with ARM64 support for Pi 5
+- Runs on CPU (~slower than GPU but functional)
 
-### 3. Test All Features
-- [ ] Simple chat (no tools) - WORKS
-- [ ] Streaming chat - WORKS
-- [ ] Tools-enabled chat - TIMEOUT (investigate)
+### 3. Test Tools-Enabled Mode with Reduced Tools
+- [ ] Test "Minimal" preset (15 tools) with streaming
+- [ ] Test "Standard" preset (30 tools) with streaming
+- [ ] Compare response times with llama3.2:3b vs qwen2.5:1.5b
+- [ ] Verify tool execution works
+
+### 4. Test All Features
+- [x] Simple chat (no tools) - WORKS
+- [x] Streaming chat - WORKS
+- [ ] Tools-enabled with Minimal preset
 - [ ] Village Protocol search
 - [ ] Conversations save/load
-- [ ] Presets
 - [ ] Agent spawning
 
-### 4. Consider UI Improvements
+### 5. Future UI Improvements
 - Add model info (parameter size) to selector
 - Show Hailo-specific status (chip temp, memory)
-- Add tool category filter for small models
+- Individual tool toggles within groups
 
 ---
 
@@ -188,11 +247,14 @@ Changes ready to commit:
 - `app_config.py` - Default model fix
 - `routes/chat.py` - Native Ollama streaming
 - `routes/models.py` - Native Ollama health/models
-- `services/tool_service.py` - sys.path fix
+- `routes/tools.py` - Tool settings API endpoints
+- `services/tool_service.py` - sys.path fix + Tool Groups + Presets
+- `templates/index.html` - Tool selector UI
 - `run_venv.sh` - Helper script (new)
 - `HANDOVER_FASTAPI.md` - This file (new)
+- `data/tool_settings.json` - Tool exclusion state (created at runtime)
 
-28+ commits already in airlock from previous sessions.
+29+ commits already in airlock from previous sessions.
 
 ---
 
