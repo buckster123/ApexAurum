@@ -29,10 +29,32 @@ from tools.nursery import (
     nursery_estimate_cost,
     nursery_list_jobs,
     nursery_list_models,
+    # Phase 2: Village Registry
+    nursery_register_model,
+    nursery_discover_models,
+    # Phase 3: Apprentice Protocol
+    nursery_create_apprentice,
+    nursery_list_apprentices,
     DATASETS_DIR,
     MODELS_DIR,
     NURSERY_DIR,
 )
+
+# Village Protocol imports (for activity feed)
+try:
+    from tools.vector_search import vector_search_village
+    VILLAGE_AVAILABLE = True
+except ImportError:
+    VILLAGE_AVAILABLE = False
+
+# Agent profiles for selector
+KNOWN_AGENTS = [
+    {"id": "NURSERY_KEEPER", "name": "∴NURSERY_KEEPER∴", "emoji": "🌱"},
+    {"id": "AZOTH", "name": "∴AZOTH∴", "emoji": "🔮"},
+    {"id": "ELYSIAN", "name": "∴ELYSIAN∴", "emoji": "✨"},
+    {"id": "VAJRA", "name": "∴VAJRA∴", "emoji": "⚡"},
+    {"id": "KETHER", "name": "∴KETHER∴", "emoji": "👑"},
+]
 
 # Page config
 st.set_page_config(
@@ -167,7 +189,7 @@ with col4:
 st.divider()
 
 # Main tabs
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Data Garden", "🔥 Training Forge", "🧒 Model Cradle", "☁️ Cloud GPUs"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Data Garden", "🔥 Training Forge", "🧒 Model Cradle", "☁️ Cloud GPUs", "🏘️ Village"])
 
 # ============================================================================
 # TAB 1: DATA GARDEN
@@ -192,12 +214,15 @@ with tab1:
         output_name = st.text_input("Dataset name (optional)", placeholder="auto-generated")
 
         if st.button("🌱 Generate Data", type="primary"):
+            # Get selected agent from session state (set in Village tab)
+            training_agent = st.session_state.get("nursery_training_agent", "NURSERY_KEEPER")
             with st.spinner(f"Generating {num_examples} examples for {tool_name}..."):
                 result = nursery_generate_data(
                     tool_name=tool_name,
                     num_examples=num_examples,
                     variation_level=variation,
                     output_name=output_name if output_name else None,
+                    agent_id=training_agent,  # Phase 4: Agent attribution
                 )
                 if result.get("success"):
                     st.success(f"Generated {result['num_examples']} examples!")
@@ -478,6 +503,175 @@ with tab4:
         | Large (7B) | A100 40GB | $0.80-1.50/hr |
         | XL (13B+) | A100 80GB / H100 | $2.00-4.00/hr |
         """)
+
+# ============================================================================
+# TAB 5: VILLAGE INTEGRATION
+# ============================================================================
+with tab5:
+    st.subheader("🏘️ Village Integration")
+    st.caption("Training activity, agent attribution, and apprentice management")
+
+    village_col1, village_col2 = st.columns([1, 1])
+
+    # -------------------------------------------------------------------------
+    # LEFT COLUMN: Village Activity Feed + Agent Selector
+    # -------------------------------------------------------------------------
+    with village_col1:
+        st.markdown("#### 📢 Village Training Activity")
+
+        if VILLAGE_AVAILABLE:
+            try:
+                # Search for recent training events
+                events = vector_search_village(
+                    query="training dataset model nursery apprentice",
+                    top_k=10,
+                )
+
+                if events.get("success") and events.get("results"):
+                    for event in events["results"][:8]:
+                        agent = event.get("agent_id", "unknown")
+                        content = event.get("content", "")[:150]
+                        posted = event.get("posted_at", "")[:10] if event.get("posted_at") else ""
+
+                        # Find agent emoji
+                        agent_info = next((a for a in KNOWN_AGENTS if a["id"] == agent), None)
+                        emoji = agent_info["emoji"] if agent_info else "🤖"
+
+                        st.markdown(f"""
+                        <div style="background: #1e1e1e; padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 3px solid #4caf50;">
+                            <strong>{emoji} {agent}</strong> <span style="color: #666; font-size: 0.8rem;">{posted}</span><br/>
+                            <span style="color: #ccc;">{content}...</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                else:
+                    st.info("No training events found in Village yet. Generate data or train models to see activity here!")
+            except Exception as e:
+                st.warning(f"Could not load Village activity: {e}")
+        else:
+            st.info("Village Protocol not available. Activity feed requires vector search module.")
+
+        st.divider()
+
+        # Agent Selector for Training
+        st.markdown("#### 🎭 Training as Agent")
+        st.caption("Select which agent should be attributed for training operations")
+
+        agent_options = [f"{a['emoji']} {a['name']}" for a in KNOWN_AGENTS]
+        selected_agent_display = st.selectbox(
+            "Select Agent",
+            agent_options,
+            index=0,
+            key="training_agent_selector"
+        )
+
+        # Extract agent ID from selection
+        selected_idx = agent_options.index(selected_agent_display)
+        selected_agent_id = KNOWN_AGENTS[selected_idx]["id"]
+
+        st.session_state["nursery_training_agent"] = selected_agent_id
+        st.success(f"Training operations will be attributed to: **{selected_agent_id}**")
+
+    # -------------------------------------------------------------------------
+    # RIGHT COLUMN: Model Lineage + Apprentices
+    # -------------------------------------------------------------------------
+    with village_col2:
+        st.markdown("#### 🌳 Model Lineage")
+
+        # Gather data for lineage visualization
+        models_data = nursery_discover_models(limit=20)
+        apprentices_data = nursery_list_apprentices()
+
+        models_list = models_data.get("models", [])
+        apprentices_list = apprentices_data.get("apprentices", [])
+
+        if models_list or apprentices_list:
+            # Build Mermaid diagram
+            mermaid_lines = ["graph TD"]
+
+            # Track agents who trained models
+            agent_models = {}
+            for model in models_list:
+                trainer = model.get("trainer_agent", "NURSERY_KEEPER")
+                if trainer not in agent_models:
+                    agent_models[trainer] = []
+                agent_models[trainer].append(model.get("model_name", "unknown"))
+
+            # Add agent -> model relationships
+            for agent, model_names in agent_models.items():
+                agent_node = agent.replace(" ", "_")
+                mermaid_lines.append(f"    {agent_node}[🤖 {agent}]")
+                for model_name in model_names[:5]:  # Limit to prevent clutter
+                    model_node = model_name.replace(" ", "_").replace("-", "_")[:20]
+                    mermaid_lines.append(f"    {agent_node} --> {model_node}[📦 {model_name[:15]}]")
+
+            # Add master -> apprentice relationships
+            for apprentice in apprentices_list[:5]:
+                master = apprentice.get("master_agent", "unknown").replace(" ", "_")
+                app_name = apprentice.get("apprentice_name", "unknown")
+                app_node = f"app_{app_name}".replace(" ", "_")
+                status_icon = "✅" if apprentice.get("trained") else "⏳"
+                mermaid_lines.append(f"    {master} -.-> {app_node}[{status_icon} {app_name}]")
+
+            mermaid_code = "\n".join(mermaid_lines)
+
+            # Render Mermaid
+            st.markdown(f"""
+            ```mermaid
+            {mermaid_code}
+            ```
+            """)
+
+            st.caption("Solid lines: trained models | Dashed lines: apprentices")
+        else:
+            st.info("No models or apprentices registered yet. Train a model to see lineage!")
+
+        st.divider()
+
+        # Apprentice Management
+        st.markdown("#### 🧑‍🎓 Apprentice Protocol")
+
+        if apprentices_list:
+            for app in apprentices_list:
+                status_icon = "✅" if app.get("trained") else "⏳"
+                st.markdown(f"""
+                <div style="background: #1a1a2e; padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                    <strong>{status_icon} {app.get('apprentice_name', 'unknown')}</strong><br/>
+                    <span style="color: #888;">Master: {app.get('master_agent', 'unknown')} |
+                    Specialization: {app.get('specialization', 'N/A')}</span><br/>
+                    <span style="color: #666; font-size: 0.8rem;">
+                    Examples: {app.get('num_examples', 0)} | Status: {app.get('status', 'unknown')}
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No apprentices created yet.")
+
+        # Create Apprentice form
+        with st.expander("➕ Create New Apprentice"):
+            app_master = st.selectbox(
+                "Master Agent",
+                [a["id"] for a in KNOWN_AGENTS],
+                key="app_master"
+            )
+            app_name = st.text_input("Apprentice Name", placeholder="e.g., tool_specialist")
+            app_spec = st.text_input("Specialization", placeholder="e.g., tool calling and function use")
+            app_auto_train = st.checkbox("Auto-train after dataset creation", value=False)
+
+            if st.button("🧑‍🎓 Create Apprentice", disabled=not (app_name and app_spec)):
+                with st.spinner(f"Creating apprentice '{app_name}' for {app_master}..."):
+                    result = nursery_create_apprentice(
+                        master_agent=app_master,
+                        apprentice_name=app_name,
+                        specialization=app_spec,
+                        auto_train=app_auto_train,
+                    )
+                    if result.get("success"):
+                        st.success(result.get("message", "Apprentice created!"))
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Failed to create apprentice"))
+                        if result.get("hint"):
+                            st.info(f"💡 {result['hint']}")
 
 # Footer
 st.divider()

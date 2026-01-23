@@ -201,10 +201,20 @@ def nursery_create_apprentice(
 
 ---
 
-### Phase 4: Streamlit UI Enhancement
-**Effort:** Medium | **Impact:** High
+### Phase 4: Streamlit UI Enhancement ✅ COMPLETE
+**Effort:** Medium | **Impact:** High | **Completed:** 2026-01-23
 
 **Goal:** Rich Nursery UI with Village integration.
+
+**Implementation Summary:**
+- New "🏘️ Village" tab (5th tab) with full Village integration
+- Village Activity Feed - Shows recent training events from Village
+- Agent Selector - Choose which agent to attribute training to
+- Model Lineage Visualization - Mermaid diagram of agent → model → apprentice
+- Apprentice Management UI - List, create, and monitor apprentices
+- Session state persistence for selected training agent
+- Data Garden updated to use selected agent for attribution
+- Page grew from 484 → 678 lines (+194 lines)
 
 #### 4.1 Village Activity Feed in Nursery Page
 Show recent training events from Village:
@@ -332,8 +342,8 @@ introduction_ritual(
 | 1. Village Event Hooks | Small | High | ✅ **COMPLETE** |
 | 2. Shared Model Registry | Medium | High | ✅ **COMPLETE** |
 | 3. Agent Training | Medium | Very High | ✅ **COMPLETE** |
-| 4. Streamlit UI | Medium | High | 🔴 **NOW** |
-| 5. FastAPI Parity | Small | Medium | 🟡 Soon |
+| 4. Streamlit UI | Medium | High | ✅ **COMPLETE** |
+| 5. FastAPI Parity | Small | Medium | 🔴 **NOW** |
 | 6. NURSERY_KEEPER | Small | Fun! | 🟢 Whenever |
 
 ---
