@@ -210,6 +210,39 @@ from tools.camera import (
     CAMERA_TOOL_SCHEMAS,
 )
 
+# Browser tools (Chrome DevTools MCP)
+from tools.browser import (
+    browser_connect,
+    browser_disconnect,
+    browser_navigate,
+    browser_new_tab,
+    browser_close_tab,
+    browser_list_tabs,
+    browser_select_tab,
+    browser_wait_for,
+    browser_click,
+    browser_fill,
+    browser_fill_form,
+    browser_press_key,
+    browser_hover,
+    browser_drag,
+    browser_upload_file,
+    browser_handle_dialog,
+    browser_screenshot,
+    browser_snapshot,
+    browser_evaluate,
+    browser_console_messages,
+    browser_get_console_message,
+    browser_network_requests,
+    browser_network_request,
+    browser_perf_start,
+    browser_perf_stop,
+    browser_perf_analyze,
+    browser_emulate,
+    browser_resize,
+    BROWSER_TOOL_SCHEMAS,
+)
+
 from services.llm_service import get_llm_client
 from services.event_service import get_event_broadcaster
 from app_config import settings
@@ -328,6 +361,30 @@ TOOL_GROUPS = {
                   "camera_timelapse", "camera_captures_list"],
         "description": "Camera capture & Hailo detection"
     },
+    "browser": {
+        "name": "Browser Automation",
+        "icon": "🌐",
+        "tools": [
+            # Lifecycle (2)
+            "browser_connect", "browser_disconnect",
+            # Navigation (6)
+            "browser_navigate", "browser_new_tab", "browser_close_tab",
+            "browser_list_tabs", "browser_select_tab", "browser_wait_for",
+            # Input (8)
+            "browser_click", "browser_fill", "browser_fill_form", "browser_press_key",
+            "browser_hover", "browser_drag", "browser_upload_file", "browser_handle_dialog",
+            # Inspection (5)
+            "browser_screenshot", "browser_snapshot", "browser_evaluate",
+            "browser_console_messages", "browser_get_console_message",
+            # Network (2)
+            "browser_network_requests", "browser_network_request",
+            # Performance (3)
+            "browser_perf_start", "browser_perf_stop", "browser_perf_analyze",
+            # Emulation (2)
+            "browser_emulate", "browser_resize"
+        ],
+        "description": "Chrome DevTools automation - navigate, click, screenshot, inspect"
+    },
 }
 
 # Preset tool selections for different use cases
@@ -350,8 +407,8 @@ TOOL_PRESETS = {
     },
     "research": {
         "name": "Research",
-        "description": "Vector search, agents, Village Protocol, memory health",
-        "groups": ["utility", "memory", "vector", "agent", "village", "memory_health", "dataset", "web"]
+        "description": "Vector search, agents, Village Protocol, memory health, browser automation",
+        "groups": ["utility", "memory", "vector", "agent", "village", "memory_health", "dataset", "web", "browser"]
     },
     "ml_training": {
         "name": "ML Training",
@@ -691,6 +748,43 @@ class ToolService:
         self.register("camera_detect", camera_detect, CAMERA_TOOL_SCHEMAS.get("camera_detect"))
         self.register("camera_timelapse", camera_timelapse, CAMERA_TOOL_SCHEMAS.get("camera_timelapse"))
         self.register("camera_captures_list", camera_captures_list, CAMERA_TOOL_SCHEMAS.get("camera_captures_list"))
+
+        # Browser tools (Chrome DevTools MCP) - 28 tools
+        # Lifecycle
+        self.register("browser_connect", browser_connect, BROWSER_TOOL_SCHEMAS.get("browser_connect"))
+        self.register("browser_disconnect", browser_disconnect, BROWSER_TOOL_SCHEMAS.get("browser_disconnect"))
+        # Navigation
+        self.register("browser_navigate", browser_navigate, BROWSER_TOOL_SCHEMAS.get("browser_navigate"))
+        self.register("browser_new_tab", browser_new_tab, BROWSER_TOOL_SCHEMAS.get("browser_new_tab"))
+        self.register("browser_close_tab", browser_close_tab, BROWSER_TOOL_SCHEMAS.get("browser_close_tab"))
+        self.register("browser_list_tabs", browser_list_tabs, BROWSER_TOOL_SCHEMAS.get("browser_list_tabs"))
+        self.register("browser_select_tab", browser_select_tab, BROWSER_TOOL_SCHEMAS.get("browser_select_tab"))
+        self.register("browser_wait_for", browser_wait_for, BROWSER_TOOL_SCHEMAS.get("browser_wait_for"))
+        # Input
+        self.register("browser_click", browser_click, BROWSER_TOOL_SCHEMAS.get("browser_click"))
+        self.register("browser_fill", browser_fill, BROWSER_TOOL_SCHEMAS.get("browser_fill"))
+        self.register("browser_fill_form", browser_fill_form, BROWSER_TOOL_SCHEMAS.get("browser_fill_form"))
+        self.register("browser_press_key", browser_press_key, BROWSER_TOOL_SCHEMAS.get("browser_press_key"))
+        self.register("browser_hover", browser_hover, BROWSER_TOOL_SCHEMAS.get("browser_hover"))
+        self.register("browser_drag", browser_drag, BROWSER_TOOL_SCHEMAS.get("browser_drag"))
+        self.register("browser_upload_file", browser_upload_file, BROWSER_TOOL_SCHEMAS.get("browser_upload_file"))
+        self.register("browser_handle_dialog", browser_handle_dialog, BROWSER_TOOL_SCHEMAS.get("browser_handle_dialog"))
+        # Inspection
+        self.register("browser_screenshot", browser_screenshot, BROWSER_TOOL_SCHEMAS.get("browser_screenshot"))
+        self.register("browser_snapshot", browser_snapshot, BROWSER_TOOL_SCHEMAS.get("browser_snapshot"))
+        self.register("browser_evaluate", browser_evaluate, BROWSER_TOOL_SCHEMAS.get("browser_evaluate"))
+        self.register("browser_console_messages", browser_console_messages, BROWSER_TOOL_SCHEMAS.get("browser_console_messages"))
+        self.register("browser_get_console_message", browser_get_console_message, BROWSER_TOOL_SCHEMAS.get("browser_get_console_message"))
+        # Network
+        self.register("browser_network_requests", browser_network_requests, BROWSER_TOOL_SCHEMAS.get("browser_network_requests"))
+        self.register("browser_network_request", browser_network_request, BROWSER_TOOL_SCHEMAS.get("browser_network_request"))
+        # Performance
+        self.register("browser_perf_start", browser_perf_start, BROWSER_TOOL_SCHEMAS.get("browser_perf_start"))
+        self.register("browser_perf_stop", browser_perf_stop, BROWSER_TOOL_SCHEMAS.get("browser_perf_stop"))
+        self.register("browser_perf_analyze", browser_perf_analyze, BROWSER_TOOL_SCHEMAS.get("browser_perf_analyze"))
+        # Emulation
+        self.register("browser_emulate", browser_emulate, BROWSER_TOOL_SCHEMAS.get("browser_emulate"))
+        self.register("browser_resize", browser_resize, BROWSER_TOOL_SCHEMAS.get("browser_resize"))
 
         # Update session_info with actual tool count
         set_session_info_config(tool_count=len(self.tools))
