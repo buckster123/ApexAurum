@@ -12,7 +12,9 @@ export const useChatStore = defineStore('chat', () => {
 
   // Getters
   const sortedConversations = computed(() => {
-    return [...conversations.value].sort((a, b) =>
+    const convs = conversations.value || []
+    if (!Array.isArray(convs)) return []
+    return [...convs].sort((a, b) =>
       new Date(b.updated_at) - new Date(a.updated_at)
     )
   })

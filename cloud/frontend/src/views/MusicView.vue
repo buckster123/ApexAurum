@@ -35,9 +35,10 @@ async function fetchLibrary() {
       params.append('favorites_only', 'true')
     }
     const response = await api.get(`/api/v1/music/library?${params}`)
-    library.value = response.data.tasks
+    library.value = response.data?.tasks || []
   } catch (e) {
     console.error('Failed to fetch library:', e)
+    library.value = []
   } finally {
     loading.value = false
   }

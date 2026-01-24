@@ -56,18 +56,20 @@ async function search() {
 async function fetchThreads() {
   try {
     const response = await api.get('/api/v1/village/threads')
-    threads.value = response.data.threads
+    threads.value = response.data?.threads || []
   } catch (e) {
     console.error('Failed to fetch threads:', e)
+    threads.value = []
   }
 }
 
 async function checkConvergence() {
   try {
     const response = await api.get('/api/v1/village/convergence')
-    convergence.value = response.data
+    convergence.value = response.data || null
   } catch (e) {
     console.error('Failed to check convergence:', e)
+    convergence.value = null
   }
 }
 
@@ -117,7 +119,7 @@ function getVisibilityIcon(visibility) {
             {{ convergence.convergence_type === 'CONSENSUS' ? 'Consensus Reached!' : 'Harmony Detected' }}
           </div>
           <div class="text-sm text-gray-400">
-            {{ convergence.agents.join(', ') }} agree on: {{ convergence.topic }}
+            {{ convergence.agents?.join(', ') || 'Agents' }} agree on: {{ convergence.topic }}
           </div>
         </div>
         <div class="ml-auto text-2xl font-bold">
