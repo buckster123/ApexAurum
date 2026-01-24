@@ -29,6 +29,13 @@ from .utilities import (
     UTILITY_TOOL_SCHEMAS,
 )
 
+# Web Tools (fetch & search)
+from .web import (
+    web_fetch,
+    web_search,
+    WEB_TOOL_SCHEMAS,
+)
+
 from .filesystem import (
     fs_read_file,
     fs_write_file,
@@ -277,6 +284,7 @@ NURSERY_TOOL_SCHEMAS = {
 # Combine all schemas
 ALL_TOOL_SCHEMAS = {
     **UTILITY_TOOL_SCHEMAS,
+    **WEB_TOOL_SCHEMAS,
     **FILESYSTEM_TOOL_SCHEMAS,
     **CODE_EXECUTION_TOOL_SCHEMAS,
     **MEMORY_TOOL_SCHEMAS,
@@ -301,6 +309,9 @@ ALL_TOOLS = {
     "count_words": count_words,
     "random_number": random_number,
     "session_info": session_info,
+    # Web Tools
+    "web_fetch": web_fetch,
+    "web_search": web_search,
     # Filesystem
     "fs_read_file": fs_read_file,
     "fs_write_file": fs_write_file,
