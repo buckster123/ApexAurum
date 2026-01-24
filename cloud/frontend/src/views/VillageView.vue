@@ -45,7 +45,7 @@ async function search() {
     }
 
     const response = await api.get(`/api/v1/village/knowledge?${params}`)
-    searchResults.value = response.data.results
+    searchResults.value = response.data?.results || []
   } catch (e) {
     console.error('Search failed:', e)
   } finally {

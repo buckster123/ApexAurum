@@ -43,9 +43,10 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/api/v1/user/profile')
       user.value = response.data
     } catch (e) {
-      if (e.response?.status === 401) {
-        clearTokens()
-      }
+      // Don't clear tokens on profile fetch failure - token might still be valid
+      // This prevents logout loops when profile endpoint has issues
+      console.error('Failed to fetch profile:', e)
+      user.value = null
     }
   }
 

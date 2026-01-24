@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -30,6 +30,8 @@ async function handleSubmit() {
 
   try {
     await auth.register(email.value, password.value, displayName.value || null)
+    // Wait for Vue reactivity to propagate
+    await nextTick()
     await router.push('/chat')
   } catch (e) {
     console.error('Registration error:', e)

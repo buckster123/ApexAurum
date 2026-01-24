@@ -34,12 +34,19 @@ async function fetchAgents() {
   loading.value = true
   try {
     const response = await api.get('/api/v1/agents/')
-    agents.value = response.data
+    agents.value = Array.isArray(response.data) ? response.data : []
   } catch (e) {
     console.error('Failed to fetch agents:', e)
+    agents.value = []
   } finally {
     loading.value = false
   }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Unknown'
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? 'Unknown' : d.toLocaleString()
 }
 
 async function spawnAgent() {
@@ -151,7 +158,7 @@ function getStatusIcon(status) {
         <p class="text-sm text-gray-300 mb-3 line-clamp-2">{{ agent.task }}</p>
 
         <div class="text-xs text-gray-500">
-          {{ new Date(agent.created_at).toLocaleString() }}
+          {{ formatDate(agent.created_at) }}
         </div>
 
         <div v-if="agent.result" class="mt-3 pt-3 border-t border-apex-border">

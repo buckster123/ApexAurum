@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -18,6 +18,8 @@ async function handleSubmit() {
 
   try {
     await auth.login(email.value, password.value)
+    // Wait for Vue reactivity to propagate
+    await nextTick()
     const redirect = route.query.redirect || '/chat'
     await router.push(redirect)
   } catch (e) {
