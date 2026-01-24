@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app_config import settings
 from routes import chat, tools, models, memory, benchmark, conversations, stats, presets, village, prompts
-from routes import suno, audio, nursery
+from routes import suno, audio, nursery, pocket
 from routes import websocket as ws_routes
 
 # Configure logging
@@ -85,6 +85,7 @@ app.include_router(suno.router, prefix="/api/suno", tags=["Suno Compiler"])
 app.include_router(audio.router, prefix="/api/audio", tags=["Audio Editor"])
 app.include_router(nursery.router, tags=["Nursery"])
 app.include_router(ws_routes.router, prefix="/ws", tags=["WebSocket"])
+app.include_router(pocket.router, prefix="/api/pocket", tags=["ApexPocket"])
 
 # Mount Village GUI static files
 village_static = Path(__file__).parent / "static" / "village"
