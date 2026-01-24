@@ -1,4 +1,5 @@
 # ApexAurum Cloud - Backend Dependencies
+# Cache bust: 2026-01-24-v2
 
 # Core Framework
 fastapi>=0.109.0
@@ -33,7 +34,7 @@ numpy>=1.26.0
 # sentence-transformers>=2.2.0
 
 # Utilities
-python-multipart>=0.0.6
+python-multipart>=0.0.7
 python-dotenv>=1.0.0
 email-validator>=2.1.0  # Required by Pydantic for email validation
 
