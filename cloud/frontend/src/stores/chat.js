@@ -19,14 +19,25 @@ export const useChatStore = defineStore('chat', () => {
 
   // Actions
   async function fetchConversations() {
-    const response = await api.get('/api/v1/chat/conversations')
-    conversations.value = response.data.conversations
+    try {
+      const response = await api.get('/api/v1/chat/conversations')
+      conversations.value = response.data.conversations || []
+    } catch (e) {
+      console.error('Failed to fetch conversations:', e)
+      conversations.value = []
+    }
   }
 
   async function loadConversation(id) {
-    const response = await api.get(`/api/v1/chat/conversations/${id}`)
-    currentConversation.value = response.data
-    messages.value = response.data.messages
+    try {
+      const response = await api.get(`/api/v1/chat/conversations/${id}`)
+      currentConversation.value = response.data
+      messages.value = response.data.messages || []
+    } catch (e) {
+      console.error('Failed to load conversation:', e)
+      currentConversation.value = null
+      messages.value = []
+    }
   }
 
   async function createConversation() {

@@ -30,9 +30,10 @@ async function handleSubmit() {
 
   try {
     await auth.register(email.value, password.value, displayName.value || null)
-    router.push('/chat')
+    await router.push('/chat')
   } catch (e) {
-    error.value = e.response?.data?.detail || 'Registration failed'
+    console.error('Registration error:', e)
+    error.value = e.response?.data?.detail || e.message || 'Registration failed'
   } finally {
     loading.value = false
   }

@@ -19,9 +19,10 @@ async function handleSubmit() {
   try {
     await auth.login(email.value, password.value)
     const redirect = route.query.redirect || '/chat'
-    router.push(redirect)
+    await router.push(redirect)
   } catch (e) {
-    error.value = e.response?.data?.detail || 'Login failed'
+    console.error('Login error:', e)
+    error.value = e.response?.data?.detail || e.message || 'Login failed'
   } finally {
     loading.value = false
   }
