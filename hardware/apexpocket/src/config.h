@@ -14,8 +14,8 @@
 // HARDWARE VARIANT
 // ============================================================================
 // Uncomment ONE of these:
-#define VARIANT_WOKWI           // Wokwi simulation (ESP32 DevKit)
-// #define VARIANT_XIAO_S3      // Seeed XIAO ESP32-S3 (production)
+// #define VARIANT_WOKWI        // Wokwi simulation (ESP32 DevKit)
+#define VARIANT_XIAO_S3         // Seeed XIAO ESP32-S3 (production)
 // #define VARIANT_DEVKIT       // Generic ESP32 DevKit
 
 // ============================================================================
@@ -31,6 +31,7 @@
 #define FEATURE_DEEPSLEEP       // Deep sleep for battery life
 #define FEATURE_ANIMATIONS      // Smooth face animations
 #define FEATURE_RICH_OFFLINE    // Extended offline responses
+#define FEATURE_SD              // External SD card for library storage
 // #define FEATURE_BLE          // Bluetooth Low Energy (future)
 // #define FEATURE_VIBRATION    // Haptic feedback motor
 // #define FEATURE_RGB          // RGB LED (NeoPixel)
@@ -54,17 +55,25 @@
 #endif
 
 #ifdef VARIANT_XIAO_S3
-    // Seeed XIAO ESP32-S3
-    #define PIN_BTN_A       4       // D3
-    #define PIN_BTN_B       5       // D4
-    #define PIN_LED         21      // Built-in
-    #define PIN_I2C_SDA     6       // D5
-    #define PIN_I2C_SCL     7       // D6
-    #define PIN_BUZZER      43      // D7 (TX)
-    #define PIN_BATTERY     1       // A0 (D0)
-    #define PIN_VIBRATION   44      // D8 (RX)
+    // Seeed XIAO ESP32-S3 - ApexPocket MAX Build
+    // Matches your physical stack!
+    #define PIN_BTN_A       1       // D0 - Also WAKE pin
+    #define PIN_BTN_B       2       // D1
+    #define PIN_LED         21      // Built-in LED
+    #define PIN_I2C_SDA     5       // D4 - OLED + 24LC32 EEPROM
+    #define PIN_I2C_SCL     6       // D5 - OLED + 24LC32 EEPROM
+    #define PIN_BUZZER      7       // D6 - M5Stack Buzzer SIG
+    #define PIN_BATTERY     3       // D2/A2 - ADC for LiPo monitoring
+    #define PIN_VIBRATION   4       // D3 - Future: haptic motor
     #define USE_LITTLEFS    true
-    #define HAS_PSRAM       true
+    #define HAS_PSRAM       false   // Regular XIAO S3 (not Sense)
+
+    // SD Card SPI (Pololu breakout) - ACTIVE
+    #define FEATURE_SD_CARD
+    #define PIN_SD_CS       44      // D7
+    #define PIN_SD_MOSI     9       // D9
+    #define PIN_SD_MISO     8       // D8
+    #define PIN_SD_SCK      43      // D10
 #endif
 
 #ifdef VARIANT_DEVKIT
@@ -100,12 +109,16 @@
 #ifdef VARIANT_WOKWI
     #define WIFI_SSID       "Wokwi-GUEST"
     #define WIFI_PASS       ""
+    #define APEX_HOST       "host.wokwi.internal"
 #else
-    #define WIFI_SSID       "YourWiFi"
-    #define WIFI_PASS       "YourPassword"
+    // ═══════════════════════════════════════════════════════
+    // ██  CONFIGURE THESE FOR YOUR NETWORK  ██
+    // ═══════════════════════════════════════════════════════
+    #define WIFI_SSID       "YOUR_WIFI_NAME"      // ← Your WiFi
+    #define WIFI_PASS       "YOUR_WIFI_PASSWORD"  // ← Your Password
+    #define APEX_HOST       "192.168.X.X"         // ← Pi IP (run: hostname -I)
+    // ═══════════════════════════════════════════════════════
 #endif
-
-#define APEX_HOST           "192.168.0.114"
 #define APEX_PORT           8765
 #define API_TIMEOUT_MS      10000
 
@@ -118,7 +131,7 @@
 #define BATTERY_R2          100     // Voltage divider R2 (kΩ)
 
 #define SLEEP_TIMEOUT_MS    300000  // 5 minutes idle → deep sleep
-#define SLEEP_WAKEUP_PIN    PIN_BTN_A
+#define SLEEP_WAKEUP_PIN    1       // GPIO1 (D0/BTN_A) - must be RTC GPIO
 
 // ============================================================================
 // AUDIO SETTINGS

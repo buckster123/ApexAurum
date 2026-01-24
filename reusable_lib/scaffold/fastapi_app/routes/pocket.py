@@ -164,7 +164,7 @@ RULES:
         # Get LLM response
         client = get_llm_client()
         response = client.chat(
-            prompt=request.message,
+            messages=request.message,  # ClaudeClient accepts string or list
             system=system_prompt,
             max_tokens=100  # Keep it short for display
         )

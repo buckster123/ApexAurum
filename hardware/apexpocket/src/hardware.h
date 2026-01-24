@@ -14,6 +14,14 @@
 #include <Wire.h>
 #include "config.h"
 
+#if USE_LITTLEFS
+#include <LittleFS.h>
+#endif
+
+#ifdef FEATURE_DEEPSLEEP
+#include "esp_sleep.h"
+#endif
+
 // ============================================================================
 // HARDWARE DETECTION RESULTS
 // ============================================================================
