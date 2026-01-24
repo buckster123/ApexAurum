@@ -70,6 +70,28 @@ class ChromeMCPClient:
     def connected(self) -> bool:
         return self._connected and self.process is not None
 
+    def transport_alive(self) -> bool:
+        """Check if the transport is actually alive (not just cached state)"""
+        if not self._connected or self.process is None:
+            return False
+        # Check if process is still running
+        if self.process.returncode is not None:
+            logger.warning("MCP process has terminated")
+            self._connected = False
+            return False
+        # Check if stdin is still writable
+        if self.process.stdin is None or self.process.stdin.is_closing():
+            logger.warning("MCP stdin is closed")
+            self._connected = False
+            return False
+        return True
+
+    async def reconnect(self) -> Dict[str, Any]:
+        """Force reconnect - disconnect if needed, then connect fresh"""
+        logger.info("Reconnecting to MCP server...")
+        await self.disconnect()
+        return await self.connect()
+
     async def connect(self) -> Dict[str, Any]:
         """
         Start MCP server subprocess and establish connection.
@@ -171,19 +193,27 @@ class ChromeMCPClient:
             self.process = None
             return {"success": False, "error": str(e)}
 
-    async def call_tool(self, tool_name: str, arguments: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def call_tool(self, tool_name: str, arguments: Dict[str, Any] = None, auto_reconnect: bool = True) -> Dict[str, Any]:
         """
         Call an MCP tool and return result.
 
         Args:
             tool_name: Tool name (e.g., "navigate_page", "click", "take_screenshot")
             arguments: Tool-specific arguments
+            auto_reconnect: If True, reconnect if transport is dead (Streamlit fix)
 
         Returns:
             Tool result dict with success/error and data
         """
-        if not self._connected:
-            return {"success": False, "error": "Not connected. Call connect() first."}
+        # Check if we need to reconnect (Streamlit transport fix)
+        if not self.transport_alive():
+            if auto_reconnect:
+                logger.info(f"Transport dead before {tool_name}, auto-reconnecting...")
+                reconnect_result = await self.reconnect()
+                if not reconnect_result.get("success"):
+                    return {"success": False, "error": f"Auto-reconnect failed: {reconnect_result.get('error')}"}
+            else:
+                return {"success": False, "error": "Not connected. Call connect() first."}
 
         try:
             result = await self._send_request("tools/call", {
@@ -354,12 +384,18 @@ async def ensure_connected(
     isolated: bool = True,
     viewport: str = "1920x1080"
 ) -> Dict[str, Any]:
-    """Ensure client is connected with given config"""
+    """Ensure client is connected with given config (checks actual transport, not just flag)"""
     global _client
 
-    if _client is None or not _client.connected:
+    # Check if we need to create or reconnect
+    if _client is None:
         config = MCPConfig(headless=headless, isolated=isolated, viewport=viewport)
         _client = ChromeMCPClient(config)
         return await _client.connect()
+
+    # Check if transport is actually alive (Streamlit fix)
+    if not _client.transport_alive():
+        logger.info("Transport dead in ensure_connected, reconnecting...")
+        return await _client.reconnect()
 
     return {"success": True, "message": "Already connected"}
