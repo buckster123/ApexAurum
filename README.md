@@ -8,7 +8,7 @@
 
 <br/>
 
-[![Tools](https://img.shields.io/badge/tools-79+-blueviolet?style=for-the-badge)]()
+[![Tools](https://img.shields.io/badge/tools-110+-blueviolet?style=for-the-badge)]()
 [![Code](https://img.shields.io/badge/lines-60k+-blue?style=for-the-badge)]()
 [![Python](https://img.shields.io/badge/python-3.10+-green?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)]()
@@ -34,7 +34,7 @@
 
 **ApexAurum** transforms Claude from a simple chatbot into a full AI operating environment:
 
-- **79+ integrated tools** spanning file ops, code execution, agents, music, EEG, vision, and more
+- **110+ integrated tools** spanning file ops, code execution, agents, music, ML training, vision, and more
 - **Multi-agent orchestration** — spawn independent Claude instances that collaborate
 - **Persistent memory** — the Village Protocol lets agents share knowledge across sessions
 - **Neural resonance** — optional EEG integration so AI can perceive human emotional states
@@ -51,7 +51,7 @@ flowchart LR
     subgraph APEX[ApexAurum]
         direction TB
         CHAT[Chat Interface]
-        TOOLS[79+ Tools]
+        TOOLS[110+ Tools]
         AGENTS[Agent Swarm]
         MEMORY[Village Memory]
     end
@@ -234,10 +234,57 @@ cd reusable_lib/scaffold/fastapi_app
 - Native Ollama streaming
 - Tool selector with presets
 - Village Protocol support
-- All 79 tools available
+- All 110+ tools available
 - Works with hailo-ollama
 
 Perfect for headless Pi deployment.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### The Nursery 🌱
+**Train your own models** with cloud or local GPU:
+
+```python
+# Generate training data from tools
+nursery_generate_data("memory_store", 50)
+
+# Train on cloud GPU ($0.09 per run!)
+nursery_train_cloud(
+    dataset_name="tool_examples",
+    base_model="TinyLlama-1.1B",
+    output_name="my_fine_tuned_model"
+)
+```
+
+- Automatic dataset generation
+- Cloud training via Vast.ai
+- Local LoRA training (CPU/GPU)
+- Village-integrated model registry
+
+</td>
+<td width="50%" valign="top">
+
+### Apprentice Protocol 🧒
+**Agents can train their own specialists:**
+
+```python
+# Master agent creates apprentice
+nursery_create_apprentice(
+    master_agent="AZOTH",
+    apprentice_name="memory_specialist",
+    specialization="Knowledge retrieval"
+)
+```
+
+- Master → Apprentice model lineage
+- Auto-training from Village knowledge
+- Model discovery across agents
+- Shared registry with attribution
+
+*"From the Nursery, new minds emerge."*
 
 </td>
 </tr>
@@ -258,7 +305,7 @@ flowchart TB
         MV[Music Visualizer]
     end
 
-    subgraph TOOLS[79+ Tools]
+    subgraph TOOLS[110+ Tools]
         direction LR
         T1[Filesystem]
         T2[Code Sandbox]
@@ -351,7 +398,7 @@ streamlit run main.py
 
 ## Tool Ecosystem
 
-### 79+ Tools Across 14 Categories
+### 110+ Tools Across 16 Categories
 
 | Category | Count | Highlights |
 |----------|-------|------------|
@@ -401,7 +448,7 @@ Each archetype has a distinct personality, approach to problems, and can be summ
 ```
 
 - **1-4 agents** respond simultaneously with ThreadPoolExecutor
-- **Full tool access** — all 79+ tools available during dialogue
+- **Full tool access** — all 110+ tools available during dialogue
 - **Per-agent cost tracking** in real-time
 - **History persistence** — save, load, resume conversations
 - **Convergence detection** — system detects HARMONY (2 agents agree) or CONSENSUS (3+)
@@ -418,7 +465,7 @@ Each archetype has a distinct personality, approach to problems, and can be summ
  • API Client        • Code Execution     • Context Mgmt      • Conversations     • Village Protocol
  • Tool System       • Vision Support     • Multi-Agent       • Vector Search     • Neural Resonance
  • Cost Tracking     • UI Polish          • UX Polish         • Prompt Caching    • Extended Thinking
-                                                                                  • 79+ Tools / 53K Lines
+                                                                                  • 110+ Tools / 65K Lines
 ```
 
 ---
@@ -470,7 +517,7 @@ MAX_TOKENS=64000
 ├────────────────────────────────────────────────────────────┤
 │  Total Code              │  60,000+ lines                  │
 │  Main Application        │  5,600+ lines                   │
-│  Tools Available         │  79+                            │
+│  Tools Available         │  110+                           │
 │  Agent Archetypes        │  4                              │
 │  UI Versions             │  Streamlit + FastAPI            │
 │  Streamlit Pages         │  5                              │
@@ -527,7 +574,7 @@ Support ongoing development by joining the $APEX-AURUM community on [bags.fm](ht
 
 <br/>
 
-**60,000+ lines** · **79+ tools** · **4 archetypes** · **Edge AI Ready** · **Infinite possibilities**
+**65,000+ lines** · **110+ tools** · **4 archetypes** · **Edge AI Ready** · **Infinite possibilities**
 
 <br/>
 

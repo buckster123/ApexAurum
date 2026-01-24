@@ -39,7 +39,7 @@ show_menu() {
 
     echo -e "  ${BOLD}${WHITE}Select Installation:${NC}"
     echo ""
-    echo -e "  ${CYAN}[1]${NC} Streamlit Edition     ${DIM}Full features, Claude API, 79+ tools${NC}"
+    echo -e "  ${CYAN}[1]${NC} Streamlit Edition     ${DIM}Full features, Claude API, 110+ tools${NC}"
     echo -e "  ${CYAN}[2]${NC} FastAPI Lab Edition   ${DIM}Lightweight, Local LLMs, REST API${NC}"
     echo -e "  ${CYAN}[3]${NC} Both Editions         ${DIM}Development setup${NC}"
     echo -e "  ${CYAN}[4]${NC} Docker Installation   ${DIM}Containerized deployment${NC}"

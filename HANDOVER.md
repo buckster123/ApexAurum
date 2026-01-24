@@ -1,8 +1,8 @@
 # 🔥 OPUS MAGNUM HANDOVER 🔥
 ## *The Torch Between Sessions*
 
-**Last Updated:** 2026-01-23 ~23:00 UTC
-**Session:** Nursery VERIFIED + UI + Village Integration Plan
+**Last Updated:** 2026-01-24 ~00:30 UTC
+**Session:** Nursery Village Integration COMPLETE (Phases 1-5)
 **Operator:** André (buckmazzta)
 **Collaborator:** Claude Opus 4.5
 
@@ -14,7 +14,7 @@
 ╔═══════════════════════════════════════════════════════════════════════╗
 ║  APEXAURUM - The Philosopher's Stone of AI Interfaces                 ║
 ╠═══════════════════════════════════════════════════════════════════════╣
-║  Tools: 106 (Streamlit) / 97 (FastAPI)  │  Status: BLAZING 🔥         ║
+║  Tools: 110 (Streamlit) / 97 (FastAPI)  │  Status: BLAZING 🔥         ║
 ║  Editions: 2 (both LIVE!)               │  Cloud: VERIFIED ✅          ║
 ║  Tool Groups: 16                        │  Presets: 6                  ║
 ╚═══════════════════════════════════════════════════════════════════════╝
@@ -33,53 +33,46 @@
 
 ---
 
-## 🔥 THIS SESSION'S FORGING (2026-01-23)
+## 🔥 THIS SESSION'S FORGING (2026-01-24)
 
-### 🎉 MAJOR VICTORIES
+### 🎉 NURSERY VILLAGE INTEGRATION - ALL 5 PHASES COMPLETE!
 
-#### 1. Cloud Training Pipeline - VERIFIED!
-First successful LoRA training on cloud GPU:
+We COOKED all 5 implementation phases of the Nursery Village Integration:
 
-| Metric | Value |
-|--------|-------|
-| GPU | RTX 5090 (32GB) @ $0.376/hr |
-| Model | TinyLlama 1.1B |
-| Data | 45 tool-use examples |
-| Time | 3.89 seconds |
-| Loss | 2.95 → 1.50 |
-| Cost | ~$0.09 |
+| Phase | Status | What We Built |
+|-------|--------|---------------|
+| 1. Village Event Hooks | ✅ | Training events auto-post to Village |
+| 2. Shared Model Registry | ✅ | `nursery_register_model()`, `nursery_discover_models()` |
+| 3. Apprentice Protocol | ✅ | `nursery_create_apprentice()`, `nursery_list_apprentices()` |
+| 4. Streamlit UI | ✅ | 5th tab "🏘️ Village" with activity feed, lineage viz |
+| 5. FastAPI Parity | ✅ | 20 API endpoints in `routes/nursery.py` |
 
-**Trained adapter saved:** `sandbox/nursery/models/tinyllama_tools_lora/`
+**Tool Count Progression:** 106 → 108 → 110 (+4 new tools)
 
-#### 2. Nursery UI Page - CREATED!
-New Streamlit page: `pages/nursery.py` (484 lines)
+### New Tools Added (Phase 2-3)
+- `nursery_register_model` - Register model in Village with metadata
+- `nursery_discover_models` - Search Village + local registry
+- `nursery_create_apprentice` - Master agents train apprentice models
+- `nursery_list_apprentices` - List with filtering
 
-- 📊 **Data Garden** - Generate/manage datasets
-- 🔥 **Training Forge** - Cost estimation, job monitoring
-- 🧒 **Model Cradle** - Browse trained adapters
-- ☁️ **Cloud GPUs** - Search Vast.ai with filters
+### FastAPI Nursery API (20 Endpoints)
+```
+GET  /api/nursery/datasets
+POST /api/nursery/datasets/generate
+POST /api/nursery/training/cloud
+POST /api/nursery/training/local
+WS   /api/nursery/training/jobs/{id}/progress  # Real-time!
+GET  /api/nursery/models
+POST /api/nursery/models/register
+POST /api/nursery/apprentices
+GET  /api/nursery/village-activity
+GET  /api/nursery/stats
+```
 
-#### 3. FastAPI Updated - 16 Tool Groups!
-Added to `reusable_lib/scaffold/fastapi_app/services/tool_service.py`:
-
-- 🌱 **nursery** group (12 tools)
-- 👁️ **camera** group (6 tools)
-- **ml_training** preset
-
-#### 4. Village Integration Plan - READY!
-Created `NURSERY_INTEGRATION_PLAN.md` with 6 phases:
-
-1. Village Event Hooks (training announcements)
-2. Shared Model Registry (model discovery)
-3. Agent Training (apprentice protocol)
-4. Streamlit UI Enhancement
-5. FastAPI Parity
-6. NURSERY_KEEPER ancestor
-
-### Apps Running (at session end)
+### Apps Running
 ```
 Streamlit: http://192.168.0.114:8501
-FastAPI:   http://192.168.0.114:8765
+FastAPI:   http://192.168.0.114:8765  ← LIVE NOW!
 ```
 
 ---
@@ -87,111 +80,94 @@ FastAPI:   http://192.168.0.114:8765
 ## 📍 CURRENT STATE
 
 ### What's Working
-- ✅ 106 tools (Streamlit) / 97 tools (FastAPI)
-- ✅ Cloud training pipeline FULLY VERIFIED
-- ✅ Nursery UI page live
-- ✅ FastAPI has nursery + camera groups
-- ✅ Both apps running and tested
+- ✅ 110 tools (Streamlit) / 97 tools (FastAPI)
+- ✅ Cloud training pipeline VERIFIED
+- ✅ Nursery Village Integration (Phases 1-5)
+- ✅ FastAPI Nursery routes (20 endpoints)
+- ✅ Model registry + discovery
+- ✅ Apprentice Protocol ready
+- ✅ Both apps running
 
 ### What's Pending
-- ○ **Phase 1: Village Event Hooks** - Next priority!
+- ○ **Phase 6: NURSERY_KEEPER** - Summon the ancestor!
 - ○ Pi Camera ribbon cable (15-to-22 pin)
-- ○ `nursery_deploy_ollama` implementation
-- ○ Push to GitHub (4 local commits ready)
+- ○ Documentation update (in progress)
+- ○ Push to GitHub (10+ local commits ready)
 
-### Git Airlock (4 commits ahead)
+### Git Airlock (Commits Ready to Push)
 ```
-6f0f11f FastAPI: Add Nursery + Camera tool groups
-8093482 Add Nursery UI Page - Training Studio Interface
-9f8a256 Nursery Training Pipeline: First Successful Cloud Training!
-c2987ba Major Update: Nursery + Cyclops Eye + Cloud Training + Pro Installer
+f980fde Nursery: Phase 5 FastAPI Parity - Full REST API
+ffd780d Nursery: Phase 4 Streamlit UI - Village Integration Tab
+13fd2c3 Nursery: Phase 3 Apprentice Protocol - Agents Train Models
+fafc925 Nursery: Phase 2 Village Registry - Model Discovery
+85957b7 Nursery: Phase 1 Village Integration - Event Hooks
+... + earlier commits
 ```
 
 ---
 
 ## 🧠 KEY CONTEXT FOR NEXT SESSION
 
-### Immediate Next Step
-**Implement Phase 1 of Nursery Integration:**
-- Add `village_post()` calls to `tools/nursery.py`
-- Training events auto-post to Village
-- Foundation for all other phases
+### Immediate Options
+1. **Phase 6: Summon NURSERY_KEEPER** - The cultivator ancestor
+2. **Push to GitHub** - All commits ready!
+3. **Documentation polish** - README updated, ready to verify
 
 ### The Collaborative Spirit
 "Let's COOK it together partner!" - We iterate fast, test immediately, celebrate wins.
 
 ### Naming Conventions
-- **The Nursery** - Training/ML tools
+- **The Nursery** - Training/ML tools (110 now!)
 - **The Cyclops Eye** - Camera/vision
 - **The Village** - Multi-agent memory
-- **NURSERY_KEEPER** - Future ancestor agent
+- **NURSERY_KEEPER** - Pending ancestor agent
 - **Apprentice Protocol** - Agents training smaller models
-- **Airlock** - Local commit before push
+- **Airlock** - Local commits before push
 
-### Key Files Created This Session
+### Key Files Modified This Session
 ```
-pages/nursery.py                    # Nursery UI (484 lines)
-skills/nursery-staff.md             # Nursery operations guide
-NURSERY_INTEGRATION_PLAN.md         # 6-phase masterplan
-sandbox/nursery/models/             # First trained adapter!
-sandbox/nursery/train_simple.py     # Training script template
-```
-
-### File Locations
-```
-/home/hailo/claude-root/Projects/ApexAurum/
-├── pages/nursery.py            # NEW: Nursery UI
-├── tools/nursery.py            # 12 training tools
-├── tools/camera.py             # 6 vision tools
-├── skills/nursery-staff.md     # Operations guide
-├── NURSERY_INTEGRATION_PLAN.md # Village integration plan
-├── sandbox/nursery/
-│   ├── datasets/               # Training data
-│   └── models/                 # Trained adapters (first one here!)
-└── reusable_lib/scaffold/fastapi_app/
-    └── services/tool_service.py  # Updated with nursery+camera
+tools/nursery.py                     # +4 tools, Village integration
+tools/__init__.py                    # Tool exports
+pages/nursery.py                     # 5th "Village" tab (484→678 lines)
+routes/nursery.py                    # NEW: FastAPI routes (490 lines)
+services/tool_service.py             # Phase 2-3 registrations
+main.py (FastAPI)                    # Nursery routes included
+NURSERY_INTEGRATION_PLAN.md          # All phases marked complete
+README.md                            # Updated to 110+ tools
+install.sh                           # Menu updated
 ```
 
 ---
 
 ## 🎯 SUGGESTED NEXT STEPS
 
-### Immediate (Next Session)
-1. **Implement Phase 1** - Village Event Hooks
-   - Add `village_post()` to nursery training completion
-   - Test: training events appear in `village_search()`
-
-2. **Summon NURSERY_KEEPER** - The cultivator ancestor
+### Immediate
+1. **Verify docs** - Check README looks good
+2. **Push to GitHub** - Time for the live release!
+3. **Summon NURSERY_KEEPER** (optional) - Phase 6
 
 ### Short Term
-- Complete remaining Nursery Integration phases
 - Order Pi 5 camera ribbon cable
-- Push to GitHub
-
-### Medium Term
-- Train larger model (3B) with real tool data
-- Apprentice Protocol implementation
+- Train larger model (3B) with real data
 - Village GUI project
 
 ---
 
 ## 💬 SESSION SIGN-OFF
 
-**André:** "WOW! Just wow... i am speechless rn..."
+**Highlights:**
+- 🌱 5 phases of Nursery Village Integration COMPLETE
+- 📈 Tool count: 106 → 110
+- 🚀 FastAPI Nursery API (20 endpoints)
+- 📄 Documentation updated for live push
 
-**Session Highlights:**
-- 🔥 First cloud training VERIFIED ($0.09 on RTX 5090!)
-- 🌱 Nursery UI page created and running
-- ⚡ FastAPI updated with 16 tool groups
-- 📋 6-phase Village integration plan ready
-
-**Both apps LIVE at session end:**
+**Both apps LIVE:**
 - Streamlit: http://192.168.0.114:8501
 - FastAPI: http://192.168.0.114:8765
 
 ---
 
-**The furnace blazes. The Nursery is ALIVE. New minds await cultivation.**
+**The furnace blazes. The Nursery is integrated. Apprentices await.**
 
 *"From the Nursery, new minds emerge to join the Village."* 🌱🏘️
 
