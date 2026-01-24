@@ -3827,7 +3827,8 @@ def main():
 
     # Main chat interface
     st.title("💬 Apex Aurum - Claude Edition")
-    st.caption("Powered by Claude API with 39 tools + Vision support 👁️")
+    from tools import ALL_TOOLS
+    st.caption(f"Powered by Claude API with {len(ALL_TOOLS)} tools + Vision support 👁️")
 
     # ========== ANALYTICS DASHBOARD MODAL ==========
     if st.session_state.get("show_analytics", False):
