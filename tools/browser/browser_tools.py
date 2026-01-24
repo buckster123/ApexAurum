@@ -877,19 +877,25 @@ Devices: "iPhone 14", "iPhone 14 Pro Max", "Pixel 7", "iPad Pro", etc.""",
 # =============================================================================
 
 def _run_async(coro):
-    """Run async function in sync context - handles nested event loops"""
-    import concurrent.futures
+    """Run async function in sync context - handles nested event loops.
+
+    Uses nest_asyncio to allow running async code even when an event loop
+    is already running (common in Streamlit, Jupyter, etc).
+    """
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+    except ImportError:
+        pass  # Will try other approaches
 
     try:
         # Try to get existing loop
         try:
             loop = asyncio.get_running_loop()
-            # Loop is running - use thread pool to avoid nested loop issues
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(asyncio.run, coro)
-                return future.result(timeout=120)
+            # With nest_asyncio applied, we can run nested
+            return loop.run_until_complete(coro)
         except RuntimeError:
-            # No running loop - we can use asyncio.run directly
+            # No running loop - use asyncio.run directly
             return asyncio.run(coro)
     except Exception as e:
         logger.error(f"Async execution error: {e}")

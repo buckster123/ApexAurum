@@ -27,6 +27,32 @@ from typing import Optional, Any, Dict, List
 logger = logging.getLogger(__name__)
 
 
+def _detect_browser_path() -> Optional[str]:
+    """Auto-detect Chrome/Chromium executable path."""
+    import os
+    # Check common locations in order of preference
+    candidates = [
+        "/usr/bin/chromium",           # Debian/Raspberry Pi
+        "/usr/bin/chromium-browser",   # Ubuntu
+        "/usr/bin/google-chrome",      # Google Chrome
+        "/opt/google/chrome/chrome",   # Google Chrome (alt)
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",  # macOS
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    # Try which for common names
+    for name in ["chromium", "chromium-browser", "google-chrome", "chrome"]:
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+# Debug port for managed Chrome
+CHROME_DEBUG_PORT = 9222
+
+
 @dataclass
 class MCPConfig:
     """Configuration for Chrome DevTools MCP server"""
@@ -36,15 +62,39 @@ class MCPConfig:
     isolated: bool = True
     viewport: str = "1920x1080"
     timeout: int = 30
+    executable_path: Optional[str] = None  # Auto-detected if not specified
+    use_managed_chrome: bool = True  # Pi/Linux: start Chrome ourselves, connect MCP to it
 
     def __post_init__(self):
         if not self.args:
-            self.args = [
-                "-y", "chrome-devtools-mcp@latest",
-                f"--headless={str(self.headless).lower()}",
-                f"--isolated={str(self.isolated).lower()}",
-                f"--viewport={self.viewport}"
-            ]
+            if self.use_managed_chrome:
+                # Connect to externally managed Chrome via browserUrl
+                self.args = [
+                    "-y", "chrome-devtools-mcp@latest",
+                    f"--browserUrl=http://127.0.0.1:{CHROME_DEBUG_PORT}",
+                ]
+                logger.info(f"MCP will connect to managed Chrome on port {CHROME_DEBUG_PORT}")
+            else:
+                # Let MCP launch Chrome (may have signal issues on Pi)
+                browser_path = self.executable_path or _detect_browser_path()
+
+                self.args = [
+                    "-y", "chrome-devtools-mcp@latest",
+                    f"--headless={str(self.headless).lower()}",
+                    f"--isolated={str(self.isolated).lower()}",
+                    f"--viewport={self.viewport}"
+                ]
+
+                if browser_path:
+                    self.args.append(f"--executablePath={browser_path}")
+                    logger.info(f"Using browser: {browser_path}")
+
+                # Chrome args for headless on Linux/Pi
+                self.args.extend([
+                    "--chromeArg=--no-sandbox",
+                    "--chromeArg=--disable-dev-shm-usage",
+                    "--chromeArg=--disable-gpu",
+                ])
 
 
 class MCPError(Exception):
@@ -56,11 +106,16 @@ class ChromeMCPClient:
     """
     Manages lifecycle and communication with chrome-devtools-mcp.
     Uses JSON-RPC 2.0 over stdio (MCP protocol).
+
+    On Pi/Linux, uses "managed Chrome" mode: starts Chrome ourselves with
+    remote debugging, then connects MCP to it. This avoids signal propagation
+    issues when MCP tries to spawn Chrome as a child process.
     """
 
     def __init__(self, config: Optional[MCPConfig] = None):
         self.config = config or MCPConfig()
-        self.process: Optional[asyncio.subprocess.Process] = None
+        self.process: Optional[asyncio.subprocess.Process] = None  # MCP server
+        self.chrome_process: Optional[asyncio.subprocess.Process] = None  # Managed Chrome
         self._request_id = 0
         self._connected = False
         self._pending_requests: Dict[int, asyncio.Future] = {}
@@ -92,9 +147,80 @@ class ChromeMCPClient:
         await self.disconnect()
         return await self.connect()
 
+    def _check_chrome_running(self) -> bool:
+        """Check if Chrome is already running on debug port."""
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.settimeout(1)
+            result = sock.connect_ex(('127.0.0.1', CHROME_DEBUG_PORT))
+            return result == 0
+        except Exception:
+            return False
+        finally:
+            sock.close()
+
+    async def _start_managed_chrome(self) -> bool:
+        """Start Chrome with remote debugging (managed mode for Pi/Linux).
+
+        Uses subprocess.Popen with shell to properly detach Chrome from
+        Python's process tree, avoiding signal propagation issues.
+        """
+        # Check if Chrome is already running
+        if self._check_chrome_running():
+            logger.info(f"Chrome already running on port {CHROME_DEBUG_PORT}")
+            return True
+
+        browser_path = _detect_browser_path()
+        if not browser_path:
+            logger.error("No Chrome/Chromium found")
+            return False
+
+        # Build Chrome command with all necessary flags for headless Pi
+        width, height = self.config.viewport.split("x") if "x" in self.config.viewport else ("1920", "1080")
+
+        # Use shell command with proper backgrounding to avoid signal issues
+        chrome_cmd = (
+            f'"{browser_path}" '
+            f'--headless={"new" if self.config.headless else "false"} '
+            f'--no-sandbox '
+            f'--disable-dev-shm-usage '
+            f'--disable-gpu '
+            f'--remote-debugging-port={CHROME_DEBUG_PORT} '
+            f'--window-size={width},{height} '
+            f'--disable-extensions '
+            f'--disable-background-networking '
+            f'--no-first-run '
+            f'about:blank '
+            f'>/dev/null 2>&1 &'
+        )
+
+        logger.info(f"Starting managed Chrome: {browser_path}")
+        try:
+            # Use subprocess.Popen with shell=True to properly detach
+            import os
+            os.system(chrome_cmd)
+
+            # Wait for Chrome to start and open debug port
+            for _ in range(10):  # Wait up to 5 seconds
+                await asyncio.sleep(0.5)
+                if self._check_chrome_running():
+                    logger.info(f"Managed Chrome started on port {CHROME_DEBUG_PORT}")
+                    return True
+
+            logger.error("Chrome did not start within timeout")
+            return False
+
+        except Exception as e:
+            logger.error(f"Failed to start managed Chrome: {e}")
+            return False
+
     async def connect(self) -> Dict[str, Any]:
         """
         Start MCP server subprocess and establish connection.
+
+        In managed Chrome mode (default on Pi/Linux), starts Chrome ourselves
+        then connects MCP to it via browserUrl.
 
         Returns:
             Server capabilities and info
@@ -110,6 +236,11 @@ class ChromeMCPClient:
             }
 
         try:
+            # Start managed Chrome if configured (Pi/Linux mode)
+            if self.config.use_managed_chrome:
+                if not await self._start_managed_chrome():
+                    return {"success": False, "error": "Failed to start managed Chrome"}
+
             # Start the MCP server process
             cmd = [self.config.command] + self.config.args
             logger.info(f"Starting MCP server: {' '.join(cmd)}")
@@ -159,7 +290,7 @@ class ChromeMCPClient:
             return {"success": False, "error": str(e)}
 
     async def disconnect(self) -> Dict[str, Any]:
-        """Gracefully shutdown MCP server"""
+        """Gracefully shutdown MCP server and managed Chrome"""
         try:
             if self._reader_task:
                 self._reader_task.cancel()
@@ -181,6 +312,15 @@ class ChromeMCPClient:
                     self.process.kill()
 
                 self.process = None
+
+            # Stop managed Chrome if we started it (uses pkill since we used os.system)
+            if self.config.use_managed_chrome and self._check_chrome_running():
+                logger.info("Stopping managed Chrome...")
+                try:
+                    import os
+                    os.system("pkill -f 'chromium.*--remote-debugging-port' >/dev/null 2>&1")
+                except Exception:
+                    pass
 
             self._connected = False
             self._pending_requests.clear()
@@ -278,8 +418,12 @@ class ChromeMCPClient:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _send_request(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Send JSON-RPC request and wait for response"""
+    async def _send_request(self, method: str, params: Dict[str, Any], _retry: bool = True) -> Dict[str, Any]:
+        """Send JSON-RPC request and wait for response.
+
+        Includes mid-flight transport death recovery (Streamlit fix).
+        If stdin dies during await, reconnects and retries once.
+        """
         if not self.process or not self.process.stdin:
             raise MCPError("Process not running")
 
@@ -296,10 +440,23 @@ class ChromeMCPClient:
         self._pending_requests[request_id] = future
 
         try:
-            # Send request
+            # Send request - wrapped for mid-flight death recovery
             message = json.dumps(request) + "\n"
-            self.process.stdin.write(message.encode())
-            await self.process.stdin.drain()
+            try:
+                self.process.stdin.write(message.encode())
+                await self.process.stdin.drain()
+            except (AttributeError, BrokenPipeError, ConnectionResetError, OSError) as write_err:
+                # Transport died mid-flight! (Streamlit frame boundary issue)
+                # Clean up the pending request
+                self._pending_requests.pop(request_id, None)
+
+                if _retry:
+                    logger.warning(f"Transport died mid-flight ({type(write_err).__name__}), reconnecting...")
+                    await self.reconnect()
+                    # Retry once (with _retry=False to prevent infinite loop)
+                    return await self._send_request(method, params, _retry=False)
+                else:
+                    raise MCPError(f"Transport died and retry failed: {write_err}")
 
             # Wait for response with timeout
             result = await asyncio.wait_for(future, timeout=self.config.timeout)
@@ -307,6 +464,9 @@ class ChromeMCPClient:
 
         except asyncio.TimeoutError:
             self._pending_requests.pop(request_id, None)
+            raise
+        except MCPError:
+            # Re-raise our own errors
             raise
         except Exception as e:
             self._pending_requests.pop(request_id, None)
@@ -324,8 +484,12 @@ class ChromeMCPClient:
         }
 
         message = json.dumps(notification) + "\n"
-        self.process.stdin.write(message.encode())
-        await self.process.stdin.drain()
+        try:
+            self.process.stdin.write(message.encode())
+            await self.process.stdin.drain()
+        except (AttributeError, BrokenPipeError, ConnectionResetError, OSError) as e:
+            # Transport died - notifications are fire-and-forget, just log it
+            logger.warning(f"Notification failed (transport dead): {e}")
 
     async def _read_responses(self):
         """Background task to read responses from MCP server"""
