@@ -1,0 +1,13 @@
+# PlatformIO build files
+.pio/
+.vscode/
+.clangd/
+.cache/
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
