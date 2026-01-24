@@ -1,0 +1,5 @@
+{"user_query": "Remember that I prefer dark mode", "tool_name": "memory_store", "tool_arguments": {"key": "user_preference", "value": "Remember that I prefer dark mode"}, "assistant_response": null}
+{"user_query": "I need you to remember my name is alice", "tool_name": "memory_store", "tool_arguments": {"key": "user_name", "value": "Alice"}, "assistant_response": null}
+{"user_query": "Can you remember that i prefer dark mode", "tool_name": "memory_store", "tool_arguments": {"key": "user_preference", "value": "Can you remember that i prefer dark mode"}, "assistant_response": null}
+{"user_query": "Save my email as bob@example.com", "tool_name": "memory_store", "tool_arguments": {"key": "email", "value": "bob@example.com"}, "assistant_response": null}
+{"user_query": "Remember that I prefer dark mode for me", "tool_name": "memory_store", "tool_arguments": {"key": "user_preference", "value": "Remember that I prefer dark mode for me"}, "assistant_response": null}
