@@ -872,38 +872,173 @@ Devices: "iPhone 14", "iPhone 14 Pro Max", "Pixel 7", "iPad Pro", etc.""",
 }
 
 
-# Synchronous wrappers for non-async contexts
+# =============================================================================
+# SYNC WRAPPERS - For Streamlit/non-async tool execution
+# =============================================================================
+
 def _run_async(coro):
-    """Run async function in sync context"""
+    """Run async function in sync context - handles nested event loops"""
+    import concurrent.futures
+
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # If loop is running, create task
-            import concurrent.futures
+        # Try to get existing loop
+        try:
+            loop = asyncio.get_running_loop()
+            # Loop is running - use thread pool to avoid nested loop issues
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 future = pool.submit(asyncio.run, coro)
-                return future.result(timeout=60)
-        else:
-            return loop.run_until_complete(coro)
-    except RuntimeError:
-        return asyncio.run(coro)
+                return future.result(timeout=120)
+        except RuntimeError:
+            # No running loop - we can use asyncio.run directly
+            return asyncio.run(coro)
+    except Exception as e:
+        logger.error(f"Async execution error: {e}")
+        return {"success": False, "error": str(e)}
 
 
-# Create sync versions of all tools for compatibility
-def browser_connect_sync(**kwargs):
-    return _run_async(browser_connect(**kwargs))
+# Rename async functions with _async suffix for clarity
+browser_connect_async = browser_connect
+browser_disconnect_async = browser_disconnect
+browser_navigate_async = browser_navigate
+browser_new_tab_async = browser_new_tab
+browser_close_tab_async = browser_close_tab
+browser_list_tabs_async = browser_list_tabs
+browser_select_tab_async = browser_select_tab
+browser_wait_for_async = browser_wait_for
+browser_click_async = browser_click
+browser_fill_async = browser_fill
+browser_fill_form_async = browser_fill_form
+browser_press_key_async = browser_press_key
+browser_hover_async = browser_hover
+browser_drag_async = browser_drag
+browser_upload_file_async = browser_upload_file
+browser_handle_dialog_async = browser_handle_dialog
+browser_screenshot_async = browser_screenshot
+browser_snapshot_async = browser_snapshot
+browser_evaluate_async = browser_evaluate
+browser_console_messages_async = browser_console_messages
+browser_get_console_message_async = browser_get_console_message
+browser_network_requests_async = browser_network_requests
+browser_network_request_async = browser_network_request
+browser_perf_start_async = browser_perf_start
+browser_perf_stop_async = browser_perf_stop
+browser_perf_analyze_async = browser_perf_analyze
+browser_emulate_async = browser_emulate
+browser_resize_async = browser_resize
 
-def browser_disconnect_sync():
-    return _run_async(browser_disconnect())
 
-def browser_navigate_sync(url: str):
-    return _run_async(browser_navigate(url))
+# =============================================================================
+# SYNC VERSIONS - These are what get registered as tools
+# =============================================================================
 
-def browser_click_sync(selector: str):
-    return _run_async(browser_click(selector))
+def browser_connect(headless: bool = True, isolated: bool = True, viewport: str = "1920x1080") -> Dict[str, Any]:
+    """Initialize browser connection (sync wrapper)."""
+    return _run_async(browser_connect_async(headless=headless, isolated=isolated, viewport=viewport))
 
-def browser_fill_sync(selector: str, value: str):
-    return _run_async(browser_fill(selector, value))
+def browser_disconnect() -> Dict[str, Any]:
+    """Disconnect browser (sync wrapper)."""
+    return _run_async(browser_disconnect_async())
 
-def browser_screenshot_sync(**kwargs):
-    return _run_async(browser_screenshot(**kwargs))
+def browser_navigate(url: str) -> Dict[str, Any]:
+    """Navigate to URL (sync wrapper)."""
+    return _run_async(browser_navigate_async(url))
+
+def browser_new_tab(url: Optional[str] = None) -> Dict[str, Any]:
+    """Open new tab (sync wrapper)."""
+    return _run_async(browser_new_tab_async(url))
+
+def browser_close_tab(page_id: str) -> Dict[str, Any]:
+    """Close tab (sync wrapper)."""
+    return _run_async(browser_close_tab_async(page_id))
+
+def browser_list_tabs() -> Dict[str, Any]:
+    """List tabs (sync wrapper)."""
+    return _run_async(browser_list_tabs_async())
+
+def browser_select_tab(page_id: str) -> Dict[str, Any]:
+    """Select tab (sync wrapper)."""
+    return _run_async(browser_select_tab_async(page_id))
+
+def browser_wait_for(selector: Optional[str] = None, timeout: int = 30000, state: str = "visible") -> Dict[str, Any]:
+    """Wait for element (sync wrapper)."""
+    return _run_async(browser_wait_for_async(selector, timeout, state))
+
+def browser_click(selector: str) -> Dict[str, Any]:
+    """Click element (sync wrapper)."""
+    return _run_async(browser_click_async(selector))
+
+def browser_fill(selector: str, value: str) -> Dict[str, Any]:
+    """Fill input (sync wrapper)."""
+    return _run_async(browser_fill_async(selector, value))
+
+def browser_fill_form(fields: Dict[str, str]) -> Dict[str, Any]:
+    """Fill form (sync wrapper)."""
+    return _run_async(browser_fill_form_async(fields))
+
+def browser_press_key(key: str) -> Dict[str, Any]:
+    """Press key (sync wrapper)."""
+    return _run_async(browser_press_key_async(key))
+
+def browser_hover(selector: str) -> Dict[str, Any]:
+    """Hover element (sync wrapper)."""
+    return _run_async(browser_hover_async(selector))
+
+def browser_drag(source_selector: str, target_selector: str) -> Dict[str, Any]:
+    """Drag element (sync wrapper)."""
+    return _run_async(browser_drag_async(source_selector, target_selector))
+
+def browser_upload_file(selector: str, file_path: str) -> Dict[str, Any]:
+    """Upload file (sync wrapper)."""
+    return _run_async(browser_upload_file_async(selector, file_path))
+
+def browser_handle_dialog(action: str = "accept", prompt_text: Optional[str] = None) -> Dict[str, Any]:
+    """Handle dialog (sync wrapper)."""
+    return _run_async(browser_handle_dialog_async(action, prompt_text))
+
+def browser_screenshot(full_page: bool = False, selector: Optional[str] = None) -> Dict[str, Any]:
+    """Take screenshot (sync wrapper)."""
+    return _run_async(browser_screenshot_async(full_page, selector))
+
+def browser_snapshot() -> Dict[str, Any]:
+    """Take DOM snapshot (sync wrapper)."""
+    return _run_async(browser_snapshot_async())
+
+def browser_evaluate(script: str) -> Dict[str, Any]:
+    """Execute JavaScript (sync wrapper)."""
+    return _run_async(browser_evaluate_async(script))
+
+def browser_console_messages() -> Dict[str, Any]:
+    """Get console messages (sync wrapper)."""
+    return _run_async(browser_console_messages_async())
+
+def browser_get_console_message(message_id: str) -> Dict[str, Any]:
+    """Get console message (sync wrapper)."""
+    return _run_async(browser_get_console_message_async(message_id))
+
+def browser_network_requests() -> Dict[str, Any]:
+    """List network requests (sync wrapper)."""
+    return _run_async(browser_network_requests_async())
+
+def browser_network_request(request_id: str) -> Dict[str, Any]:
+    """Get network request (sync wrapper)."""
+    return _run_async(browser_network_request_async(request_id))
+
+def browser_perf_start() -> Dict[str, Any]:
+    """Start perf trace (sync wrapper)."""
+    return _run_async(browser_perf_start_async())
+
+def browser_perf_stop() -> Dict[str, Any]:
+    """Stop perf trace (sync wrapper)."""
+    return _run_async(browser_perf_stop_async())
+
+def browser_perf_analyze(insight_type: str = "all") -> Dict[str, Any]:
+    """Analyze performance (sync wrapper)."""
+    return _run_async(browser_perf_analyze_async(insight_type))
+
+def browser_emulate(device: str) -> Dict[str, Any]:
+    """Emulate device (sync wrapper)."""
+    return _run_async(browser_emulate_async(device))
+
+def browser_resize(width: int, height: int) -> Dict[str, Any]:
+    """Resize viewport (sync wrapper)."""
+    return _run_async(browser_resize_async(width, height))
