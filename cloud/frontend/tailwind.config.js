@@ -4,6 +4,15 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  // Safelist dynamic classes that Tailwind can't detect
+  safelist: [
+    // Agent colors - backgrounds with opacity
+    'bg-azoth/20', 'bg-elysian/20', 'bg-vajra/20', 'bg-kether/20', 'bg-claude/20',
+    // Agent colors - text
+    'text-azoth', 'text-elysian', 'text-vajra', 'text-kether', 'text-claude',
+    // Agent colors - rings
+    'ring-azoth', 'ring-elysian', 'ring-vajra', 'ring-kether', 'ring-claude',
+  ],
   theme: {
     extend: {
       colors: {
