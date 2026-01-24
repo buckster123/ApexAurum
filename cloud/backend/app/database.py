@@ -11,9 +11,9 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# Create async engine
+# Create async engine (convert postgresql:// to postgresql+asyncpg://)
 engine = create_async_engine(
-    settings.database_url,
+    settings.async_database_url,
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=5,

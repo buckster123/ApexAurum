@@ -18,8 +18,16 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production"
     allowed_origins: str = "http://localhost:3000"
 
-    # Database
-    database_url: str = "postgresql+asyncpg://apex:apex@localhost:5432/apex"
+    # Database (Railway provides postgresql://, we convert to asyncpg)
+    database_url: str = "postgresql://apex:apex@localhost:5432/apex"
+
+    @property
+    def async_database_url(self) -> str:
+        """Convert standard postgres URL to async format."""
+        url = self.database_url
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
 
     # Redis
     redis_url: str = "redis://localhost:6379/0"
