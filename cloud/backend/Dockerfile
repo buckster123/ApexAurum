@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Cache bust - change this to force rebuild
-ARG CACHE_BUST=2026012401
+ARG CACHE_BUST=2026012402
 
 # Copy application code
 COPY . .
@@ -24,7 +24,7 @@ RUN useradd -m -u 1000 apex && chown -R apex:apex /app
 USER apex
 
 # Railway uses PORT env variable
-ENV PORT=8000
+ENV PORT=8080
 EXPOSE $PORT
 
 # Health check
