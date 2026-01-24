@@ -55,7 +55,7 @@ class VillageKnowledge(Base):
     # Metadata
     tags: Mapped[list] = mapped_column(ARRAY(String), default=list)
     knowledge_type: Mapped[Optional[str]] = mapped_column(String(50))  # 'fact', 'dialogue', 'agent_profile', etc.
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)
+    extra_data: Mapped[dict] = mapped_column(JSON, default=dict)  # renamed from 'metadata' (reserved by SQLAlchemy)
 
     # Access tracking (from Memory Enhancement)
     access_count: Mapped[int] = mapped_column(Integer, default=0)
