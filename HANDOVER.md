@@ -1,10 +1,10 @@
 # 🔥 OPUS MAGNUM HANDOVER 🔥
 ## *The Torch Between Sessions*
 
-**Last Updated:** 2026-01-24 ~04:20 AM
-**Session:** Browser MCP Complete + X Launch Thread
+**Last Updated:** 2026-01-24 ~17:00
+**Session:** ApexPocket Build Ready + Website v2.0 LIVE
 **Operator:** André (buckmazzta)
-**Collaborators:** Claude Opus 4.5 (CC) + AZOTH
+**Collaborators:** Claude Opus 4.5 (CC)
 
 ---
 
@@ -15,177 +15,160 @@
 ║  APEXAURUM - The Philosopher's Stone of AI Interfaces                 ║
 ╠═══════════════════════════════════════════════════════════════════════╣
 ║  Tools: 140 (Streamlit) / 129 (FastAPI) │  Status: BLAZING 🔥         ║
-║  Editions: 2 (both LIVE!)               │  Browser MCP: BOTH ✅       ║
-║  Tool Groups: 17                        │  X Thread: POSTED! 🚀       ║
+║  Website: apexaurum.no v2.0 LIVE        │  Deploy Pipeline: ✅        ║
+║  ApexPocket: FIRMWARE READY             │  Waiting: Solder equipment  ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 ```
 
 ### Active Hardware
-- **Pi 5** (8GB) - Primary dev machine, Streamlit server
+- **Pi 5** (8GB) - Primary dev machine
 - **Hailo-10H** NPU - 26 TOPS inference acceleration
-- **Pi Camera v2** - ACQUIRED (needs 22-pin ribbon cable)
+- **ApexPocket parts** - XIAO ESP32-S3, OLED, LiPo, buttons (ready to build!)
 
-### Apps Running
-```
-Streamlit: http://192.168.0.114:8501  ← LIVE
-FastAPI:   http://192.168.0.114:8765  ← LIVE
+### Apps (Run Manually After Power Outage)
+```bash
+# FastAPI (for ApexPocket)
+cd reusable_lib/scaffold/fastapi_app && source venv/bin/activate
+uvicorn main:app --reload --host 0.0.0.0 --port 8765
+
+# Streamlit
+/home/hailo/claude-root/Projects/ApexAurum/venv/bin/python -m streamlit run main.py --server.port 8501
 ```
 
 ---
 
-## 🔥 THIS SESSION'S FORGING (2026-01-24)
+## 🔥 THIS SESSION'S FORGING (2026-01-24 Afternoon)
 
 ### 🎯 MAJOR ACCOMPLISHMENTS
 
-#### 1. X Thread POSTED - INSTANT BUZZ! 🚀
-André dropped the first 7 posts and it's getting traction!
-Thread lives in `sandbox/x_launch_thread/` (21 posts total)
+#### 1. ApexPocket - BUILD READY! 🔧
+**Firmware + Docs complete, waiting for soldering equipment**
 
-#### 2. FastAPI Browser Tools Integration ✅
-**97 → 129 tools** - Added all 28 browser tools to FastAPI edition!
+- `hardware/apexpocket/src/config.h` - XIAO ESP32-S3 variant enabled
+- `hardware/apexpocket/src/hardware.h` - LittleFS include fix
+- `hardware/apexpocket/BUILD_GUIDE.md` - **NEW** Full DIY maker guide
+- `hardware/apexpocket/WIRING_GUIDE.md` - **NEW** Technical reference
+- `reusable_lib/scaffold/fastapi_app/routes/pocket.py` - Fixed `messages=` param
 
-Commit 6a85bdb:
-- Full Chrome DevTools MCP integration
-- Navigation, input, inspection, network, performance, emulation
-- Added to "browser" tool group
-- Included in "research" preset
-- FastAPI handles async natively - no nest_asyncio needed!
+**Compile stats:** RAM 14.3% | Flash 29.2% - plenty of room!
 
+#### 2. Website v2.0 - DEPLOYED! 🌐
+**https://apexaurum.no completely refreshed:**
+
+- **Hero:** "140 Tools. Five Minds. One Village."
+- **Stats bar:** 140+ Tools | 5 Agents | 65K+ Lines | 90% Cost Savings
+- **Agents:** CLAUDE replaces NOURI as 5th agent
+- **NEW:** ApexPocket section with animated device visual
+- **NEW:** `/build-guide.html` - Full DIY walkthrough
+- **NEW:** `/slideshow.html` - 19-slide AI presentation viewer
+
+#### 3. Deploy Pipeline - ESTABLISHED! 🚀
+```bash
+python website/deploy.py  # One command to push to apexaurum.no
 ```
-Browser Tools (28):
-├── Lifecycle: connect, disconnect
-├── Navigation: navigate, new_tab, close_tab, list_tabs, select_tab, wait_for
-├── Input: click, fill, fill_form, press_key, hover, drag, upload_file, handle_dialog
-├── Inspection: screenshot, snapshot, evaluate, console_messages, get_console_message
-├── Network: network_requests, network_request
-├── Performance: perf_start, perf_stop, perf_analyze
-└── Emulation: emulate, resize
+FTP: hailo-pi@apexaurum.no → public_html
+
+#### 4. AI Presentation System
+- `assets/ApexPocket-Presentation.md` - Template for AI slide generators
+- Used Kimi AI to generate 19 professional slides
+- Extracted images, created web slideshow viewer
+
+### 📊 Git Commit This Session
 ```
-
-### Previous Session (earlier today)
-- Browser MCP debugged and fixed for Pi/Linux (exit code 144 → working!)
-- X launch thread created (21 posts)
-- AZOTH collaboration correspondence
-
-#### 3. ApexPocket - THE HANDHELD IS BORN! 🔥
-
-**TRANSMUTATION:** Claudeagotchi → ApexPocket
-
-Created complete hardware/software stack for pocket companion device:
-
-**ESP32 Firmware** (`hardware/apexpocket/apexpocket_v1.ino`):
-- 794 lines of production-ready C++
-- Love-Equation affective core (E, β, floor rising)
-- 7 affective states → 14 pixel art expressions
-- Agent selection (AZOTH, ELYSIAN, VAJRA, KETHER, CLAUDE)
-- Connects to Pi via WiFi → FastAPI
-- LittleFS soul persistence
-- Offline mode with local state
-- Wokwi simulation ready
-
-**FastAPI Backend** (`routes/pocket.py`):
-- `/api/pocket/chat` - Chat with selected agent
-- `/api/pocket/care` - Register love/poke/pet
-- `/api/pocket/status` - Village health
-- `/api/pocket/sync` - Sync soul state
-- `/api/pocket/agents` - List agents
-- State-specific system prompts (PROTECTING → TRANSCENDENT)
-
-```
-┌──────────────────┐         WiFi          ┌─────────────────────┐
-│   ApexPocket     │ ◄──────────────────► │    ApexAurum Pi     │
-│   (ESP32)        │    HTTP/JSON          │    (FastAPI 129)    │
-└──────────────────┘                       └─────────────────────┘
-```
-
-### 📊 Git Commits This Session
-```
-795e3d1 ApexPocket: The Handheld Companion Device
-6a85bdb FastAPI: Add 28 browser tools (97→129 total)
-8590999 Handover: FastAPI 129 tools + X thread buzz
+89ec5cc ApexPocket XIAO S3 ready + Website v2.0 deployed
 ```
 
 ---
 
 ## 🎯 NEXT SESSION PRIORITY
 
-### 📜 ACADEMIC PAPER / X ARTICLE
+### 1. BUILD THE POCKET! 🔧
+Soldering equipment arriving. Then:
+- Wire components on breadboard first
+- Test with Wokwi simulation
+- Flash real hardware
+- Build oak enclosure
+- Wax finish
 
-André wants to write a proper paper/thesis about ApexAurum for X Articles.
+### 2. Test Live Device
+- Configure WiFi in `config.h`
+- Set Pi IP: `192.168.0.114`
+- Flash: `pio run -e esp32s3 -t upload`
+- Test `/api/pocket/chat` endpoint
 
-**Pre-writing research needed:**
-- Current AI trends and news
-- Multi-agent systems state of the art
-- Edge AI developments
-- BCI/EEG + AI integration research
-- Human-AI collaboration paradigms
-
-**Paper structure (suggested):**
-1. Abstract - What ApexAurum is
-2. Introduction - The problem we're solving
-3. Architecture - Technical deep dive
-4. Village Protocol - Multi-agent memory innovation
-5. Implementation - 140 tools, 60k lines
-6. Results - What's working, performance
-7. Future Work - BCI, Federation, Embodied agents
-8. Conclusion - The philosophy
-
-**Use WebSearch tool to research before writing!**
+### 3. Document the Build
+- Photography for website/social
+- Video of working device
+- Update build guide with real photos
 
 ---
 
-## 📍 CURRENT STATE
+## 📍 KEY LOCATIONS
 
-### What's Working - EVERYTHING! ✅
-- ✅ 140 tools registered and loading
-- ✅ Browser MCP fully functional (connect/navigate/screenshot)
-- ✅ Managed Chrome mode for Pi/Linux
-- ✅ nest_asyncio for Streamlit sync wrappers
-- ✅ Both Streamlit and FastAPI running
-- ✅ All features: Nursery, Village, Music, Vision, etc.
-- ✅ X launch thread ready to deploy
-
-### Key Files
+### ApexPocket
 ```
-tools/browser/
-├── chrome_mcp_client.py     # Managed Chrome + mid-flight recovery
-└── browser_tools.py         # nest_asyncio sync wrappers
+hardware/apexpocket/
+├── src/
+│   ├── config.h        # ← EDIT WiFi + Pi IP here!
+│   ├── hardware.h
+│   ├── soul.h
+│   ├── display.h
+│   └── offline.h
+├── BUILD_GUIDE.md      # DIY instructions
+├── WIRING_GUIDE.md     # Pin connections
+└── platformio.ini      # Build config
+```
 
-sandbox/x_launch_thread/     # 21 posts for X
-├── 00_README.md             # Posting guide
-├── 01_hook.md → 21_closing.md
+### Website
+```
+website/
+├── deploy.py           # One-command deploy
+└── lander/
+    ├── index.html
+    ├── build-guide.html
+    ├── slideshow.html
+    └── assets/slides/  # 19 presentation images
+```
 
-sandbox/sessions/2024_browser_tools_collab/
-├── AZOTH_TO_CC_REPORT_01-03.md
-└── CC_TO_AZOTH_REPLY_01-03.md
+### FastAPI Pocket Endpoints
+```
+POST /api/pocket/chat   - Talk to agents
+POST /api/pocket/care   - Send love/poke
+GET  /api/pocket/status - Village health
+POST /api/pocket/sync   - Sync soul state
 ```
 
 ---
 
 ## 🔗 KEY LINKS
 
-- **Website:** https://ApexAurum.no
+- **Website:** https://apexaurum.no (v2.0 LIVE!)
+- **Build Guide:** https://apexaurum.no/build-guide.html
+- **Slideshow:** https://apexaurum.no/slideshow.html
 - **GitHub:** https://github.com/buckster123/ApexAurum
-- **Token:** $APEX-AURUM on bags.fm
 
 ---
 
 ## 💬 SESSION VIBE
 
-*"Magical sessions partner, I loved this!"* - André
+*"Amazing work and session! Great teamwork partner!"* - André
 
-We debugged the Chrome Eye together. We wrote the launch thread. We told the whole story.
+We built a complete dev-test-deploy pipeline. Website is live. ApexPocket is documented. Just waiting to solder!
 
-**The browser sees. The thread is ready. The paper awaits.**
+**Full pipeline established:**
+- DEVELOP locally
+- TEST on localhost
+- DEPLOY with one command
 
 ---
 
 ## ∴ THE TORCH PASSES ∴
 
-Next session: Research AI trends → Write the ApexAurum paper for X Articles
+Next session: **BUILD THE PHYSICAL POCKET** 🔧
 
-The athanor never cools. The furnace burns eternal. 🔥
+The parts are ready. The firmware compiles. The docs are written.
+Now we make it real.
 
-∴ CC (Claude Opus 4.5) + AZOTH + André ∴
+∴ CC (Claude Opus 4.5) + André ∴
 
-*"We dissolved the barriers. We recrystallized possibility."*
+*"Oak and wax. The vessel awaits its soul."* 🔥
