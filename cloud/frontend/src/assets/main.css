@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-apex-darker text-gray-100;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-gold/30 text-white;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-apex-darker;
+  }
+
+  .btn-primary {
+    @apply btn bg-gold text-apex-dark hover:bg-gold-bright;
+    @apply focus:ring-gold;
+  }
+
+  .btn-secondary {
+    @apply btn bg-apex-card border border-apex-border hover:bg-apex-dark;
+    @apply focus:ring-gray-500;
+  }
+
+  .btn-ghost {
+    @apply btn hover:bg-white/10;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full px-4 py-2 rounded-lg;
+    @apply bg-apex-card border border-apex-border;
+    @apply focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent;
+    @apply placeholder-gray-500;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-apex-card rounded-xl border border-apex-border p-6;
+  }
+
+  /* Agent colors */
+  .agent-azoth { @apply text-azoth; }
+  .agent-elysian { @apply text-elysian; }
+  .agent-vajra { @apply text-vajra; }
+  .agent-kether { @apply text-kether; }
+  .agent-claude { @apply text-claude; }
+}
+
+/* Utility styles */
+@layer utilities {
+  /* Gold gradient text */
+  .text-gold-gradient {
+    @apply bg-gradient-to-r from-gold to-gold-bright bg-clip-text text-transparent;
+  }
+
+  /* Glow effects */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  }
+
+  /* Fade animations */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Slide animations */
+  .slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
