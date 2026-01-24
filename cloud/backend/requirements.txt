@@ -10,7 +10,7 @@ pydantic-settings>=2.1.0
 sqlalchemy[asyncio]>=2.0.25
 asyncpg>=0.29.0
 alembic>=1.13.0
-# pgvector>=0.2.4  # Enable when vector search needed
+pgvector>=0.2.4
 
 # Authentication
 pyjwt>=2.8.0
