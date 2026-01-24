@@ -8,57 +8,58 @@
       "id": "esp",
       "top": 0,
       "left": 0,
-      "attrs": { "builder": "esp32-s3-devkitc-1" }
+      "attrs": {}
     },
     {
       "type": "wokwi-ssd1306",
-      "id": "oled",
-      "top": -120,
+      "id": "oled1",
+      "top": -180,
       "left": 80,
       "attrs": { "i2cAddress": "0x3c" }
     },
     {
       "type": "wokwi-pushbutton",
-      "id": "btn_a",
-      "top": 100,
-      "left": -60,
+      "id": "btn1",
+      "top": 250,
+      "left": -80,
       "attrs": { "color": "green", "label": "LOVE" }
     },
     {
       "type": "wokwi-pushbutton",
-      "id": "btn_b",
-      "top": 100,
-      "left": 200,
+      "id": "btn2",
+      "top": 250,
+      "left": 40,
       "attrs": { "color": "blue", "label": "POKE" }
     },
     {
       "type": "wokwi-led",
-      "id": "led",
-      "top": -20,
-      "left": -40,
+      "id": "led1",
+      "top": 250,
+      "left": 280,
       "attrs": { "color": "orange" }
     },
     {
       "type": "wokwi-resistor",
       "id": "r1",
-      "top": 20,
-      "left": -50,
+      "top": 280,
+      "left": 260,
       "attrs": { "value": "220" }
     }
   ],
   "connections": [
-    ["esp:TX", "$serialMonitor:RX", "", []],
-    ["esp:RX", "$serialMonitor:TX", "", []],
-    ["oled:GND", "esp:GND.1", "black", ["v20", "h-40"]],
-    ["oled:VCC", "esp:3V3", "red", ["v30", "h-60"]],
-    ["oled:SCL", "esp:9", "green", ["v40", "h-80"]],
-    ["oled:SDA", "esp:8", "blue", ["v50", "h-100"]],
-    ["btn_a:1.l", "esp:GND.2", "black", ["h-20", "v60"]],
-    ["btn_a:2.r", "esp:4", "green", ["h20", "v40"]],
-    ["btn_b:1.l", "esp:GND.3", "black", ["h20", "v60"]],
-    ["btn_b:2.r", "esp:5", "blue", ["h-20", "v40"]],
-    ["led:A", "r1:2", "orange", []],
-    ["r1:1", "esp:6", "orange", ["v-20"]],
-    ["led:C", "esp:GND.1", "black", ["v20", "h40"]]
-  ]
+    ["esp:TX0", "$serialMonitor:RX", "", []],
+    ["esp:RX0", "$serialMonitor:TX", "", []],
+    ["oled1:GND", "esp:GND.1", "black", ["v20", "h-60"]],
+    ["oled1:VCC", "esp:3V3", "red", ["v30", "h-50"]],
+    ["oled1:SCL", "esp:22", "yellow", ["v40", "h-40"]],
+    ["oled1:SDA", "esp:21", "green", ["v50", "h-30"]],
+    ["btn1:1.l", "esp:GND.2", "black", ["v60"]],
+    ["btn1:2.l", "esp:4", "orange", ["v50"]],
+    ["btn2:1.l", "esp:GND.3", "black", ["v70"]],
+    ["btn2:2.l", "esp:5", "purple", ["v60"]],
+    ["led1:A", "r1:2", "orange", []],
+    ["r1:1", "esp:2", "orange", ["v0"]],
+    ["led1:C", "esp:GND.4", "black", ["v30"]]
+  ],
+  "dependencies": {}
 }

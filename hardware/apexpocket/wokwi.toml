@@ -1,0 +1,13 @@
+# ApexPocket Wokwi Configuration
+# Compile: pio run -e esp32
+# Simulate: wokwi-cli .
+
+[wokwi]
+version = 1
+firmware = ".pio/build/esp32/firmware.bin"
+elf = ".pio/build/esp32/firmware.elf"
+
+# Network forwarding - connect to ApexAurum Pi
+[[net.forward]]
+from = "localhost:8765"
+to = "target:8765"
