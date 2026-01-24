@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Cache bust - change this to force rebuild
+ARG CACHE_BUST=2026012401
+
 # Copy application code
 COPY . .
 
