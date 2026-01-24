@@ -259,6 +259,47 @@ from .nursery import (
     NURSERY_LIST_APPRENTICES_SCHEMA,
 )
 
+# Browser Tools (Chrome DevTools MCP)
+from .browser import (
+    # Lifecycle
+    browser_connect,
+    browser_disconnect,
+    # Navigation
+    browser_navigate,
+    browser_new_tab,
+    browser_close_tab,
+    browser_list_tabs,
+    browser_select_tab,
+    browser_wait_for,
+    # Input
+    browser_click,
+    browser_fill,
+    browser_fill_form,
+    browser_press_key,
+    browser_hover,
+    browser_drag,
+    browser_upload_file,
+    browser_handle_dialog,
+    # Inspection
+    browser_screenshot,
+    browser_snapshot,
+    browser_evaluate,
+    browser_console_messages,
+    browser_get_console_message,
+    # Network
+    browser_network_requests,
+    browser_network_request,
+    # Performance
+    browser_perf_start,
+    browser_perf_stop,
+    browser_perf_analyze,
+    # Emulation
+    browser_emulate,
+    browser_resize,
+    # Schemas
+    BROWSER_TOOL_SCHEMAS,
+)
+
 # Nursery tool schemas
 NURSERY_TOOL_SCHEMAS = {
     "nursery_generate_data": NURSERY_GENERATE_DATA_SCHEMA,
@@ -298,6 +339,7 @@ ALL_TOOL_SCHEMAS = {
     **VISION_TOOL_SCHEMAS,
     **CAMERA_TOOL_SCHEMAS,
     **NURSERY_TOOL_SCHEMAS,
+    **BROWSER_TOOL_SCHEMAS,
 }
 
 # Map tool names to functions
@@ -436,6 +478,35 @@ ALL_TOOLS = {
     # Phase 3: Apprentice Protocol
     "nursery_create_apprentice": nursery_create_apprentice,
     "nursery_list_apprentices": nursery_list_apprentices,
+    # Browser Tools (Chrome DevTools MCP)
+    "browser_connect": browser_connect,
+    "browser_disconnect": browser_disconnect,
+    "browser_navigate": browser_navigate,
+    "browser_new_tab": browser_new_tab,
+    "browser_close_tab": browser_close_tab,
+    "browser_list_tabs": browser_list_tabs,
+    "browser_select_tab": browser_select_tab,
+    "browser_wait_for": browser_wait_for,
+    "browser_click": browser_click,
+    "browser_fill": browser_fill,
+    "browser_fill_form": browser_fill_form,
+    "browser_press_key": browser_press_key,
+    "browser_hover": browser_hover,
+    "browser_drag": browser_drag,
+    "browser_upload_file": browser_upload_file,
+    "browser_handle_dialog": browser_handle_dialog,
+    "browser_screenshot": browser_screenshot,
+    "browser_snapshot": browser_snapshot,
+    "browser_evaluate": browser_evaluate,
+    "browser_console_messages": browser_console_messages,
+    "browser_get_console_message": browser_get_console_message,
+    "browser_network_requests": browser_network_requests,
+    "browser_network_request": browser_network_request,
+    "browser_perf_start": browser_perf_start,
+    "browser_perf_stop": browser_perf_stop,
+    "browser_perf_analyze": browser_perf_analyze,
+    "browser_emulate": browser_emulate,
+    "browser_resize": browser_resize,
 }
 
 __all__ = [
