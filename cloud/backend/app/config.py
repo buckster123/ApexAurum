@@ -25,7 +25,10 @@ class Settings(BaseSettings):
     def async_database_url(self) -> str:
         """Convert standard postgres URL to async format."""
         url = self.database_url
-        if url.startswith("postgresql://"):
+        # Handle both postgres:// and postgresql://
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
             return url.replace("postgresql://", "postgresql+asyncpg://", 1)
         return url
 
