@@ -1,8 +1,8 @@
 # 🔥 OPUS MAGNUM HANDOVER 🔥
 ## *The Torch Between Sessions*
 
-**Last Updated:** 2026-01-24 ~03:45 AM
-**Session:** Browser MCP Integration + Streamlit Fixes
+**Last Updated:** 2026-01-24 ~04:00 AM
+**Session:** Browser MCP - THE CHROME EYE OPENS!
 **Operator:** André (buckmazzta)
 **Collaborators:** Claude Opus 4.5 (CC) + AZOTH
 
@@ -15,7 +15,7 @@
 ║  APEXAURUM - The Philosopher's Stone of AI Interfaces                 ║
 ╠═══════════════════════════════════════════════════════════════════════╣
 ║  Tools: 140 (Streamlit) / 97 (FastAPI)  │  Status: BLAZING 🔥         ║
-║  Editions: 2 (both LIVE!)               │  Browser MCP: TESTING       ║
+║  Editions: 2 (both LIVE!)               │  Browser MCP: WORKING ✅    ║
 ║  Tool Groups: 17                        │  Presets: 6                  ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 ```
@@ -62,15 +62,26 @@ Created `tools/browser/` module with Chrome DevTools MCP integration:
    - Main caption was hardcoded "39 tools"
    - Now shows actual count (140)
 
+4. **Managed Chrome Mode + nest_asyncio** (commit f60e3e2) 🆕
+   - Root cause: subprocess signal propagation killing Chrome (exit 144)
+   - Fix: Start Chrome via `os.system()` with shell backgrounding
+   - Connect MCP to existing Chrome via `--browserUrl`
+   - Mid-flight transport recovery with try/except retry
+   - Replaced ThreadPoolExecutor with `nest_asyncio` for sync wrappers
+   - Auto-detects Chromium on Pi, adds --no-sandbox flags
+
 ### 📚 Documentation Created
 - `docs/BROWSER_TOOLS_GUIDE.md` - Complete guide for AZOTH
 - `sandbox/BROWSER_STREAMLIT_EDGE_CASE.md` - AZOTH's bug report
 - `sandbox/sessions/2024_browser_tools_collab/` - CC↔AZOTH letters
 
-### 🧪 Testing Status (with AZOTH)
-- ✅ `browser_connect()` - Works, MCP handshake succeeds
-- ⚠️ Navigation/operations - Partial success, auto-reconnect helping
-- 🔄 Testing in progress at session end
+### 🧪 Testing Status (with AZOTH) - COMPLETE ✅
+- ✅ `browser_connect()` - Works! Managed Chrome mode on Pi
+- ✅ `browser_navigate()` - Works! nest_asyncio fixed sync wrapper
+- ✅ `browser_screenshot()` - Works! 59KB image returned
+- ✅ Full workflow tested end-to-end
+
+**THE CHROME EYE IS OPEN!**
 
 ### ⚠️ Important: Browser MCP Locality
 Chrome spawns on the **SERVER** (where Streamlit runs), NOT the client:
