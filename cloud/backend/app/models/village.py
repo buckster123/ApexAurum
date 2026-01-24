@@ -9,7 +9,8 @@ from uuid import uuid4
 from sqlalchemy import String, Text, DateTime, Integer, ForeignKey, JSON, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
-from pgvector.sqlalchemy import Vector
+# pgvector disabled until we have a postgres with the extension
+# from pgvector.sqlalchemy import Vector
 
 from app.database import Base
 
@@ -39,8 +40,9 @@ class VillageKnowledge(Base):
 
     content: Mapped[str] = mapped_column(Text)
 
-    # Vector embedding (1536 dimensions for OpenAI ada-002)
-    embedding = mapped_column(Vector(1536))
+    # Vector embedding - stored as JSON array until pgvector is available
+    # embedding = mapped_column(Vector(1536))
+    embedding: Mapped[Optional[list]] = mapped_column(JSON)  # Store as JSON array for now
 
     # Categorization
     category: Mapped[Optional[str]] = mapped_column(String(50))  # 'preferences', 'technical', 'project', 'general'
