@@ -8,12 +8,13 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import async_session
+from app.database import get_session_factory
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Get database session."""
-    async with async_session() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         try:
             yield session
             await session.commit()

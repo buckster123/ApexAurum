@@ -9,23 +9,36 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.config import get_settings
 
-settings = get_settings()
+# Lazy initialization to avoid import-time database connection
+_engine = None
+_async_session = None
 
-# Create async engine (convert postgresql:// to postgresql+asyncpg://)
-engine = create_async_engine(
-    settings.async_database_url,
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-)
 
-# Session factory
-async_session = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+def get_engine():
+    """Get or create database engine (lazy initialization)."""
+    global _engine
+    if _engine is None:
+        settings = get_settings()
+        _engine = create_async_engine(
+            settings.async_database_url,
+            echo=settings.debug,
+            pool_pre_ping=True,
+            pool_size=5,
+            max_overflow=10,
+        )
+    return _engine
+
+
+def get_session_factory():
+    """Get or create session factory (lazy initialization)."""
+    global _async_session
+    if _async_session is None:
+        _async_session = async_sessionmaker(
+            get_engine(),
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+    return _async_session
 
 
 class Base(DeclarativeBase):
@@ -35,7 +48,8 @@ class Base(DeclarativeBase):
 
 async def get_db() -> AsyncSession:
     """Dependency for getting database session."""
-    async with async_session() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         try:
             yield session
             await session.commit()
@@ -48,10 +62,12 @@ async def get_db() -> AsyncSession:
 
 async def init_db():
     """Initialize database (create tables)."""
+    engine = get_engine()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
 async def close_db():
     """Close database connections."""
+    engine = get_engine()
     await engine.dispose()
