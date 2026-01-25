@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Cache bust - change this to force rebuild of COPY and beyond
-ARG CACHE_BUST=2026012504
-RUN echo "Cache bust: $CACHE_BUST"
+# Force rebuild - Railway cache invalidation
+ARG BUILD_DATE=2026-01-25-v5
+RUN echo "Build: $BUILD_DATE" > /tmp/build-info.txt
 
 # Copy application code
 COPY . .

@@ -1,5 +1,5 @@
 # ApexAurum Cloud - Backend Dependencies
-# Cache bust: 2026-01-24-v2
+# Build: 2026-01-25-v5
 
 # Core Framework
 fastapi>=0.109.0
