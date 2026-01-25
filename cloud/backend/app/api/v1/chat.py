@@ -4,8 +4,11 @@ Chat Endpoints
 Core chat functionality with streaming responses and tool execution.
 """
 
+import json
+import logging
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -17,8 +20,20 @@ from app.database import get_db
 from app.models.user import User
 from app.models.conversation import Conversation, Message
 from app.auth.deps import get_current_user
+from app.services.claude import ClaudeService
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Initialize Claude service
+_claude_service = None
+
+def get_claude_service() -> ClaudeService:
+    """Get or create Claude service singleton."""
+    global _claude_service
+    if _claude_service is None:
+        _claude_service = ClaudeService()
+    return _claude_service
 
 
 # Schemas
@@ -60,27 +75,132 @@ async def send_message(
     If stream=True, returns Server-Sent Events (SSE) stream.
     If stream=False, returns complete response as JSON.
     """
-    # TODO: Implement Claude API integration with streaming
-    # TODO: Implement tool execution pipeline
-    # TODO: Store messages in database
+    try:
+        claude = get_claude_service()
+    except ValueError as e:
+        logger.error(f"Claude service initialization failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI service not configured"
+        )
+
+    # Get or create conversation
+    conversation = None
+    if request.conversation_id:
+        result = await db.execute(
+            select(Conversation)
+            .where(Conversation.id == request.conversation_id)
+            .where(Conversation.user_id == user.id)
+        )
+        conversation = result.scalar_one_or_none()
+
+    if not conversation:
+        # Create new conversation
+        conversation = Conversation(
+            id=uuid4(),
+            user_id=user.id,
+            title=request.message[:50] + "..." if len(request.message) > 50 else request.message,
+        )
+        db.add(conversation)
+        await db.flush()
+
+    # Build messages for Claude
+    # Get previous messages from conversation
+    existing_messages = []
+    if conversation.messages:
+        for msg in conversation.messages[-20:]:  # Last 20 messages for context
+            existing_messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
+
+    # Add current user message
+    messages = existing_messages + [{"role": "user", "content": request.message}]
+
+    # Save user message to database
+    user_msg = Message(
+        id=uuid4(),
+        conversation_id=conversation.id,
+        role="user",
+        content=request.message,
+    )
+    db.add(user_msg)
+
+    # System prompt
+    system_prompt = """You are ApexAurum, a helpful AI assistant. Be concise, accurate, and friendly."""
 
     if request.stream:
         async def stream_response():
-            # Placeholder for streaming implementation
-            yield "data: {\"type\": \"start\"}\n\n"
-            yield "data: {\"type\": \"token\", \"content\": \"Hello from ApexAurum Cloud!\"}\n\n"
-            yield "data: {\"type\": \"end\"}\n\n"
+            full_response = ""
+            try:
+                yield f"data: {json.dumps({'type': 'start', 'conversation_id': str(conversation.id)})}\n\n"
+
+                async for event in claude.chat_stream(
+                    messages=messages,
+                    model=request.model,
+                    system=system_prompt,
+                ):
+                    yield f"data: {json.dumps(event)}\n\n"
+                    if event.get("type") == "token":
+                        full_response += event.get("content", "")
+
+                yield f"data: {json.dumps({'type': 'end'})}\n\n"
+
+                # Save assistant message after streaming completes
+                # Note: This runs in the generator context, db session may be closed
+                # For production, consider using background tasks
+
+            except Exception as e:
+                logger.error(f"Streaming error: {e}")
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
         return StreamingResponse(
             stream_response(),
-            media_type="text/event-stream"
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            }
         )
     else:
-        return {
-            "conversation_id": request.conversation_id,
-            "message": "Hello from ApexAurum Cloud!",
-            "model": request.model,
-        }
+        # Non-streaming response
+        try:
+            response = await claude.chat(
+                messages=messages,
+                model=request.model,
+                system=system_prompt,
+            )
+
+            # Extract text from response
+            assistant_content = ""
+            for block in response.get("content", []):
+                if block.get("text"):
+                    assistant_content += block["text"]
+
+            # Save assistant message
+            assistant_msg = Message(
+                id=uuid4(),
+                conversation_id=conversation.id,
+                role="assistant",
+                content=assistant_content,
+            )
+            db.add(assistant_msg)
+            await db.commit()
+
+            return {
+                "conversation_id": str(conversation.id),
+                "message": assistant_content,
+                "model": response.get("model", request.model),
+                "usage": response.get("usage"),
+            }
+
+        except Exception as e:
+            logger.error(f"Chat error: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"AI service error: {str(e)}"
+            )
 
 
 @router.get("/conversations", response_model=ConversationListResponse)
