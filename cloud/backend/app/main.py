@@ -21,9 +21,11 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
-    print("Starting ApexAurum Cloud...")
+    print("=" * 50)
+    print("ApexAurum Cloud v5 - WITH CLAUDE INTEGRATION")
+    print("=" * 50)
     await init_db()
-    print("Database initialized")
+    print("Database initialized - FRESH BUILD")
 
     yield
 
