@@ -31,5 +31,5 @@ EXPOSE $PORT
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/health || exit 1
 
-# Start command - Railway will override with $PORT
-CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Start command with explicit logging
+CMD ["sh", "-c", "echo 'Starting uvicorn...' && python -u -m uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level info"]
