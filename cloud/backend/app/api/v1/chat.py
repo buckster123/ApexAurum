@@ -40,7 +40,7 @@ def get_claude_service() -> ClaudeService:
 class ChatRequest(BaseModel):
     message: str
     conversation_id: Optional[UUID] = None
-    model: str = "claude-3-5-sonnet-20241022"
+    model: str = "claude-3-haiku-20240307"
     stream: bool = True
 
 

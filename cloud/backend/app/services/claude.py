@@ -26,7 +26,7 @@ class ClaudeService:
     async def chat(
         self,
         messages: list[dict],
-        model: str = "claude-3-5-sonnet-20241022",
+        model: str = "claude-3-haiku-20240307",
         system: Optional[str] = None,
         max_tokens: int = 4096,
         tools: Optional[list[dict]] = None,
@@ -68,7 +68,7 @@ class ClaudeService:
     async def chat_stream(
         self,
         messages: list[dict],
-        model: str = "claude-3-5-sonnet-20241022",
+        model: str = "claude-3-haiku-20240307",
         system: Optional[str] = None,
         max_tokens: int = 4096,
         tools: Optional[list[dict]] = None,
@@ -115,7 +115,7 @@ class ClaudeService:
                             "tool_id": event.content_block.id,
                         }
 
-    async def count_tokens(self, text: str, model: str = "claude-3-5-sonnet-20241022") -> int:
+    async def count_tokens(self, text: str, model: str = "claude-3-haiku-20240307") -> int:
         """Count tokens in text."""
         response = await self.client.messages.count_tokens(
             model=model,
