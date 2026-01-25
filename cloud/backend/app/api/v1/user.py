@@ -147,7 +147,7 @@ async def get_preferences(
     """Get user preferences (subset of settings)."""
     settings = user.settings or {}
     return {
-        "default_model": settings.get("default_model", "claude-sonnet-4-5-20250514"),
+        "default_model": settings.get("default_model", "claude-3-5-sonnet-20241022"),
         "cache_strategy": settings.get("cache_strategy", "balanced"),
         "context_strategy": settings.get("context_strategy", "adaptive"),
         "theme": settings.get("theme", "dark"),
