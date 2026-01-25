@@ -105,14 +105,9 @@ async def send_message(
         await db.flush()
 
     # Build messages for Claude
-    # Get previous messages from conversation
+    # For now, just use the current message (skip history to avoid async lazy-load issue)
+    # TODO: Add selectinload for conversation history
     existing_messages = []
-    if conversation.messages:
-        for msg in conversation.messages[-20:]:  # Last 20 messages for context
-            existing_messages.append({
-                "role": msg.role,
-                "content": msg.content
-            })
 
     # Add current user message
     messages = existing_messages + [{"role": "user", "content": request.message}]
