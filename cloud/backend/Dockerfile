@@ -27,9 +27,7 @@ USER apex
 ENV PORT=8080
 EXPOSE $PORT
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/health || exit 1
+# Railway handles healthchecks - removing Docker healthcheck to prevent startup race condition
 
 # Start command with explicit logging
 CMD ["sh", "-c", "echo 'Starting uvicorn...' && python -u -m uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level info"]
