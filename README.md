@@ -563,7 +563,7 @@ Support ongoing development by joining the $APEX-AURUM community on [bags.fm](ht
 
 ## Community
 
-- **Website**: [aurumvivum.no](https://aurumvivum.no)
+- **Website**: [apexaurum.cloud](https://apexaurum.cloud)
 - **Token**: [$APEX-AURUM on bags.fm](https://bags.fm)
 - **GitHub Issues**: Bug reports & feature requests
 - **License**: MIT
